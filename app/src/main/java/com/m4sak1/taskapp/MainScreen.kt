@@ -82,27 +82,29 @@ fun MainScreen(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             // BACKGROUND IMAGE LAYER
-            themeController.backgroundPath?.let { path ->
-                val bitmap = remember(path) {
+            val bgPath = themeController.backgroundPath
+            val bitmap = remember(bgPath) {
+                if (bgPath != null) {
                     try {
-                        val file = File(path)
-                        if (file.exists()) BitmapFactory.decodeFile(path) else null
+                        val file = File(bgPath)
+                        if (file.exists()) BitmapFactory.decodeFile(bgPath) else null
                     } catch (e: Exception) { null }
-                }
-                bitmap?.let {
-                    Image(
-                        bitmap = it.asImageBitmap(),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .blur(themeController.backgroundBlur.dp),
-                        contentScale = ContentScale.Crop
-                    )
-                    Box(modifier = Modifier.fillMaxSize().background(
-                        if (themeController.isDarkTheme) Color.Black.copy(alpha = 0.3f)
-                        else Color.White.copy(alpha = 0.3f)
-                    ))
-                }
+                } else null
+            }
+            
+            bitmap?.let {
+                Image(
+                    bitmap = it.asImageBitmap(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .blur(themeController.backgroundBlur.dp),
+                    contentScale = ContentScale.Crop
+                )
+                Box(modifier = Modifier.fillMaxSize().background(
+                    if (themeController.isDarkTheme) Color.Black.copy(alpha = 0.3f)
+                    else Color.White.copy(alpha = 0.3f)
+                ))
             }
 
             when {

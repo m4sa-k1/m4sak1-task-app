@@ -14,11 +14,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -34,6 +30,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Initial state for theme/language from some persistence could go here
+        // For now using mutableStateOf in setContent
+
         setContent {
             var themeMode by remember { mutableStateOf(AppThemeMode.System) }
             var appLanguage by remember { mutableStateOf(AppLanguage.System) }
@@ -121,9 +121,10 @@ class MainActivity : ComponentActivity() {
         return try {
             val inputStream = contentResolver.openInputStream(uri)
             val file = File(filesDir, "background.jpg")
-            val outputStream = FileOutputStream(file)
-            inputStream?.use { input ->
-                outputStream.use { output ->
+            if (file.exists()) file.delete()
+            
+            FileOutputStream(file).use { output ->
+                inputStream?.use { input ->
                     input.copyTo(output)
                 }
             }
@@ -135,8 +136,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-fun Context.findActivity(): ComponentActivity? = when (this) {
-    is ComponentActivity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
+fun Context.findActivity(): ComponentActivity? {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is ComponentActivity) return context
+        context = context.baseContext
+    }
+    return null
 }
