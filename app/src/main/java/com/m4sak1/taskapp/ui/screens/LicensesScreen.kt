@@ -20,12 +20,18 @@ import com.m4sak1.taskapp.R
 private data class LicenseItem(val name: String, val author: String, val license: String)
 
 private val licenses = listOf(
-    LicenseItem("Kotlin", "JetBrains", "Apache License 2.0"),
-    LicenseItem("Jetpack Compose", "Google LLC", "Apache License 2.0"),
-    LicenseItem("AndroidX Room", "Google LLC", "Apache License 2.0"),
+    LicenseItem("Kotlin Standard Library", "JetBrains s.r.o.", "Apache License 2.0"),
+    LicenseItem("Kotlinx Coroutines", "JetBrains s.r.o.", "Apache License 2.0"),
+    LicenseItem("AndroidX Core KTX", "Google LLC", "Apache License 2.0"),
     LicenseItem("AndroidX Lifecycle", "Google LLC", "Apache License 2.0"),
-    LicenseItem("AndroidX Navigation", "Google LLC", "Apache License 2.0"),
-    LicenseItem("Kotlinx Coroutines", "JetBrains", "Apache License 2.0")
+    LicenseItem("AndroidX Activity Compose", "Google LLC", "Apache License 2.0"),
+    LicenseItem("Jetpack Compose UI", "Google LLC", "Apache License 2.0"),
+    LicenseItem("Jetpack Compose Material 3", "Google LLC", "Apache License 2.0"),
+    LicenseItem("Jetpack Compose Foundation", "Google LLC", "Apache License 2.0"),
+    LicenseItem("AndroidX Navigation Compose", "Google LLC", "Apache License 2.0"),
+    LicenseItem("AndroidX Room", "Google LLC", "Apache License 2.0"),
+    LicenseItem("AndroidX SQLite", "Google LLC", "Apache License 2.0"),
+    LicenseItem("Kotlin Symbol Processing (KSP)", "Google LLC", "Apache License 2.0")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,10 +40,10 @@ fun LicensesScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Open Source Licenses") },
+                title = { Text(stringResource(R.string.settings_licenses)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -61,7 +67,7 @@ fun LicensesScreen(onBack: () -> Unit) {
                     Text(
                         text = item.name,
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(modifier = Modifier.height(4.dp))
