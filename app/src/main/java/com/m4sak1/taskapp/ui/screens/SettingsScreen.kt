@@ -146,14 +146,12 @@ fun SettingsScreen(viewModel: TaskViewModel, onShowLicenses: () -> Unit) {
     if (showAboutDialog) {
         AlertDialog(
             onDismissRequest = { showAboutDialog = false },
-            title = { Text("About Lumina Task") },
+            title = { Text(stringResource(R.string.confirm)) },
             text = {
                 Column {
-                    Text("Lumina Task v1.0.0")
+                    Text("m4 task")
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("Maintained by m4sak1")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("A minimal and sophisticated task manager built with Kotlin and Jetpack Compose.", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                 }
             },
             confirmButton = {
@@ -179,7 +177,7 @@ fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) 
         Text(
             text = title,
             fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Normal,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
             modifier = Modifier.padding(start = 12.dp, bottom = 8.dp)
         )
@@ -213,7 +211,7 @@ fun SettingsItem(
             text = title,
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Normal
         )
         if (trailingContent != null) {
             trailingContent()

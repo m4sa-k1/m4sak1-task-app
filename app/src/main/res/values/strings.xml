@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">M4sak1 Task App</string>
+    <string name="app_name">m4 task</string>
     <string name="tab_home">Home</string>
     <string name="tab_stats">Stats</string>
     <string name="tab_settings">Settings</string>
@@ -21,6 +21,7 @@
     <string name="stats_quick_rate">24h Completion Rate</string>
     <string name="past_tasks">Past Tasks</string>
     <string name="settings_about">About</string>
-    <string name="settings_immediate_hide">Hide completed tasks immediately</string>
+    <string name="settings_immediate_hide">Hide completed tasks now</string>
     <string name="settings_immediate_hide_desc">Off: Hide after 15m or app close</string>
+    <string name="confirm">Confirm</string>
 </resources>

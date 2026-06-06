@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">M4sak1 Task App</string>
+    <string name="app_name">m4 task</string>
     <string name="tab_home">ホーム</string>
     <string name="tab_stats">統計</string>
     <string name="tab_settings">設定</string>
@@ -22,6 +22,7 @@
     <string name="stats_quick_rate">24時間以内達成率</string>
     <string name="past_tasks">過去のタスク</string>
     <string name="settings_about">このアプリについて</string>
-    <string name="settings_immediate_hide">完了タスクを即座に非表示</string>
+    <string name="settings_immediate_hide">完了時に即非表示</string>
     <string name="settings_immediate_hide_desc">オフの場合: 15分後または終了時に非表示</string>
+    <string name="confirm">確認</string>
 </resources>
