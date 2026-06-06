@@ -3,6 +3,10 @@ package com.m4sak1.taskapp
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Matrix
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -114,16 +118,38 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun saveBackgroundImage(uri: Uri): String? {
+    fun saveBackgroundImage(uri: Uri, scale: Float, tx: Float, ty: Float): String? {
         return try {
-            contentResolver.openInputStream(uri)?.use { inputStream ->
-                val file = File(filesDir, "background.jpg")
-                if (file.exists()) file.delete()
-                FileOutputStream(file).use { outputStream ->
-                    inputStream.copyTo(outputStream)
-                }
-                file.absolutePath
+            val inputStream = contentResolver.openInputStream(uri) ?: return null
+            val original = BitmapFactory.decodeStream(inputStream) ?: return null
+            
+            val displayMetrics = resources.displayMetrics
+            val screenWidth = displayMetrics.widthPixels
+            val screenHeight = displayMetrics.heightPixels
+            
+            val result = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(result)
+            
+            val matrix = Matrix()
+            
+            // 1. Initial centering and fitting
+            val scaleFit = Math.max(
+                screenWidth.toFloat() / original.width,
+                screenHeight.toFloat() / original.height
+            )
+            matrix.postTranslate(-original.width / 2f, -original.height / 2f)
+            matrix.postScale(scaleFit * scale, scaleFit * scale)
+            matrix.postTranslate(screenWidth / 2f + tx, screenHeight / 2f + ty)
+            
+            canvas.drawBitmap(original, matrix, null)
+            
+            val file = File(filesDir, "background.jpg")
+            if (file.exists()) file.delete()
+            
+            FileOutputStream(file).use { output ->
+                result.compress(Bitmap.CompressFormat.JPEG, 90, output)
             }
+            file.absolutePath
         } catch (e: Exception) {
             e.printStackTrace()
             null

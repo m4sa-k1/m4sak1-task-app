@@ -30,7 +30,7 @@ import java.io.InputStream
 @Composable
 fun BackgroundEditorScreen(
     imageUri: Uri,
-    onSave: (blurEnabled: Boolean) -> Unit,
+    onSave: (scale: Float, offsetX: Float, offsetY: Float, blurEnabled: Boolean) -> Unit,
     onCancel: () -> Unit
 ) {
     val context = LocalContext.current
@@ -60,7 +60,7 @@ fun BackgroundEditorScreen(
                 },
                 actions = {
                     Button(
-                        onClick = { onSave(blurEnabled) },
+                        onClick = { onSave(scale, offsetX, offsetY, blurEnabled) },
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(stringResource(R.string.save))

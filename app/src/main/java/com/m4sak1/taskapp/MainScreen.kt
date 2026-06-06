@@ -117,10 +117,10 @@ fun MainScreen(
                 editingBgUri != null -> {
                     BackgroundEditorScreen(
                         imageUri = editingBgUri!!,
-                        onSave = { blurEnabled ->
+                        onSave = { scale, tx, ty, blurEnabled ->
                             val activity = context.findActivity() as? MainActivity
-                            val finalPath = activity?.saveBackgroundImage(editingBgUri!!)
-                            themeController.setBackgroundPath(finalPath)
+                            val finalPath = activity?.saveBackgroundImage(editingBgUri!!, scale, tx, ty)
+                            taskViewModel.updateBackgroundPath(finalPath)
                             themeController.setBackgroundBlur(if (blurEnabled) 15f else 0f)
                             editingBgUri = null
                         },
