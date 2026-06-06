@@ -1,9 +1,21 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.24"
 }
+
+val versionPropsFile = rootProject.file("version.properties")
+val versionProps = Properties().apply {
+    versionPropsFile.inputStream().use { load(it) }
+}
+
+val verMajor = versionProps.getProperty("major").toInt()
+val verMinor = versionProps.getProperty("minor").toInt()
+val verPatch = versionProps.getProperty("patch").toInt()
+val verBuild = versionProps.getProperty("build").toInt()
 
 android {
     namespace = "com.m4sak1.taskapp"
@@ -13,8 +25,8 @@ android {
         applicationId = "com.m4sak1.taskapp"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = verBuild
+        versionName = "$verMajor.$verMinor.$verPatch"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
