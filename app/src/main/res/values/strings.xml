@@ -42,4 +42,7 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="customize">Customize</string>
+    <string name="backup_success">Backup successful</string>
+    <string name="restore_success">Restore successful</string>
+    <string name="restore_failed">Restore failed</string>
 </resources>

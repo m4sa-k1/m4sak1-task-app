@@ -22,14 +22,14 @@ import com.m4sak1.taskapp.ui.components.FloatingBottomNav
 import com.m4sak1.taskapp.ui.screens.*
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 enum class ScreenTab { Home, Stats, Settings }
 
 @Composable
 fun MainScreen(
-    taskViewModel: TaskViewModel,
-    onExportBackup: () -> Unit // Note: We'll use our own launcher here but keeping signature for now
+    taskViewModel: TaskViewModel
 ) {
     var currentTab by remember { mutableStateOf(ScreenTab.Home) }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -44,20 +44,35 @@ fun MainScreen(
     
     val context = LocalContext.current
     val themeController = LocalThemeController.current
-    
-    // Launcher MUST be registered at the top level of the Composable
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    val backupSuccessMsg = stringResource(R.string.backup_success)
+    val restoreSuccessMsg = stringResource(R.string.restore_success)
+    val restoreFailedMsg = stringResource(R.string.restore_failed)
+
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        uri?.let { taskViewModel.importBackup(context, it, themeController) }
+        uri?.let { 
+            taskViewModel.importBackup(
+                context, it, themeController,
+                onSuccess = { scope.launch { snackbarHostState.showSnackbar(restoreSuccessMsg) } },
+                onError = { scope.launch { snackbarHostState.showSnackbar(restoreFailedMsg) } }
+            )
+        }
     }
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
-        uri?.let { taskViewModel.exportBackup(context, it) }
+        uri?.let { 
+            taskViewModel.exportBackup(
+                context, it,
+                onSuccess = { scope.launch { snackbarHostState.showSnackbar(backupSuccessMsg) } }
+            )
+        }
     }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        // Screen Content Layer
         Box(modifier = Modifier.fillMaxSize()) {
             when {
                 showLicenses -> LicensesScreen(onBack = { showLicenses = false })
@@ -67,6 +82,7 @@ fun MainScreen(
                 else -> {
                     Scaffold(
                         containerColor = MaterialTheme.colorScheme.background,
+                        snackbarHost = { SnackbarHost(snackbarHostState) },
                         bottomBar = {
                             FloatingBottomNav(
                                 currentTab = currentTab,
@@ -107,7 +123,6 @@ fun MainScreen(
                         }
                     }
 
-                    // Floating Action Button Layer (Home Only)
                     if (currentTab == ScreenTab.Home) {
                         Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                             FloatingActionButton(
@@ -126,7 +141,6 @@ fun MainScreen(
                 }
             }
 
-            // Dialogs Layer
             if (showAddDialog) {
                 AlertDialog(
                     onDismissRequest = { showAddDialog = false },

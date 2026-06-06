@@ -103,31 +103,39 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // BACKUP & RESTORE
-    fun exportBackup(context: Context, uri: Uri) {
+    fun exportBackup(context: Context, uri: Uri, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            val allTasks = taskDao.getAllTasksDirect()
-            val backup = AppBackup(
-                tasks = allTasks.map { TaskBackup(it.title, it.isCompleted, it.createdAt, it.completedAt) },
-                settings = SettingsBackup(
-                    themeMode = "NOT_STORED_HERE", // We'll handle this in UI state or separate store later
-                    appLanguage = "NOT_STORED_HERE",
-                    fabOffsetX = _fabOffsetX.value,
-                    fabOffsetY = _fabOffsetY.value,
-                    hideImmediately = _hideImmediately.value
+            try {
+                val allTasks = taskDao.getAllTasksDirect()
+                val backup = AppBackup(
+                    tasks = allTasks.map { TaskBackup(it.title, it.isCompleted, it.createdAt, it.completedAt) },
+                    settings = SettingsBackup(
+                        themeMode = "NOT_STORED_HERE",
+                        appLanguage = "NOT_STORED_HERE",
+                        fabOffsetX = _fabOffsetX.value,
+                        fabOffsetY = _fabOffsetY.value,
+                        hideImmediately = _hideImmediately.value
+                    )
                 )
-            )
-            val json = Json.encodeToString(backup)
-            context.contentResolver.openOutputStream(uri)?.use { 
-                it.write(json.toByteArray())
+                val json = Json.encodeToString(backup)
+                context.contentResolver.openOutputStream(uri)?.use { 
+                    it.write(json.toByteArray())
+                }
+                onSuccess()
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
 
-    fun importBackup(context: Context, uri: Uri, themeController: ThemeController) {
+    fun importBackup(context: Context, uri: Uri, themeController: ThemeController, onSuccess: () -> Unit, onError: () -> Unit) {
         viewModelScope.launch {
             val content = context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 BufferedReader(InputStreamReader(inputStream)).use { it.readText() }
-            } ?: return@launch
+            } ?: run {
+                onError()
+                return@launch
+            }
             
             try {
                 val backup = Json.decodeFromString<AppBackup>(content)
@@ -143,10 +151,10 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                 _fabOffsetY.value = backup.settings.fabOffsetY
                 _hideImmediately.value = backup.settings.hideImmediately
                 
-                // Note: themeMode and appLanguage need to be passed back to MainActivity or handled via ThemeController
-                // Since they are state in MainActivity, we might need a better way to persist them permanently
+                onSuccess()
             } catch (e: Exception) {
                 e.printStackTrace()
+                onError()
             }
         }
     }

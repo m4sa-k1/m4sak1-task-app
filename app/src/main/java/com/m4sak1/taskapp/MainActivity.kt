@@ -49,7 +49,6 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            // Important: Keep the original activity context
             val activityContext = LocalContext.current as ComponentActivity
             val configuration = LocalConfiguration.current
             
@@ -83,7 +82,6 @@ class MainActivity : ComponentActivity() {
                 LocalThemeController provides themeController,
                 LocalConfiguration provides localizedConfiguration,
                 LocalContext provides localizedContext,
-                // CRITICAL FIX: Re-provide Activity-related owners because LocalContext override hides the Activity
                 LocalActivityResultRegistryOwner provides activityContext,
                 LocalOnBackPressedDispatcherOwner provides activityContext
             ) {
@@ -93,10 +91,7 @@ class MainActivity : ComponentActivity() {
                         color = MaterialTheme.colorScheme.background
                     ) {
                         MainScreen(
-                            taskViewModel = taskViewModel,
-                            onExportBackup = { /* Handled in MainScreen with a launcher and activity result contract but wait, let's keep it here */
-                                // Actually, let's just let MainScreen handle everything but now it's safe
-                            }
+                            taskViewModel = taskViewModel
                         )
                     }
                 }

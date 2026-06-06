@@ -43,4 +43,7 @@
     <string name="theme_light">ライトモード</string>
     <string name="theme_dark">ダークモード</string>
     <string name="customize">カスタマイズ</string>
+    <string name="backup_success">バックアップが完了しました</string>
+    <string name="restore_success">復元が完了しました</string>
+    <string name="restore_failed">復元に失敗しました</string>
 </resources>

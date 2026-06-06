@@ -43,4 +43,7 @@
     <string name="theme_light">淺色模式</string>
     <string name="theme_dark">深色模式</string>
     <string name="customize">自定義</string>
+    <string name="backup_success">備份成功</string>
+    <string name="restore_success">恢復成功</string>
+    <string name="restore_failed">恢復失敗</string>
 </resources>
