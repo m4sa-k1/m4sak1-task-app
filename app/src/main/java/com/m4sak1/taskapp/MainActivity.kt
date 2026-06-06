@@ -31,15 +31,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Initial state for theme/language from some persistence could go here
-        // For now using mutableStateOf in setContent
-
         setContent {
             var themeMode by remember { mutableStateOf(AppThemeMode.System) }
             var appLanguage by remember { mutableStateOf(AppLanguage.System) }
             var accentColor by remember { mutableStateOf(AppAccentColor.Default) }
             var customAccentColor by remember { mutableStateOf(Color.Unspecified) }
-            var backgroundPath by remember { mutableStateOf<String?>(null) }
+            val backgroundPath by taskViewModel.backgroundPath.collectAsState()
             var backgroundBlur by remember { mutableStateOf(0f) }
 
             val isDarkTheme = when (themeMode) {
@@ -59,7 +56,7 @@ class MainActivity : ComponentActivity() {
                     customAccentColor = customAccentColor,
                     setCustomAccentColor = { customAccentColor = it },
                     backgroundPath = backgroundPath,
-                    setBackgroundPath = { backgroundPath = it },
+                    setBackgroundPath = { taskViewModel.updateBackgroundPath(it) },
                     backgroundBlur = backgroundBlur,
                     setBackgroundBlur = { backgroundBlur = it },
                     isDarkTheme = isDarkTheme

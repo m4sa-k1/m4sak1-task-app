@@ -34,6 +34,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _fabOffsetY = MutableStateFlow(-240f) 
     val fabOffsetY = _fabOffsetY.asStateFlow()
 
+    private val _backgroundPath = MutableStateFlow<String?>(null)
+    val backgroundPath = _backgroundPath.asStateFlow()
+
     val allCompletedTasks: Flow<List<Task>> = taskDao.getAllCompletedTasks()
 
     val uiTasks: StateFlow<List<Task>> = combine(
@@ -67,6 +70,10 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     fun resetFabPosition() {
         _fabOffsetX.value = 0f
         _fabOffsetY.value = -240f
+    }
+
+    fun updateBackgroundPath(path: String?) {
+        _backgroundPath.value = path
     }
 
     fun addTask(title: String) {
@@ -119,7 +126,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                         accentColor = themeController.accentColor.name,
                         customAccentColor = themeController.customAccentColor.toArgb().toLong(),
                         backgroundBlur = themeController.backgroundBlur,
-                        hasBackground = themeController.backgroundPath != null,
+                        hasBackground = _backgroundPath.value != null,
                         fabOffsetX = _fabOffsetX.value,
                         fabOffsetY = _fabOffsetY.value,
                         hideImmediately = _hideImmediately.value
@@ -129,13 +136,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
                 context.contentResolver.openOutputStream(uri)?.use { os ->
                     ZipOutputStream(os).use { zos ->
-                        // 1. Write JSON
                         zos.putNextEntry(ZipEntry("backup.json"))
                         zos.write(json.toByteArray())
                         zos.closeEntry()
 
-                        // 2. Write Background Image if exists
-                        themeController.backgroundPath?.let { path ->
+                        _backgroundPath.value?.let { path ->
                             val bgFile = File(path)
                             if (bgFile.exists()) {
                                 zos.putNextEntry(ZipEntry("background.jpg"))
@@ -181,19 +186,16 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
                 val backup = backupData ?: throw Exception("No JSON in ZIP")
 
-                // 1. Clear and Restore DB
                 taskDao.deleteAllTasks()
                 taskDao.insertAll(backup.tasks.map { 
                     Task(title = it.title, isCompleted = it.isCompleted, createdAt = it.createdAt, completedAt = it.completedAt)
                 })
 
                 withContext(Dispatchers.Main) {
-                    // 2. Restore Viewmodel State
                     _fabOffsetX.value = backup.settings.fabOffsetX
                     _fabOffsetY.value = backup.settings.fabOffsetY
                     _hideImmediately.value = backup.settings.hideImmediately
                     
-                    // 3. Restore UI State
                     themeController.setThemeMode(AppThemeMode.valueOf(backup.settings.themeMode))
                     themeController.setAppLanguage(AppLanguage.valueOf(backup.settings.appLanguage))
                     themeController.setAccentColor(AppAccentColor.valueOf(backup.settings.accentColor))
@@ -203,9 +205,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                     if (hasBgInZip) {
                         val realBgFile = File(context.filesDir, "background.jpg")
                         tempBgFile.renameTo(realBgFile)
-                        themeController.setBackgroundPath(realBgFile.absolutePath)
+                        _backgroundPath.value = realBgFile.absolutePath
                     } else {
-                        themeController.setBackgroundPath(null)
+                        _backgroundPath.value = null
                     }
                     
                     onSuccess()
