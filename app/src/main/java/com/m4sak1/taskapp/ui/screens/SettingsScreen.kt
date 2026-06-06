@@ -196,6 +196,7 @@ private fun getThemeModeName(mode: AppThemeMode): String = when (mode) {
     AppThemeMode.Dark -> "Dark"
 }
 
+@Composable
 private fun getLanguageName(language: AppLanguage): String = when (language) {
     AppLanguage.System -> "System Default"
     AppLanguage.English -> "English"

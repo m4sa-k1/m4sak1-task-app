@@ -1,7 +1,7 @@
 package com.m4sak1.taskapp
 
 import android.content.Context
-import android.content.ContextWrapper
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import com.m4sak1.taskapp.ui.theme.*
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
@@ -46,15 +47,41 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            // Apply Language Wrap
             val context = LocalContext.current
-            val wrappedContext = remember(appLanguage) {
-                updateContextLocale(context, appLanguage)
+            val configuration = LocalConfiguration.current
+            
+            // Create a custom configuration based on selected language
+            val localizedConfiguration = remember(appLanguage, configuration) {
+                val config = Configuration(configuration)
+                if (appLanguage != AppLanguage.System) {
+                    val localeCode = when (appLanguage) {
+                        AppLanguage.English -> "en"
+                        AppLanguage.Japanese -> "ja"
+                        AppLanguage.SimplifiedChinese -> "zh-CN"
+                        AppLanguage.TraditionalChinese -> "zh-TW"
+                        else -> "en"
+                    }
+                    val locale = if (localeCode.contains("-")) {
+                        val parts = localeCode.split("-")
+                        Locale(parts[0], parts[1])
+                    } else {
+                        Locale(localeCode)
+                    }
+                    Locale.setDefault(locale)
+                    config.setLocale(locale)
+                }
+                config
+            }
+
+            // Create a localized context to provide through LocalContext
+            val localizedContext = remember(localizedConfiguration, context) {
+                context.createConfigurationContext(localizedConfiguration)
             }
 
             CompositionLocalProvider(
                 LocalThemeController provides themeController,
-                LocalContext provides wrappedContext
+                LocalConfiguration provides localizedConfiguration,
+                LocalContext provides localizedContext
             ) {
                 TaskAppTheme(darkTheme = isDarkTheme) {
                     Surface(
@@ -66,30 +93,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    private fun updateContextLocale(context: Context, language: AppLanguage): Context {
-        if (language == AppLanguage.System) return context
-        
-        val localeCode = when (language) {
-            AppLanguage.English -> "en"
-            AppLanguage.Japanese -> "ja"
-            AppLanguage.SimplifiedChinese -> "zh-CN"
-            AppLanguage.TraditionalChinese -> "zh-TW"
-            else -> return context
-        }
-        
-        val locale = if (localeCode.contains("-")) {
-            val parts = localeCode.split("-")
-            Locale(parts[0], parts[1])
-        } else {
-            Locale(localeCode)
-        }
-        
-        Locale.setDefault(locale)
-        val config = context.resources.configuration
-        config.setLocale(locale)
-        config.setLayoutDirection(locale)
-        return context.createConfigurationContext(config)
     }
 }
