@@ -1,28 +1,31 @@
 package com.m4sak1.taskapp.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-import com.m4sak1.taskapp.ui.theme.LocalThemeController
-import androidx.compose.foundation.clickable
-import androidx.compose.ui.res.stringResource
 import com.m4sak1.taskapp.R
+import com.m4sak1.taskapp.ui.theme.AppLanguage
+import com.m4sak1.taskapp.ui.theme.AppThemeMode
+import com.m4sak1.taskapp.ui.theme.LocalThemeController
 
 @Composable
 fun SettingsScreen(onShowLicenses: () -> Unit) {
     val themeController = LocalThemeController.current
-    
+    var showThemeDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -40,16 +43,17 @@ fun SettingsScreen(onShowLicenses: () -> Unit) {
         )
 
         SettingsSection(title = stringResource(R.string.settings_general)) {
-            SettingsItem(title = stringResource(R.string.settings_dark_mode)) {
-                Switch(
-                    checked = themeController.isDarkTheme,
-                    onCheckedChange = { themeController.toggleTheme(it) }
-                )
-            }
+            SettingsItem(
+                title = stringResource(R.string.settings_dark_mode),
+                contentText = themeController.themeMode.name,
+                modifier = Modifier.clickable { showThemeDialog = true }
+            )
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-            SettingsItem(title = stringResource(R.string.settings_show_loading)) {
-                Switch(checked = true, onCheckedChange = {})
-            }
+            SettingsItem(
+                title = "Language / 言語",
+                contentText = themeController.appLanguage.name,
+                modifier = Modifier.clickable { showLanguageDialog = true }
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -58,11 +62,67 @@ fun SettingsScreen(onShowLicenses: () -> Unit) {
             SettingsItem(title = stringResource(R.string.settings_version), contentText = "1.0.0")
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
-                title = stringResource(R.string.settings_licenses), 
+                title = stringResource(R.string.settings_licenses),
                 contentText = stringResource(R.string.settings_details),
                 modifier = Modifier.clickable { onShowLicenses() }
             )
         }
+    }
+
+    if (showThemeDialog) {
+        AlertDialog(
+            onDismissRequest = { showThemeDialog = false },
+            title = { Text(stringResource(R.string.settings_dark_mode)) },
+            text = {
+                Column {
+                    AppThemeMode.entries.forEach { mode ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    themeController.setThemeMode(mode)
+                                    showThemeDialog = false
+                                }
+                                .padding(vertical = 12.dp)
+                        ) {
+                            RadioButton(selected = themeController.themeMode == mode, onClick = null)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(text = mode.name)
+                        }
+                    }
+                }
+            },
+            confirmButton = {}
+        )
+    }
+
+    if (showLanguageDialog) {
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = { Text("Language / 言語") },
+            text = {
+                Column {
+                    AppLanguage.entries.forEach { lang ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    themeController.setAppLanguage(lang)
+                                    showLanguageDialog = false
+                                }
+                                .padding(vertical = 12.dp)
+                        ) {
+                            RadioButton(selected = themeController.appLanguage == lang, onClick = null)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(text = lang.name)
+                        }
+                    }
+                }
+            },
+            confirmButton = {}
+        )
     }
 }
 

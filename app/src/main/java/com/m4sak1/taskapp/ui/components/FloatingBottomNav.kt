@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -29,10 +30,6 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import com.m4sak1.taskapp.ScreenTab
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
-
-import androidx.compose.foundation.border
-import androidx.compose.ui.res.stringResource
-import com.m4sak1.taskapp.R
 
 val BarChartIcon: ImageVector
     get() = ImageVector.Builder(
@@ -64,76 +61,83 @@ fun FloatingBottomNav(
     val selectedIndex = tabs.indexOf(currentTab)
     val isDarkTheme = LocalThemeController.current.isDarkTheme
 
+    // Wrapper to ensure centering
     Box(
         modifier = modifier
-            .padding(bottom = 32.dp)
-            .fillMaxWidth(0.75f)
-            .height(64.dp)
-            .border(
-                width = 1.dp,
-                color = if (isDarkTheme) Color.Transparent else Color.LightGray.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(32.dp)
-            )
-            .background(
-                if (isDarkTheme) Color(0xFF2A2A2A) else Color(0xFFFAFAFA),
-                RoundedCornerShape(32.dp)
-            )
+            .fillMaxWidth()
+            .padding(bottom = 32.dp),
+        contentAlignment = Alignment.Center
     ) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val constraintsScope = this
-            val tabWidth = constraintsScope.maxWidth / tabs.size
-            val indicatorOffset by animateDpAsState(
-                targetValue = tabWidth * selectedIndex,
-                animationSpec = spring(stiffness = Spring.StiffnessLow),
-                label = "indicatorOffset"
-            )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.75f)
+                .height(64.dp)
+                .border(
+                    width = 1.dp,
+                    color = if (isDarkTheme) Color.Transparent else Color.LightGray.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(32.dp)
+                )
+                .background(
+                    if (isDarkTheme) Color(0xFF2A2A2A) else Color(0xFFFAFAFA),
+                    RoundedCornerShape(32.dp)
+                )
+        ) {
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val constraintsScope = this
+                val tabWidth = constraintsScope.maxWidth / tabs.size
+                val indicatorOffset by animateDpAsState(
+                    targetValue = tabWidth * selectedIndex,
+                    animationSpec = spring(stiffness = Spring.StiffnessLow),
+                    label = "indicatorOffset"
+                )
 
-            // Animated Black Circle
-            Box(
-                modifier = Modifier
-                    .offset(x = indicatorOffset)
-                    .width(tabWidth)
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
+                // Animated Black Circle
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.onBackground)
-                )
-            }
-
-            // Icons
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                tabs.forEachIndexed { index, tab ->
-                    val isSelected = index == selectedIndex
-                    val icon = when(tab) {
-                        ScreenTab.Home -> Icons.Outlined.Home
-                        ScreenTab.Stats -> BarChartIcon
-                        ScreenTab.Settings -> Icons.Outlined.Settings
-                    }
-                    val iconColor = if (isSelected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    
+                        .offset(x = indicatorOffset)
+                        .width(tabWidth)
+                        .fillMaxHeight(),
+                    contentAlignment = Alignment.Center
+                ) {
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
-                                onTabSelected(tab)
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = iconColor,
-                            modifier = Modifier.size(24.dp)
-                        )
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.onBackground)
+                    )
+                }
+
+                // Icons
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    tabs.forEachIndexed { index, tab ->
+                        val isSelected = index == selectedIndex
+                        val icon = when(tab) {
+                            ScreenTab.Home -> Icons.Outlined.Home
+                            ScreenTab.Stats -> BarChartIcon
+                            ScreenTab.Settings -> Icons.Outlined.Settings
+                        }
+                        val iconColor = if (isSelected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
+                                    onTabSelected(tab)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = iconColor,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
                 }
             }

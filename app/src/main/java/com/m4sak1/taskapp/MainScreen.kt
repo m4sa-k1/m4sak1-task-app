@@ -24,14 +24,12 @@ import com.m4sak1.taskapp.viewmodel.TaskViewModel
 
 enum class ScreenTab { Home, Stats, Settings }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(taskViewModel: TaskViewModel) {
     var currentTab by remember { mutableStateOf(ScreenTab.Home) }
     var showAddDialog by remember { mutableStateOf(false) }
     var showLicenses by remember { mutableStateOf(false) }
     var newTaskTitle by remember { mutableStateOf("") }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     if (showLicenses) {
         LicensesScreen(onBack = { showLicenses = false })
@@ -85,32 +83,9 @@ fun MainScreen(taskViewModel: TaskViewModel) {
         }
 
         if (showAddDialog) {
-            ModalBottomSheet(
+            AlertDialog(
                 onDismissRequest = { showAddDialog = false },
-                sheetState = sheetState,
-                containerColor = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 24.dp, end = 24.dp, bottom = 48.dp, top = 16.dp),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Text(
-                        text = stringResource(R.string.new_task),
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
-                    )
-                    OutlinedTextField(
-                        value = newTaskTitle,
-                        onValueChange = { newTaskTitle = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text(stringResource(R.string.task_placeholder)) },
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
+                confirmButton = {
                     Button(
                         onClick = {
                             if (newTaskTitle.isNotBlank()) {
@@ -122,10 +97,28 @@ fun MainScreen(taskViewModel: TaskViewModel) {
                         shape = CircleShape,
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onBackground)
                     ) {
-                        Text(stringResource(R.string.add_task), color = MaterialTheme.colorScheme.background, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                        Text(stringResource(R.string.add_task), color = MaterialTheme.colorScheme.background)
                     }
-                }
-            }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showAddDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                },
+                title = { Text(stringResource(R.string.new_task)) },
+                text = {
+                    OutlinedTextField(
+                        value = newTaskTitle,
+                        onValueChange = { newTaskTitle = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text(stringResource(R.string.task_placeholder)) },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                },
+                shape = RoundedCornerShape(24.dp),
+                containerColor = MaterialTheme.colorScheme.surface
+            )
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.m4sak1.taskapp
 
+import android.content.Context
+import android.content.ContextWrapper
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,10 +16,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.m4sak1.taskapp.ui.theme.LocalThemeController
-import com.m4sak1.taskapp.ui.theme.TaskAppTheme
-import com.m4sak1.taskapp.ui.theme.ThemeController
+import androidx.compose.ui.platform.LocalContext
+import com.m4sak1.taskapp.ui.theme.*
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
+import java.util.*
 
 class MainActivity : ComponentActivity() {
     private val taskViewModel: TaskViewModel by viewModels()
@@ -25,17 +27,35 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val systemTheme = isSystemInDarkTheme()
-            var isDarkTheme by remember { mutableStateOf(systemTheme) }
+            var themeMode by remember { mutableStateOf(AppThemeMode.System) }
+            var appLanguage by remember { mutableStateOf(AppLanguage.System) }
 
-            val themeController = remember(isDarkTheme) {
+            val isDarkTheme = when (themeMode) {
+                AppThemeMode.System -> isSystemInDarkTheme()
+                AppThemeMode.Light -> false
+                AppThemeMode.Dark -> true
+            }
+
+            val themeController = remember(themeMode, appLanguage, isDarkTheme) {
                 ThemeController(
-                    isDarkTheme = isDarkTheme,
-                    toggleTheme = { isDarkTheme = it }
+                    themeMode = themeMode,
+                    setThemeMode = { themeMode = it },
+                    appLanguage = appLanguage,
+                    setAppLanguage = { appLanguage = it },
+                    isDarkTheme = isDarkTheme
                 )
             }
 
-            CompositionLocalProvider(LocalThemeController provides themeController) {
+            // Apply Language Wrap
+            val context = LocalContext.current
+            val wrappedContext = remember(appLanguage) {
+                updateContextLocale(context, appLanguage)
+            }
+
+            CompositionLocalProvider(
+                LocalThemeController provides themeController,
+                LocalContext provides wrappedContext
+            ) {
                 TaskAppTheme(darkTheme = isDarkTheme) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
@@ -46,5 +66,30 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun updateContextLocale(context: Context, language: AppLanguage): Context {
+        if (language == AppLanguage.System) return context
+        
+        val localeCode = when (language) {
+            AppLanguage.English -> "en"
+            AppLanguage.Japanese -> "ja"
+            AppLanguage.SimplifiedChinese -> "zh-CN"
+            AppLanguage.TraditionalChinese -> "zh-TW"
+            else -> return context
+        }
+        
+        val locale = if (localeCode.contains("-")) {
+            val parts = localeCode.split("-")
+            Locale(parts[0], parts[1])
+        } else {
+            Locale(localeCode)
+        }
+        
+        Locale.setDefault(locale)
+        val config = context.resources.configuration
+        config.setLocale(locale)
+        config.setLayoutDirection(locale)
+        return context.createConfigurationContext(config)
     }
 }
