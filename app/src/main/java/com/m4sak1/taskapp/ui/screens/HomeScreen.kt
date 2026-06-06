@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.sp
 import com.m4sak1.taskapp.data.Task
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
 
+import androidx.compose.ui.res.stringResource
+import com.m4sak1.taskapp.R
 import androidx.compose.foundation.ExperimentalFoundationApi
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -36,7 +38,7 @@ fun HomeScreen(viewModel: TaskViewModel) {
         Spacer(modifier = Modifier.height(64.dp))
         
         Text(
-            text = "Tasks",
+            text = stringResource(R.string.title_tasks),
             fontSize = 48.sp,
             fontWeight = FontWeight.Light,
             color = MaterialTheme.colorScheme.onBackground,
@@ -45,7 +47,7 @@ fun HomeScreen(viewModel: TaskViewModel) {
 
         if (tasks.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "No tasks", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                Text(text = stringResource(R.string.no_tasks), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
             }
         } else {
             LazyColumn(

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">M4sak1 Task App</string>
+    <string name="tab_home">主页</string>
+    <string name="tab_stats">统计</string>
+    <string name="tab_settings">设置</string>
+    <string name="title_tasks">任务</string>
+    <string name="no_tasks">没有任务</string>
+    <string name="new_task">新任务</string>
+    <string name="task_placeholder">你需要做什么？</string>
+    <string name="add_task">添加</string>
+    <string name="settings_general">常规</string>
+    <string name="settings_dark_mode">深色模式</string>
+    <string name="settings_show_loading">显示加载屏幕</string>
+    <string name="settings_app_info">应用信息</string>
+    <string name="settings_version">版本</string>
+    <string name="settings_licenses">开源许可证</string>
+    <string name="settings_details">详细</string>
+    <string name="stats_placeholder">统计数据将在此处显示</string>
+    <string name="cancel">取消</string>
+</resources>

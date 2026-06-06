@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">M4sak1 Task App</string>
+    <string name="tab_home">ホーム</string>
+    <string name="tab_stats">統計</string>
+    <string name="tab_settings">設定</string>
+    <string name="title_tasks">タスク</string>
+    <string name="no_tasks">未完了のタスクはありません</string>
+    <string name="new_task">新しいタスク</string>
+    <string name="task_placeholder">何をしますか？</string>
+    <string name="add_task">追加</string>
+    <string name="settings_general">一般</string>
+    <string name="settings_dark_mode">ダークモード</string>
+    <string name="settings_show_loading">ロード画面を毎回表示</string>
+    <string name="settings_app_info">アプリ情報</string>
+    <string name="settings_version">バージョン</string>
+    <string name="settings_licenses">オープンソースライセンス</string>
+    <string name="settings_details">詳細</string>
+    <string name="stats_placeholder">統計データがここに表示されます</string>
+    <string name="cancel">キャンセル</string>
+</resources>

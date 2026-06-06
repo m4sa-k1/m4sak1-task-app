@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.sp
 
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.res.stringResource
+import com.m4sak1.taskapp.R
 
 @Composable
 fun SettingsScreen(onShowLicenses: () -> Unit) {
@@ -30,34 +32,34 @@ fun SettingsScreen(onShowLicenses: () -> Unit) {
     ) {
         Spacer(modifier = Modifier.height(64.dp))
         Text(
-            text = "Settings",
+            text = stringResource(R.string.tab_settings),
             fontSize = 48.sp,
             fontWeight = FontWeight.Light,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
-        SettingsSection(title = "一般") {
-            SettingsItem(title = "ダークモード") {
+        SettingsSection(title = stringResource(R.string.settings_general)) {
+            SettingsItem(title = stringResource(R.string.settings_dark_mode)) {
                 Switch(
                     checked = themeController.isDarkTheme,
                     onCheckedChange = { themeController.toggleTheme(it) }
                 )
             }
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-            SettingsItem(title = "ロード画面の毎回表示") {
+            SettingsItem(title = stringResource(R.string.settings_show_loading)) {
                 Switch(checked = true, onCheckedChange = {})
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        SettingsSection(title = "アプリ情報") {
-            SettingsItem(title = "バージョン", contentText = "1.0.0")
+        SettingsSection(title = stringResource(R.string.settings_app_info)) {
+            SettingsItem(title = stringResource(R.string.settings_version), contentText = "1.0.0")
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
-                title = "オープンソースライセンス", 
-                contentText = "詳細",
+                title = stringResource(R.string.settings_licenses), 
+                contentText = stringResource(R.string.settings_details),
                 modifier = Modifier.clickable { onShowLicenses() }
             )
         }

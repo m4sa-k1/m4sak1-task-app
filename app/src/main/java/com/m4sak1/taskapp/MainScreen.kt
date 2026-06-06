@@ -13,6 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.m4sak1.taskapp.R
 import com.m4sak1.taskapp.ui.components.FloatingBottomNav
 import com.m4sak1.taskapp.ui.screens.HomeScreen
 import com.m4sak1.taskapp.ui.screens.LicensesScreen
@@ -52,7 +54,7 @@ fun MainScreen(taskViewModel: TaskViewModel) {
                     contentColor = MaterialTheme.colorScheme.background,
                     shape = CircleShape
                 ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add Task")
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_task))
                 }
             }
         }
@@ -96,7 +98,7 @@ fun MainScreen(taskViewModel: TaskViewModel) {
                     horizontalAlignment = Alignment.End
                 ) {
                     Text(
-                        text = "New Task",
+                        text = stringResource(R.string.new_task),
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
                     )
@@ -104,7 +106,7 @@ fun MainScreen(taskViewModel: TaskViewModel) {
                         value = newTaskTitle,
                         onValueChange = { newTaskTitle = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("What do you need to do?") },
+                        placeholder = { Text(stringResource(R.string.task_placeholder)) },
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp)
                     )
@@ -120,7 +122,7 @@ fun MainScreen(taskViewModel: TaskViewModel) {
                         shape = CircleShape,
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onBackground)
                     ) {
-                        Text("Add Task", color = MaterialTheme.colorScheme.background, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                        Text(stringResource(R.string.add_task), color = MaterialTheme.colorScheme.background, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
                     }
                 }
             }

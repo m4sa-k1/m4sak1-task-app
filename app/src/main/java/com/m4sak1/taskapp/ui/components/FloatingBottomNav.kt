@@ -30,28 +30,27 @@ import androidx.compose.ui.unit.dp
 import com.m4sak1.taskapp.ScreenTab
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
 
-val PieChartIcon: ImageVector
+import androidx.compose.foundation.border
+import androidx.compose.ui.res.stringResource
+import com.m4sak1.taskapp.R
+
+val BarChartIcon: ImageVector
     get() = ImageVector.Builder(
-        name = "PieChart",
+        name = "BarChart",
         defaultWidth = 24.dp,
         defaultHeight = 24.dp,
         viewportWidth = 24f,
         viewportHeight = 24f
     ).apply {
         path(
-            stroke = SolidColor(Color.Black), // Wait, stroke color needs to adapt. Let's not hardcode.
+            stroke = SolidColor(Color.Black),
             strokeLineWidth = 2f,
             strokeLineCap = StrokeCap.Round,
             strokeLineJoin = StrokeJoin.Round
         ) {
-            moveTo(12f, 2f)
-            arcToRelative(10f, 10f, 0f, false, false, 0f, 20f)
-            arcToRelative(10f, 10f, 0f, false, false, 0f, -20f)
-            close()
-            moveTo(12f, 2f)
-            lineTo(12f, 22f)
-            moveTo(12f, 12f)
-            lineTo(22f, 12f)
+            moveTo(18f, 20f); lineTo(18f, 10f)
+            moveTo(12f, 20f); lineTo(12f, 4f)
+            moveTo(6f, 20f); lineTo(6f, 14f)
         }
     }.build()
 
@@ -61,22 +60,28 @@ fun FloatingBottomNav(
     onTabSelected: (ScreenTab) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = ScreenTab.values()
+    val tabs = ScreenTab.entries.toTypedArray()
     val selectedIndex = tabs.indexOf(currentTab)
     val isDarkTheme = LocalThemeController.current.isDarkTheme
 
     Box(
         modifier = modifier
-            .padding(bottom = 32.dp, start = 32.dp, end = 32.dp)
-            .fillMaxWidth()
+            .padding(bottom = 32.dp)
+            .fillMaxWidth(0.75f)
             .height(64.dp)
+            .border(
+                width = 1.dp,
+                color = if (isDarkTheme) Color.Transparent else Color.LightGray.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(32.dp)
+            )
             .background(
-                if (isDarkTheme) Color(0xFF2A2A2A) else Color(0xFFF0F0F0),
+                if (isDarkTheme) Color(0xFF2A2A2A) else Color(0xFFFAFAFA),
                 RoundedCornerShape(32.dp)
             )
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val tabWidth = maxWidth / tabs.size
+            val constraintsScope = this
+            val tabWidth = constraintsScope.maxWidth / tabs.size
             val indicatorOffset by animateDpAsState(
                 targetValue = tabWidth * selectedIndex,
                 animationSpec = spring(stiffness = Spring.StiffnessLow),
@@ -109,7 +114,7 @@ fun FloatingBottomNav(
                     val isSelected = index == selectedIndex
                     val icon = when(tab) {
                         ScreenTab.Home -> Icons.Outlined.Home
-                        ScreenTab.Stats -> PieChartIcon
+                        ScreenTab.Stats -> BarChartIcon
                         ScreenTab.Settings -> Icons.Outlined.Settings
                     }
                     val iconColor = if (isSelected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
