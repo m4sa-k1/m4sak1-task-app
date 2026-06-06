@@ -2,6 +2,7 @@ package com.m4sak1.taskapp.ui.screens
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -18,23 +19,29 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.m4sak1.taskapp.R
-import java.io.File
+import java.io.InputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackgroundEditorScreen(
-    tempImagePath: String,
-    onSave: (scale: Float, offsetX: Float, offsetY: Float, blurEnabled: Boolean) -> Unit,
+    imageUri: Uri,
+    onSave: (blurEnabled: Boolean) -> Unit,
     onCancel: () -> Unit
 ) {
-    val bitmap = remember(tempImagePath) {
+    val context = LocalContext.current
+    val bitmap = remember(imageUri) {
         try {
-            BitmapFactory.decodeFile(tempImagePath)
-        } catch (e: Exception) { null }
+            val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
+            BitmapFactory.decodeStream(inputStream)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     var scale by remember { mutableStateOf(1f) }
@@ -53,7 +60,7 @@ fun BackgroundEditorScreen(
                 },
                 actions = {
                     Button(
-                        onClick = { onSave(scale, offsetX, offsetY, blurEnabled) },
+                        onClick = { onSave(blurEnabled) },
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(stringResource(R.string.save))

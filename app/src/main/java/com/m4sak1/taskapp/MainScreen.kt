@@ -30,6 +30,8 @@ import com.m4sak1.taskapp.viewmodel.TaskViewModel
 import kotlinx.coroutines.launch
 import java.io.File
 import android.graphics.BitmapFactory
+import android.net.Uri
+import androidx.compose.ui.graphics.ImageBitmap
 import kotlin.math.roundToInt
 
 enum class ScreenTab { Home, Stats, Settings }
@@ -44,6 +46,7 @@ fun MainScreen(
     var showMITLicense by remember { mutableStateOf(false) }
     var showPastTasks by remember { mutableStateOf(false) }
     var showEditHome by remember { mutableStateOf(false) }
+    var editingBgUri by remember { mutableStateOf<Uri?>(null) }
     var newTaskTitle by remember { mutableStateOf("") }
 
     val fabOffsetX by taskViewModel.fabOffsetX.collectAsState()
@@ -76,11 +79,7 @@ fun MainScreen(
         }
     }
     val bgLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let {
-            val activity = context.findActivity() as? MainActivity
-            val path = activity?.saveBackgroundImage(it)
-            themeController.setBackgroundPath(path)
-        }
+        uri?.let { editingBgUri = it }
     }
 
     Surface(
@@ -89,7 +88,7 @@ fun MainScreen(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             // BACKGROUND IMAGE LAYER
-            val bgPath = themeController.backgroundPath
+            val bgPath by taskViewModel.backgroundPath.collectAsState()
             val bitmap = remember(bgPath) {
                 if (bgPath != null) {
                     try {
@@ -115,6 +114,19 @@ fun MainScreen(
             }
 
             when {
+                editingBgUri != null -> {
+                    BackgroundEditorScreen(
+                        imageUri = editingBgUri!!,
+                        onSave = { blurEnabled ->
+                            val activity = context.findActivity() as? MainActivity
+                            val finalPath = activity?.saveBackgroundImage(editingBgUri!!)
+                            themeController.setBackgroundPath(finalPath)
+                            themeController.setBackgroundBlur(if (blurEnabled) 15f else 0f)
+                            editingBgUri = null
+                        },
+                        onCancel = { editingBgUri = null }
+                    )
+                }
                 showLicenses -> LicensesScreen(onBack = { showLicenses = false })
                 showMITLicense -> MITLicenseScreen(onBack = { showMITLicense = false })
                 showPastTasks -> PastTasksScreen(viewModel = taskViewModel, onBack = { showPastTasks = false })
