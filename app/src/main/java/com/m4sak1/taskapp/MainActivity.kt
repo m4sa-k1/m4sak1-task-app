@@ -1,6 +1,7 @@
 package com.m4sak1.taskapp
 
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
@@ -8,7 +9,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,10 +31,6 @@ import java.util.*
 
 class MainActivity : ComponentActivity() {
     private val taskViewModel: TaskViewModel by viewModels()
-
-    private val createDocument = registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
-        // Note: Logic moved to MainScreen for scope reasons
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +66,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            val activityContext = LocalContext.current as ComponentActivity
+            val activityContext = this
             val configuration = LocalConfiguration.current
             
             val localizedConfiguration = remember(appLanguage, configuration) {
@@ -95,7 +91,7 @@ class MainActivity : ComponentActivity() {
                 config
             }
 
-            val localizedContext = remember(localizedConfiguration, activityContext) {
+            val localizedContext = remember(localizedConfiguration) {
                 activityContext.createConfigurationContext(localizedConfiguration)
             }
 
@@ -121,7 +117,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Helper for saving background image to internal storage
     fun saveBackgroundImage(uri: Uri): String? {
         return try {
             val inputStream = contentResolver.openInputStream(uri)
@@ -138,4 +133,10 @@ class MainActivity : ComponentActivity() {
             null
         }
     }
+}
+
+fun Context.findActivity(): ComponentActivity? = when (this) {
+    is ComponentActivity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }

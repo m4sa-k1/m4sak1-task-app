@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import com.m4sak1.taskapp.MainActivity
 import com.m4sak1.taskapp.R
+import com.m4sak1.taskapp.findActivity
 import com.m4sak1.taskapp.ui.components.CustomConfirmDialog
 import com.m4sak1.taskapp.ui.theme.AppAccentColor
 import com.m4sak1.taskapp.ui.theme.AppLanguage
@@ -50,7 +51,8 @@ fun SettingsScreen(
 
     val bgLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
-            val path = (context as MainActivity).saveBackgroundImage(it)
+            val activity = context.findActivity() as? MainActivity
+            val path = activity?.saveBackgroundImage(it)
             themeController.setBackgroundPath(path)
         }
     }
