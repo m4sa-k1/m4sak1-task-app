@@ -9,16 +9,17 @@ import com.m4sak1.taskapp.ui.components.FloatingBottomNav
 import com.m4sak1.taskapp.ui.screens.HomeScreen
 import com.m4sak1.taskapp.ui.screens.SettingsScreen
 import com.m4sak1.taskapp.ui.screens.StatsScreen
+import com.m4sak1.taskapp.viewmodel.TaskViewModel
 
 enum class ScreenTab { Home, Stats, Settings }
 
 @Composable
-fun MainScreen() {
+fun MainScreen(taskViewModel: TaskViewModel) {
     var currentTab by remember { mutableStateOf(ScreenTab.Home) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (currentTab) {
-            ScreenTab.Home -> HomeScreen()
+            ScreenTab.Home -> HomeScreen(taskViewModel)
             ScreenTab.Stats -> StatsScreen()
             ScreenTab.Settings -> SettingsScreen()
         }
