@@ -32,6 +32,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             var themeMode by remember { mutableStateOf(AppThemeMode.System) }
             var appLanguage by remember { mutableStateOf(AppLanguage.System) }
+            var accentColor by remember { mutableStateOf(AppAccentColor.Default) }
 
             val isDarkTheme = when (themeMode) {
                 AppThemeMode.System -> isSystemInDarkTheme()
@@ -39,12 +40,14 @@ class MainActivity : ComponentActivity() {
                 AppThemeMode.Dark -> true
             }
 
-            val themeController = remember(themeMode, appLanguage, isDarkTheme) {
+            val themeController = remember(themeMode, appLanguage, isDarkTheme, accentColor) {
                 ThemeController(
                     themeMode = themeMode,
                     setThemeMode = { themeMode = it },
                     appLanguage = appLanguage,
                     setAppLanguage = { appLanguage = it },
+                    accentColor = accentColor,
+                    setAccentColor = { accentColor = it },
                     isDarkTheme = isDarkTheme
                 )
             }
@@ -85,7 +88,7 @@ class MainActivity : ComponentActivity() {
                 LocalActivityResultRegistryOwner provides activityContext,
                 LocalOnBackPressedDispatcherOwner provides activityContext
             ) {
-                TaskAppTheme(darkTheme = isDarkTheme) {
+                TaskAppTheme(darkTheme = isDarkTheme, accentColor = accentColor.color) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background

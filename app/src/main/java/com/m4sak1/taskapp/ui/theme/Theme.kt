@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
+private val DarkColorSchemeBase = darkColorScheme(
     primary = PureWhite,
     secondary = LightGray,
     tertiary = AccentColor,
@@ -29,7 +29,7 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = PureWhite,
 )
 
-private val LightColorScheme = lightColorScheme(
+private val LightColorSchemeBase = lightColorScheme(
     primary = PureBlack,
     secondary = DarkGray,
     tertiary = AccentColor,
@@ -45,6 +45,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun TaskAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    accentColor: Color = Color.Unspecified,
     dynamicColor: Boolean = false, 
     content: @Composable () -> Unit
 ) {
@@ -54,8 +55,20 @@ fun TaskAppTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> {
+            if (accentColor != Color.Unspecified) {
+                DarkColorSchemeBase.copy(primary = accentColor, onBackground = accentColor)
+            } else {
+                DarkColorSchemeBase
+            }
+        }
+        else -> {
+            if (accentColor != Color.Unspecified) {
+                LightColorSchemeBase.copy(primary = accentColor, onBackground = accentColor)
+            } else {
+                LightColorSchemeBase
+            }
+        }
     }
     val view = LocalView.current
     if (!view.isInEditMode) {

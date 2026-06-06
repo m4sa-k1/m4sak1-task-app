@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import com.m4sak1.taskapp.R
 import com.m4sak1.taskapp.ui.components.CustomConfirmDialog
+import com.m4sak1.taskapp.ui.theme.AppAccentColor
 import com.m4sak1.taskapp.ui.theme.AppLanguage
 import com.m4sak1.taskapp.ui.theme.AppThemeMode
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
@@ -35,6 +37,7 @@ fun SettingsScreen(
     val themeController = LocalThemeController.current
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showAccentDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
     var showRestoreConfirm by remember { mutableStateOf(false) }
     val hideImmediately by viewModel.hideImmediately.collectAsState()
@@ -60,6 +63,22 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_dark_mode),
                 contentText = getThemeModeName(themeController.themeMode),
                 modifier = Modifier.clickable { showThemeDialog = true }
+            )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            SettingsItem(
+                title = "Accent Color",
+                contentText = themeController.accentColor.label,
+                modifier = Modifier.clickable { showAccentDialog = true },
+                trailingContent = {
+                    if (themeController.accentColor != AppAccentColor.Default) {
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(themeController.accentColor.color)
+                        )
+                    }
+                }
             )
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
@@ -168,6 +187,43 @@ fun SettingsScreen(
                         RadioButton(selected = themeController.themeMode == mode, onClick = null)
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(text = getThemeModeName(mode))
+                    }
+                }
+            }
+        }
+    }
+
+    if (showAccentDialog) {
+        CustomConfirmDialog(
+            title = "Accent Color",
+            onConfirm = { showAccentDialog = false },
+            onDismiss = { showAccentDialog = false },
+            confirmText = stringResource(R.string.ok)
+        ) {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                AppAccentColor.entries.forEach { accent ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                themeController.setAccentColor(accent)
+                                showAccentDialog = false
+                            }
+                            .padding(vertical = 12.dp)
+                    ) {
+                        RadioButton(selected = themeController.accentColor == accent, onClick = null)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(text = accent.label, color = if (accent == AppAccentColor.Default) MaterialTheme.colorScheme.onSurface else accent.color)
+                        if (accent != AppAccentColor.Default) {
+                            Spacer(modifier = Modifier.weight(1f))
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .background(accent.color)
+                            )
+                        }
                     }
                 }
             }

@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.m4sak1.taskapp.data.*
+import com.m4sak1.taskapp.ui.theme.AppAccentColor
 import com.m4sak1.taskapp.ui.theme.AppLanguage
 import com.m4sak1.taskapp.ui.theme.AppThemeMode
 import com.m4sak1.taskapp.ui.theme.ThemeController
@@ -103,15 +104,16 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // BACKUP & RESTORE
-    fun exportBackup(context: Context, uri: Uri, onSuccess: () -> Unit) {
+    fun exportBackup(context: Context, uri: Uri, themeController: ThemeController, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
                 val allTasks = taskDao.getAllTasksDirect()
                 val backup = AppBackup(
                     tasks = allTasks.map { TaskBackup(it.title, it.isCompleted, it.createdAt, it.completedAt) },
                     settings = SettingsBackup(
-                        themeMode = "NOT_STORED_HERE",
-                        appLanguage = "NOT_STORED_HERE",
+                        themeMode = themeController.themeMode.name,
+                        appLanguage = themeController.appLanguage.name,
+                        accentColor = themeController.accentColor.name,
                         fabOffsetX = _fabOffsetX.value,
                         fabOffsetY = _fabOffsetY.value,
                         hideImmediately = _hideImmediately.value
@@ -150,6 +152,13 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                 _fabOffsetX.value = backup.settings.fabOffsetX
                 _fabOffsetY.value = backup.settings.fabOffsetY
                 _hideImmediately.value = backup.settings.hideImmediately
+                
+                // 3. Restore UI State (Language, Theme, Accent)
+                try {
+                    themeController.setThemeMode(AppThemeMode.valueOf(backup.settings.themeMode))
+                    themeController.setAppLanguage(AppLanguage.valueOf(backup.settings.appLanguage))
+                    themeController.setAccentColor(AppAccentColor.valueOf(backup.settings.accentColor))
+                } catch (e: Exception) { /* Fallback for older backups */ }
                 
                 onSuccess()
             } catch (e: Exception) {

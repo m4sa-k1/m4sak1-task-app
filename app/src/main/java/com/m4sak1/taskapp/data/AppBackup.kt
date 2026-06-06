@@ -22,6 +22,7 @@ data class TaskBackup(
 data class SettingsBackup(
     val themeMode: String,
     val appLanguage: String,
+    val accentColor: String = "Default",
     val fabOffsetX: Float,
     val fabOffsetY: Float,
     val hideImmediately: Boolean

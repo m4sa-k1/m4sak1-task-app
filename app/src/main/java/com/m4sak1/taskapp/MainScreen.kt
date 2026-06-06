@@ -63,7 +63,7 @@ fun MainScreen(
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
         uri?.let { 
             taskViewModel.exportBackup(
-                context, it,
+                context, it, themeController,
                 onSuccess = { scope.launch { snackbarHostState.showSnackbar(backupSuccessMsg) } }
             )
         }
