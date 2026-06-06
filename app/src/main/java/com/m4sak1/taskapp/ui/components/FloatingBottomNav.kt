@@ -57,11 +57,11 @@ fun FloatingBottomNav(
     onTabSelected: (ScreenTab) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = ScreenTab.entries.toTypedArray()
-    val selectedIndex = tabs.indexOf(currentTab)
+    // Only show Home, Stats, Settings in the bottom nav
+    val displayTabs = listOf(ScreenTab.Home, ScreenTab.Stats, ScreenTab.Settings)
+    val selectedIndex = displayTabs.indexOf(currentTab).coerceAtLeast(0)
     val isDarkTheme = LocalThemeController.current.isDarkTheme
 
-    // Wrapper to ensure centering
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -84,7 +84,7 @@ fun FloatingBottomNav(
         ) {
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 val constraintsScope = this
-                val tabWidth = constraintsScope.maxWidth / tabs.size
+                val tabWidth = constraintsScope.maxWidth / displayTabs.size
                 val indicatorOffset by animateDpAsState(
                     targetValue = tabWidth * selectedIndex,
                     animationSpec = spring(stiffness = Spring.StiffnessLow),
@@ -92,19 +92,21 @@ fun FloatingBottomNav(
                 )
 
                 // Animated Black Circle
-                Box(
-                    modifier = Modifier
-                        .offset(x = indicatorOffset)
-                        .width(tabWidth)
-                        .fillMaxHeight(),
-                    contentAlignment = Alignment.Center
-                ) {
+                if (currentTab in displayTabs) {
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.onBackground)
-                    )
+                            .offset(x = indicatorOffset)
+                            .width(tabWidth)
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.onBackground)
+                        )
+                    }
                 }
 
                 // Icons
@@ -113,12 +115,13 @@ fun FloatingBottomNav(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    tabs.forEachIndexed { index, tab ->
-                        val isSelected = index == selectedIndex
+                    displayTabs.forEachIndexed { index, tab ->
+                        val isSelected = tab == currentTab
                         val icon = when(tab) {
                             ScreenTab.Home -> Icons.Outlined.Home
                             ScreenTab.Stats -> BarChartIcon
                             ScreenTab.Settings -> Icons.Outlined.Settings
+                            else -> Icons.Outlined.Home // Should not happen
                         }
                         val iconColor = if (isSelected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         
