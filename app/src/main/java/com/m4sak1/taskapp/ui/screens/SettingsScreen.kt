@@ -22,7 +22,7 @@ import com.m4sak1.taskapp.ui.theme.LocalThemeController
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
 
 @Composable
-fun SettingsScreen(viewModel: TaskViewModel, onShowLicenses: () -> Unit) {
+fun SettingsScreen(viewModel: TaskViewModel, onShowLicenses: () -> Unit, onShowMITLicense: () -> Unit) {
     val themeController = LocalThemeController.current
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
@@ -48,12 +48,12 @@ fun SettingsScreen(viewModel: TaskViewModel, onShowLicenses: () -> Unit) {
         SettingsSection(title = stringResource(R.string.settings_general)) {
             SettingsItem(
                 title = stringResource(R.string.settings_dark_mode),
-                contentText = themeController.themeMode.name,
+                contentText = getThemeModeName(themeController.themeMode),
                 modifier = Modifier.clickable { showThemeDialog = true }
             )
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
-                title = "Language / 言語 / 语言",
+                title = stringResource(R.string.settings_language),
                 contentText = getLanguageName(themeController.appLanguage),
                 modifier = Modifier.clickable { showLanguageDialog = true }
             )
@@ -81,10 +81,36 @@ fun SettingsScreen(viewModel: TaskViewModel, onShowLicenses: () -> Unit) {
             )
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
+                title = stringResource(R.string.settings_mit_license),
+                modifier = Modifier.clickable { onShowMITLicense() }
+            )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            SettingsItem(
                 title = stringResource(R.string.settings_about),
                 modifier = Modifier.clickable { showAboutDialog = true }
             )
         }
+
+        Spacer(modifier = Modifier.height(48.dp))
+        
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "m4 task",
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.settings_footer),
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(48.dp))
     }
 
     if (showThemeDialog) {
@@ -106,7 +132,7 @@ fun SettingsScreen(viewModel: TaskViewModel, onShowLicenses: () -> Unit) {
                         ) {
                             RadioButton(selected = themeController.themeMode == mode, onClick = null)
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text(text = mode.name)
+                            Text(text = getThemeModeName(mode))
                         }
                     }
                 }
@@ -118,7 +144,7 @@ fun SettingsScreen(viewModel: TaskViewModel, onShowLicenses: () -> Unit) {
     if (showLanguageDialog) {
         AlertDialog(
             onDismissRequest = { showLanguageDialog = false },
-            title = { Text("Language / 言語 / 语言") },
+            title = { Text(stringResource(R.string.settings_language)) },
             text = {
                 Column {
                     AppLanguage.entries.forEach { lang ->
@@ -161,6 +187,13 @@ fun SettingsScreen(viewModel: TaskViewModel, onShowLicenses: () -> Unit) {
             }
         )
     }
+}
+
+@Composable
+private fun getThemeModeName(mode: AppThemeMode): String = when (mode) {
+    AppThemeMode.System -> "System Default"
+    AppThemeMode.Light -> "Light"
+    AppThemeMode.Dark -> "Dark"
 }
 
 private fun getLanguageName(language: AppLanguage): String = when (language) {

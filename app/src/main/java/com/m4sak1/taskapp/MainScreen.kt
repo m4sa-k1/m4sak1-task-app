@@ -25,11 +25,17 @@ fun MainScreen(taskViewModel: TaskViewModel) {
     var currentTab by remember { mutableStateOf(ScreenTab.Home) }
     var showAddDialog by remember { mutableStateOf(false) }
     var showLicenses by remember { mutableStateOf(false) }
+    var showMITLicense by remember { mutableStateOf(false) }
     var showPastTasks by remember { mutableStateOf(false) }
     var newTaskTitle by remember { mutableStateOf("") }
 
     if (showLicenses) {
         LicensesScreen(onBack = { showLicenses = false })
+        return
+    }
+
+    if (showMITLicense) {
+        MITLicenseScreen(onBack = { showMITLicense = false })
         return
     }
 
@@ -79,7 +85,11 @@ fun MainScreen(taskViewModel: TaskViewModel) {
                 when (targetTab) {
                     ScreenTab.Home -> HomeScreen(taskViewModel)
                     ScreenTab.Stats -> StatsScreen(viewModel = taskViewModel, onShowPastTasks = { showPastTasks = true })
-                    ScreenTab.Settings -> SettingsScreen(viewModel = taskViewModel, onShowLicenses = { showLicenses = true })
+                    ScreenTab.Settings -> SettingsScreen(
+                        viewModel = taskViewModel, 
+                        onShowLicenses = { showLicenses = true },
+                        onShowMITLicense = { showMITLicense = true }
+                    )
                 }
             }
         }
