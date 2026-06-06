@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import com.m4sak1.taskapp.R
+import com.m4sak1.taskapp.ui.components.CustomConfirmDialog
 import com.m4sak1.taskapp.ui.theme.AppLanguage
 import com.m4sak1.taskapp.ui.theme.AppThemeMode
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
@@ -146,102 +147,90 @@ fun SettingsScreen(
     }
 
     if (showThemeDialog) {
-        AlertDialog(
-            onDismissRequest = { showThemeDialog = false },
-            title = { Text(stringResource(R.string.settings_dark_mode)) },
-            text = {
-                Column {
-                    AppThemeMode.entries.forEach { mode ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    themeController.setThemeMode(mode)
-                                    showThemeDialog = false
-                                }
-                                .padding(vertical = 12.dp)
-                        ) {
-                            RadioButton(selected = themeController.themeMode == mode, onClick = null)
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(text = getThemeModeName(mode))
-                        }
+        CustomConfirmDialog(
+            title = stringResource(R.string.settings_dark_mode),
+            onConfirm = { showThemeDialog = false },
+            onDismiss = { showThemeDialog = false },
+            confirmText = "OK"
+        ) {
+            Column {
+                AppThemeMode.entries.forEach { mode ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                themeController.setThemeMode(mode)
+                                showThemeDialog = false
+                            }
+                            .padding(vertical = 12.dp)
+                    ) {
+                        RadioButton(selected = themeController.themeMode == mode, onClick = null)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(text = getThemeModeName(mode))
                     }
                 }
-            },
-            confirmButton = {}
-        )
+            }
+        }
     }
 
     if (showLanguageDialog) {
-        AlertDialog(
-            onDismissRequest = { showLanguageDialog = false },
-            title = { Text(stringResource(R.string.settings_language)) },
-            text = {
-                Column {
-                    AppLanguage.entries.forEach { lang ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    themeController.setAppLanguage(lang)
-                                    showLanguageDialog = false
-                                }
-                                .padding(vertical = 12.dp)
-                        ) {
-                            RadioButton(selected = themeController.appLanguage == lang, onClick = null)
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(text = getLanguageName(lang))
-                        }
+        CustomConfirmDialog(
+            title = stringResource(R.string.settings_language),
+            onConfirm = { showLanguageDialog = false },
+            onDismiss = { showLanguageDialog = false },
+            confirmText = "OK"
+        ) {
+            Column {
+                AppLanguage.entries.forEach { lang ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                themeController.setAppLanguage(lang)
+                                showLanguageDialog = false
+                            }
+                            .padding(vertical = 12.dp)
+                    ) {
+                        RadioButton(selected = themeController.appLanguage == lang, onClick = null)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(text = getLanguageName(lang))
                     }
                 }
-            },
-            confirmButton = {}
-        )
+            }
+        }
     }
 
     if (showAboutDialog) {
-        AlertDialog(
-            onDismissRequest = { showAboutDialog = false },
-            title = { Text(stringResource(R.string.confirm)) },
-            text = {
-                Column {
-                    Text("m4 task")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Maintained by m4sak1")
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showAboutDialog = false }) {
-                    Text("OK")
-                }
+        CustomConfirmDialog(
+            title = stringResource(R.string.confirm),
+            onConfirm = { showAboutDialog = false },
+            onDismiss = { showAboutDialog = false },
+            confirmText = "OK"
+        ) {
+            Column {
+                Text("m4 task")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Maintained by m4sak1")
             }
-        )
+        }
     }
 
     if (showRestoreConfirm) {
-        AlertDialog(
-            onDismissRequest = { showRestoreConfirm = false },
-            title = { Text(stringResource(R.string.confirm)) },
-            text = { Text(stringResource(R.string.restore_warning)) },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onRestore()
-                        showRestoreConfirm = false
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text(stringResource(R.string.confirm), color = Color.White)
-                }
+        CustomConfirmDialog(
+            title = stringResource(R.string.confirm),
+            onConfirm = {
+                onRestore()
+                showRestoreConfirm = false
             },
-            dismissButton = {
-                TextButton(onClick = { showRestoreConfirm = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
+            onDismiss = { showRestoreConfirm = false },
+            confirmText = stringResource(R.string.confirm),
+            dismissText = stringResource(R.string.cancel),
+            confirmColor = MaterialTheme.colorScheme.error
+        ) {
+            Text(stringResource(R.string.restore_warning))
+        }
     }
 }
 
@@ -252,6 +241,7 @@ private fun getThemeModeName(mode: AppThemeMode): String = when (mode) {
     AppThemeMode.Dark -> "Dark"
 }
 
+@Composable
 private fun getLanguageName(language: AppLanguage): String = when (language) {
     AppLanguage.System -> "System Default"
     AppLanguage.English -> "English"
