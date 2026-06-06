@@ -23,18 +23,19 @@ import java.util.zip.ZipOutputStream
 
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val taskDao = AppDatabase.getDatabase(application).taskDao()
+    private val prefManager = PreferenceManager(application)
 
     private val _recentlyCompletedTasks = MutableStateFlow<List<Task>>(emptyList())
     
-    private val _hideImmediately = MutableStateFlow(false)
+    private val _hideImmediately = MutableStateFlow(prefManager.hideImmediately)
     val hideImmediately = _hideImmediately.asStateFlow()
 
-    private val _fabOffsetX = MutableStateFlow(0f)
+    private val _fabOffsetX = MutableStateFlow(prefManager.fabOffsetX)
     val fabOffsetX = _fabOffsetX.asStateFlow()
-    private val _fabOffsetY = MutableStateFlow(-240f) 
+    private val _fabOffsetY = MutableStateFlow(prefManager.fabOffsetY) 
     val fabOffsetY = _fabOffsetY.asStateFlow()
 
-    private val _backgroundPath = MutableStateFlow<String?>(null)
+    private val _backgroundPath = MutableStateFlow(prefManager.backgroundPath)
     val backgroundPath = _backgroundPath.asStateFlow()
 
     val allCompletedTasks: Flow<List<Task>> = taskDao.getAllCompletedTasks()
@@ -57,6 +58,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     fun toggleHideImmediately(hide: Boolean) {
         _hideImmediately.value = hide
+        prefManager.hideImmediately = hide
         if (hide) {
             _recentlyCompletedTasks.value = emptyList()
         }
@@ -65,15 +67,22 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     fun updateFabPosition(x: Float, y: Float) {
         _fabOffsetX.value = x
         _fabOffsetY.value = y
+        prefManager.fabOffsetX = x
+        prefManager.fabOffsetY = y
     }
 
     fun resetFabPosition() {
-        _fabOffsetX.value = 0f
-        _fabOffsetY.value = -240f
+        val dx = 0f
+        val dy = -240f
+        _fabOffsetX.value = dx
+        _fabOffsetY.value = dy
+        prefManager.fabOffsetX = dx
+        prefManager.fabOffsetY = dy
     }
 
     fun updateBackgroundPath(path: String?) {
         _backgroundPath.value = path
+        prefManager.backgroundPath = path
     }
 
     fun addTask(title: String) {
@@ -196,18 +205,30 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                     _fabOffsetY.value = backup.settings.fabOffsetY
                     _hideImmediately.value = backup.settings.hideImmediately
                     
-                    themeController.setThemeMode(AppThemeMode.valueOf(backup.settings.themeMode))
-                    themeController.setAppLanguage(AppLanguage.valueOf(backup.settings.appLanguage))
-                    themeController.setAccentColor(AppAccentColor.valueOf(backup.settings.accentColor))
-                    themeController.setCustomAccentColor(Color(backup.settings.customAccentColor.toInt()))
-                    themeController.setBackgroundBlur(backup.settings.backgroundBlur)
+                    // Persist to prefs
+                    prefManager.fabOffsetX = backup.settings.fabOffsetX
+                    prefManager.fabOffsetY = backup.settings.fabOffsetY
+                    prefManager.hideImmediately = backup.settings.hideImmediately
+                    prefManager.themeMode = AppThemeMode.valueOf(backup.settings.themeMode)
+                    prefManager.appLanguage = AppLanguage.valueOf(backup.settings.appLanguage)
+                    prefManager.accentColor = AppAccentColor.valueOf(backup.settings.accentColor)
+                    prefManager.customAccentColor = backup.settings.customAccentColor.toInt()
+                    prefManager.backgroundBlur = backup.settings.backgroundBlur
+
+                    themeController.setThemeMode(prefManager.themeMode)
+                    themeController.setAppLanguage(prefManager.appLanguage)
+                    themeController.setAccentColor(prefManager.accentColor)
+                    themeController.setCustomAccentColor(Color(prefManager.customAccentColor))
+                    themeController.setBackgroundBlur(prefManager.backgroundBlur)
                     
                     if (hasBgInZip) {
                         val realBgFile = File(context.filesDir, "background.jpg")
                         tempBgFile.renameTo(realBgFile)
                         _backgroundPath.value = realBgFile.absolutePath
+                        prefManager.backgroundPath = realBgFile.absolutePath
                     } else {
                         _backgroundPath.value = null
+                        prefManager.backgroundPath = null
                     }
                     
                     onSuccess()
