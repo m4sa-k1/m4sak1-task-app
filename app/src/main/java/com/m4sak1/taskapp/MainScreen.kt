@@ -62,20 +62,6 @@ fun MainScreen(taskViewModel: TaskViewModel) {
                 currentTab = currentTab,
                 onTabSelected = { currentTab = it }
             )
-        },
-        floatingActionButton = {
-            if (currentTab == ScreenTab.Home) {
-                FloatingActionButton(
-                    onClick = { showAddDialog = true },
-                    containerColor = MaterialTheme.colorScheme.onBackground,
-                    contentColor = MaterialTheme.colorScheme.background,
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .offset { IntOffset(fabOffsetX.roundToInt(), fabOffsetY.roundToInt()) }
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_task))
-                }
-            }
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -104,6 +90,23 @@ fun MainScreen(taskViewModel: TaskViewModel) {
                         onShowMITLicense = { showMITLicense = true },
                         onShowEditHome = { showEditHome = true }
                     )
+                }
+            }
+
+            // Fixed FAB Positioning to be consistent with Editor
+            if (currentTab == ScreenTab.Home) {
+                Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                    FloatingActionButton(
+                        onClick = { showAddDialog = true },
+                        containerColor = MaterialTheme.colorScheme.onBackground,
+                        contentColor = MaterialTheme.colorScheme.background,
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .offset { IntOffset(fabOffsetX.roundToInt(), fabOffsetY.roundToInt()) }
+                    ) {
+                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_task))
+                    }
                 }
             }
         }

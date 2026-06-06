@@ -87,8 +87,8 @@ fun EditHomeScreen(viewModel: TaskViewModel, onBack: () -> Unit) {
                 )
             }
 
-            // Draggable FAB
-            Box(modifier = Modifier.fillMaxSize()) {
+            // Draggable FAB - Using same padding (16.dp) as MainScreen for 1:1 match
+            Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                 FloatingActionButton(
                     onClick = { /* Preview only */ },
                     containerColor = MaterialTheme.colorScheme.onBackground,
@@ -96,7 +96,6 @@ fun EditHomeScreen(viewModel: TaskViewModel, onBack: () -> Unit) {
                     shape = CircleShape,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(bottom = 16.dp, end = 16.dp)
                         .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
                         .pointerInput(Unit) {
                             detectDragGestures { change, dragAmount ->
