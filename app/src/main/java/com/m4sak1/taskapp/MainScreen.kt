@@ -4,6 +4,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,7 +15,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
@@ -23,6 +28,8 @@ import com.m4sak1.taskapp.ui.screens.*
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
 import kotlinx.coroutines.launch
+import java.io.File
+import android.graphics.BitmapFactory
 import kotlin.math.roundToInt
 
 enum class ScreenTab { Home, Stats, Settings }
@@ -53,16 +60,16 @@ fun MainScreen(
 
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let { 
-            taskViewModel.importBackup(
+            taskViewModel.importBackupZip(
                 context, it, themeController,
                 onSuccess = { scope.launch { snackbarHostState.showSnackbar(restoreSuccessMsg) } },
                 onError = { scope.launch { snackbarHostState.showSnackbar(restoreFailedMsg) } }
             )
         }
     }
-    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
         uri?.let { 
-            taskViewModel.exportBackup(
+            taskViewModel.exportBackupZip(
                 context, it, themeController,
                 onSuccess = { scope.launch { snackbarHostState.showSnackbar(backupSuccessMsg) } }
             )
@@ -71,9 +78,33 @@ fun MainScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+        color = Color.Transparent
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
+            // BACKGROUND IMAGE LAYER
+            themeController.backgroundPath?.let { path ->
+                val bitmap = remember(path) {
+                    try {
+                        val file = File(path)
+                        if (file.exists()) BitmapFactory.decodeFile(path) else null
+                    } catch (e: Exception) { null }
+                }
+                bitmap?.let {
+                    Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .blur(themeController.backgroundBlur.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                    Box(modifier = Modifier.fillMaxSize().background(
+                        if (themeController.isDarkTheme) Color.Black.copy(alpha = 0.3f)
+                        else Color.White.copy(alpha = 0.3f)
+                    ))
+                }
+            }
+
             when {
                 showLicenses -> LicensesScreen(onBack = { showLicenses = false })
                 showMITLicense -> MITLicenseScreen(onBack = { showMITLicense = false })
@@ -81,7 +112,7 @@ fun MainScreen(
                 showEditHome -> EditHomeScreen(viewModel = taskViewModel, onBack = { showEditHome = false })
                 else -> {
                     Scaffold(
-                        containerColor = MaterialTheme.colorScheme.background,
+                        containerColor = Color.Transparent,
                         snackbarHost = { SnackbarHost(snackbarHostState) },
                         bottomBar = {
                             FloatingBottomNav(
@@ -115,8 +146,8 @@ fun MainScreen(
                                         onShowLicenses = { showLicenses = true },
                                         onShowMITLicense = { showMITLicense = true },
                                         onShowEditHome = { showEditHome = true },
-                                        onBackup = { exportLauncher.launch("m4task_backup.json") },
-                                        onRestore = { importLauncher.launch(arrayOf("application/json")) }
+                                        onBackup = { exportLauncher.launch("m4task_backup.zip") },
+                                        onRestore = { importLauncher.launch(arrayOf("application/zip")) }
                                     )
                                 }
                             }

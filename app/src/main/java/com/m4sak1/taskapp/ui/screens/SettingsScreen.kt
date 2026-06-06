@@ -1,5 +1,7 @@
 package com.m4sak1.taskapp.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import com.m4sak1.taskapp.MainActivity
 import com.m4sak1.taskapp.R
 import com.m4sak1.taskapp.ui.components.CustomConfirmDialog
 import com.m4sak1.taskapp.ui.theme.AppAccentColor
@@ -36,6 +40,7 @@ fun SettingsScreen(
     onRestore: () -> Unit
 ) {
     val themeController = LocalThemeController.current
+    val context = LocalContext.current
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showAccentDialog by remember { mutableStateOf(false) }
@@ -43,10 +48,16 @@ fun SettingsScreen(
     var showRestoreConfirm by remember { mutableStateOf(false) }
     val hideImmediately by viewModel.hideImmediately.collectAsState()
 
+    val bgLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            val path = (context as MainActivity).saveBackgroundImage(it)
+            themeController.setBackgroundPath(path)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
     ) {
@@ -97,15 +108,33 @@ fun SettingsScreen(
                 trailingContent = {
                     val color = if (themeController.accentColor == AppAccentColor.Custom) themeController.customAccentColor else themeController.accentColor.color
                     if (color != Color.Unspecified) {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(CircleShape)
-                                .background(color)
-                        )
+                        Box(modifier = Modifier.size(24.dp).clip(CircleShape).background(color))
                     }
                 }
             )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            SettingsItem(
+                title = "Background Image",
+                modifier = Modifier.clickable { bgLauncher.launch("image/*") },
+                trailingContent = {
+                    if (themeController.backgroundPath != null) {
+                        TextButton(onClick = { themeController.setBackgroundPath(null) }) {
+                            Text("Clear", color = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                }
+            )
+            if (themeController.backgroundPath != null) {
+                Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Blur Amount", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                    Slider(
+                        value = themeController.backgroundBlur,
+                        onValueChange = { themeController.setBackgroundBlur(it) },
+                        valueRange = 0f..25f
+                    )
+                }
+            }
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
                 title = stringResource(R.string.settings_edit_home),
@@ -168,7 +197,7 @@ fun SettingsScreen(
             )
         }
         
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(100.dp)) // Extra space for footer
     }
 
     if (showThemeDialog) {
@@ -201,7 +230,6 @@ fun SettingsScreen(
 
     if (showAccentDialog) {
         var customHex by remember { mutableStateOf("") }
-        
         CustomConfirmDialog(
             title = "Accent Color",
             onConfirm = { showAccentDialog = false },
@@ -216,23 +244,19 @@ fun SettingsScreen(
                             .fillMaxWidth()
                             .clickable {
                                 themeController.setAccentColor(accent)
-                                if (accent != AppAccentColor.Custom) {
-                                    showAccentDialog = false
-                                }
+                                if (accent != AppAccentColor.Custom) showAccentDialog = false
                             }
                             .padding(vertical = 12.dp)
                     ) {
                         RadioButton(selected = themeController.accentColor == accent, onClick = null)
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(text = accent.label, color = if (accent == AppAccentColor.Default || accent == AppAccentColor.Custom) MaterialTheme.colorScheme.onSurface else accent.color)
-                        
                         if (accent != AppAccentColor.Default && accent != AppAccentColor.Custom) {
                             Spacer(modifier = Modifier.weight(1f))
                             Box(modifier = Modifier.size(24.dp).clip(CircleShape).background(accent.color))
                         }
                     }
                 }
-                
                 if (themeController.accentColor == AppAccentColor.Custom) {
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
@@ -241,10 +265,7 @@ fun SettingsScreen(
                             if (input.length <= 7) {
                                 customHex = input
                                 if (input.startsWith("#") && input.length == 7) {
-                                    try {
-                                        val color = Color(android.graphics.Color.parseColor(input))
-                                        themeController.setCustomAccentColor(color)
-                                    } catch (e: Exception) {}
+                                    try { themeController.setCustomAccentColor(Color(android.graphics.Color.parseColor(input))) } catch (e: Exception) {}
                                 }
                             }
                         },
@@ -333,7 +354,6 @@ private fun getLanguageName(language: AppLanguage): String = when (language) {
     AppLanguage.TraditionalChinese -> "繁體中文"
 }
 
-// Fixed labels that don't change regardless of current app language
 private fun getLanguageLabel(language: AppLanguage): String = when (language) {
     AppLanguage.System -> "System Default"
     AppLanguage.English -> "English"
@@ -356,7 +376,7 @@ fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) 
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surface)
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)) // Semi-transparent for BG visibility
                 .padding(vertical = 4.dp)
         ) {
             content()

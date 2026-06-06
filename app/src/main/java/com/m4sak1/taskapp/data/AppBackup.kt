@@ -1,7 +1,5 @@
 package com.m4sak1.taskapp.data
 
-import com.m4sak1.taskapp.ui.theme.AppLanguage
-import com.m4sak1.taskapp.ui.theme.AppThemeMode
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -24,6 +22,8 @@ data class SettingsBackup(
     val appLanguage: String,
     val accentColor: String = "Default",
     val customAccentColor: Long = 0xFF000000,
+    val backgroundBlur: Float = 0f,
+    val hasBackground: Boolean = false,
     val fabOffsetX: Float,
     val fabOffsetY: Float,
     val hideImmediately: Boolean

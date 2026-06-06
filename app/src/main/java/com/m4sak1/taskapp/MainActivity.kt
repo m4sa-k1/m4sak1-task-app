@@ -2,11 +2,13 @@ package com.m4sak1.taskapp
 
 import android.content.Context
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,10 +25,16 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import com.m4sak1.taskapp.ui.theme.*
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
+import java.io.File
+import java.io.FileOutputStream
 import java.util.*
 
 class MainActivity : ComponentActivity() {
     private val taskViewModel: TaskViewModel by viewModels()
+
+    private val createDocument = registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
+        // Note: Logic moved to MainScreen for scope reasons
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +43,8 @@ class MainActivity : ComponentActivity() {
             var appLanguage by remember { mutableStateOf(AppLanguage.System) }
             var accentColor by remember { mutableStateOf(AppAccentColor.Default) }
             var customAccentColor by remember { mutableStateOf(Color.Unspecified) }
+            var backgroundPath by remember { mutableStateOf<String?>(null) }
+            var backgroundBlur by remember { mutableStateOf(0f) }
 
             val isDarkTheme = when (themeMode) {
                 AppThemeMode.System -> isSystemInDarkTheme()
@@ -42,7 +52,7 @@ class MainActivity : ComponentActivity() {
                 AppThemeMode.Dark -> true
             }
 
-            val themeController = remember(themeMode, appLanguage, isDarkTheme, accentColor, customAccentColor) {
+            val themeController = remember(themeMode, appLanguage, isDarkTheme, accentColor, customAccentColor, backgroundPath, backgroundBlur) {
                 ThemeController(
                     themeMode = themeMode,
                     setThemeMode = { themeMode = it },
@@ -52,6 +62,10 @@ class MainActivity : ComponentActivity() {
                     setAccentColor = { accentColor = it },
                     customAccentColor = customAccentColor,
                     setCustomAccentColor = { customAccentColor = it },
+                    backgroundPath = backgroundPath,
+                    setBackgroundPath = { backgroundPath = it },
+                    backgroundBlur = backgroundBlur,
+                    setBackgroundBlur = { backgroundBlur = it },
                     isDarkTheme = isDarkTheme
                 )
             }
@@ -104,6 +118,24 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    // Helper for saving background image to internal storage
+    fun saveBackgroundImage(uri: Uri): String? {
+        return try {
+            val inputStream = contentResolver.openInputStream(uri)
+            val file = File(filesDir, "background.jpg")
+            val outputStream = FileOutputStream(file)
+            inputStream?.use { input ->
+                outputStream.use { output ->
+                    input.copyTo(output)
+                }
+            }
+            file.absolutePath
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 }

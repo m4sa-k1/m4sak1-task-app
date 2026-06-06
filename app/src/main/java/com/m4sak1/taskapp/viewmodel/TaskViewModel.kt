@@ -8,17 +8,18 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.m4sak1.taskapp.data.*
-import com.m4sak1.taskapp.ui.theme.AppAccentColor
-import com.m4sak1.taskapp.ui.theme.AppLanguage
-import com.m4sak1.taskapp.ui.theme.AppThemeMode
-import com.m4sak1.taskapp.ui.theme.ThemeController
+import com.m4sak1.taskapp.ui.theme.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import java.io.*
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
 
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val taskDao = AppDatabase.getDatabase(application).taskDao()
@@ -105,69 +106,113 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // BACKUP & RESTORE
-    fun exportBackup(context: Context, uri: Uri, themeController: ThemeController, onSuccess: () -> Unit) {
-        viewModelScope.launch {
+    // ZIP BACKUP & RESTORE
+    fun exportBackupZip(context: Context, uri: Uri, themeController: ThemeController, onSuccess: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val allTasks = taskDao.getAllTasksDirect()
-                val backup = AppBackup(
+                val backupData = AppBackup(
                     tasks = allTasks.map { TaskBackup(it.title, it.isCompleted, it.createdAt, it.completedAt) },
                     settings = SettingsBackup(
                         themeMode = themeController.themeMode.name,
                         appLanguage = themeController.appLanguage.name,
                         accentColor = themeController.accentColor.name,
                         customAccentColor = themeController.customAccentColor.toArgb().toLong(),
+                        backgroundBlur = themeController.backgroundBlur,
+                        hasBackground = themeController.backgroundPath != null,
                         fabOffsetX = _fabOffsetX.value,
                         fabOffsetY = _fabOffsetY.value,
                         hideImmediately = _hideImmediately.value
                     )
                 )
-                val json = Json.encodeToString(backup)
-                context.contentResolver.openOutputStream(uri)?.use { 
-                    it.write(json.toByteArray())
+                val json = Json.encodeToString(backupData)
+
+                context.contentResolver.openOutputStream(uri)?.use { os ->
+                    ZipOutputStream(os).use { zos ->
+                        // 1. Write JSON
+                        zos.putNextEntry(ZipEntry("backup.json"))
+                        zos.write(json.toByteArray())
+                        zos.closeEntry()
+
+                        // 2. Write Background Image if exists
+                        themeController.backgroundPath?.let { path ->
+                            val bgFile = File(path)
+                            if (bgFile.exists()) {
+                                zos.putNextEntry(ZipEntry("background.jpg"))
+                                bgFile.inputStream().use { it.copyTo(zos) }
+                                zos.closeEntry()
+                            }
+                        }
+                    }
                 }
-                onSuccess()
+                withContext(Dispatchers.Main) { onSuccess() }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-    fun importBackup(context: Context, uri: Uri, themeController: ThemeController, onSuccess: () -> Unit, onError: () -> Unit) {
-        viewModelScope.launch {
-            val content = context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                BufferedReader(InputStreamReader(inputStream)).use { it.readText() }
-            } ?: run {
-                onError()
-                return@launch
-            }
-            
+    fun importBackupZip(context: Context, uri: Uri, themeController: ThemeController, onSuccess: () -> Unit, onError: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
-                val backup = Json.decodeFromString<AppBackup>(content)
-                
+                var backupData: AppBackup? = null
+                var hasBgInZip = false
+                val tempBgFile = File(context.filesDir, "temp_bg.jpg")
+
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    ZipInputStream(inputStream).use { zis ->
+                        var entry: ZipEntry? = zis.nextEntry
+                        while (entry != null) {
+                            when (entry.name) {
+                                "backup.json" -> {
+                                    val jsonContent = zis.bufferedReader().readText()
+                                    backupData = Json.decodeFromString<AppBackup>(jsonContent)
+                                }
+                                "background.jpg" -> {
+                                    FileOutputStream(tempBgFile).use { zis.copyTo(it) }
+                                    hasBgInZip = true
+                                }
+                            }
+                            zis.closeEntry()
+                            entry = zis.nextEntry
+                        }
+                    }
+                }
+
+                val backup = backupData ?: throw Exception("No JSON in ZIP")
+
                 // 1. Clear and Restore DB
                 taskDao.deleteAllTasks()
                 taskDao.insertAll(backup.tasks.map { 
                     Task(title = it.title, isCompleted = it.isCompleted, createdAt = it.createdAt, completedAt = it.completedAt)
                 })
 
-                // 2. Restore Viewmodel State
-                _fabOffsetX.value = backup.settings.fabOffsetX
-                _fabOffsetY.value = backup.settings.fabOffsetY
-                _hideImmediately.value = backup.settings.hideImmediately
-                
-                // 3. Restore UI State (Language, Theme, Accent)
-                try {
+                withContext(Dispatchers.Main) {
+                    // 2. Restore Viewmodel State
+                    _fabOffsetX.value = backup.settings.fabOffsetX
+                    _fabOffsetY.value = backup.settings.fabOffsetY
+                    _hideImmediately.value = backup.settings.hideImmediately
+                    
+                    // 3. Restore UI State
                     themeController.setThemeMode(AppThemeMode.valueOf(backup.settings.themeMode))
                     themeController.setAppLanguage(AppLanguage.valueOf(backup.settings.appLanguage))
                     themeController.setAccentColor(AppAccentColor.valueOf(backup.settings.accentColor))
                     themeController.setCustomAccentColor(Color(backup.settings.customAccentColor.toInt()))
-                } catch (e: Exception) { /* Fallback for older backups */ }
-                
-                onSuccess()
+                    themeController.setBackgroundBlur(backup.settings.backgroundBlur)
+                    
+                    if (hasBgInZip) {
+                        val realBgFile = File(context.filesDir, "background.jpg")
+                        tempBgFile.renameTo(realBgFile)
+                        themeController.setBackgroundPath(realBgFile.absolutePath)
+                    } else {
+                        themeController.setBackgroundPath(null)
+                    }
+                    
+                    onSuccess()
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
-                onError()
+                withContext(Dispatchers.Main) { onError() }
             }
         }
     }

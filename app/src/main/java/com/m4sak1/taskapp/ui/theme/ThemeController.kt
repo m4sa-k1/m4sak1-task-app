@@ -28,6 +28,10 @@ data class ThemeController(
     val setAccentColor: (AppAccentColor) -> Unit,
     val customAccentColor: Color,
     val setCustomAccentColor: (Color) -> Unit,
+    val backgroundPath: String?,
+    val setBackgroundPath: (String?) -> Unit,
+    val backgroundBlur: Float,
+    val setBackgroundBlur: (Float) -> Unit,
     val isDarkTheme: Boolean
 )
 
