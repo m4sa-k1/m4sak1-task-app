@@ -44,118 +44,124 @@ fun MainScreen(
     
     val context = LocalContext.current
     val themeController = LocalThemeController.current
-    
-    // Moved importLauncher out of conditional branches to ensure it's always registered correctly
+
+    // Launcher MUST be at the top level of the composable, never inside 'when' or 'if' branches
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let { taskViewModel.importBackup(context, it, themeController) }
     }
 
-    // Use a top-level Box to handle screen switching instead of early returns
-    // This ensures local providers and activity-related state (like launchers) stay in scope
-    Box(modifier = Modifier.fillMaxSize()) {
-        when {
-            showLicenses -> LicensesScreen(onBack = { showLicenses = false })
-            showMITLicense -> MITLicenseScreen(onBack = { showMITLicense = false })
-            showPastTasks -> PastTasksScreen(viewModel = taskViewModel, onBack = { showPastTasks = false })
-            showEditHome -> EditHomeScreen(viewModel = taskViewModel, onBack = { showEditHome = false })
-            else -> {
-                Scaffold(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    bottomBar = {
-                        FloatingBottomNav(
-                            currentTab = currentTab,
-                            onTabSelected = { currentTab = it }
-                        )
-                    }
-                ) { paddingValues ->
-                    Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-                        AnimatedContent(
-                            targetState = currentTab,
-                            transitionSpec = {
-                                val duration = 300
-                                if (targetState.ordinal > initialState.ordinal) {
-                                    (slideInHorizontally(animationSpec = tween(duration)) { width -> width } + fadeIn(animationSpec = tween(duration))).togetherWith(
-                                        slideOutHorizontally(animationSpec = tween(duration)) { width -> -width } + fadeOut(animationSpec = tween(duration))
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        // Screen Content Layer
+        Box(modifier = Modifier.fillMaxSize()) {
+            when {
+                showLicenses -> LicensesScreen(onBack = { showLicenses = false })
+                showMITLicense -> MITLicenseScreen(onBack = { showMITLicense = false })
+                showPastTasks -> PastTasksScreen(viewModel = taskViewModel, onBack = { showPastTasks = false })
+                showEditHome -> EditHomeScreen(viewModel = taskViewModel, onBack = { showEditHome = false })
+                else -> {
+                    Scaffold(
+                        containerColor = MaterialTheme.colorScheme.background,
+                        bottomBar = {
+                            FloatingBottomNav(
+                                currentTab = currentTab,
+                                onTabSelected = { currentTab = it }
+                            )
+                        }
+                    ) { paddingValues ->
+                        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                            AnimatedContent(
+                                targetState = currentTab,
+                                transitionSpec = {
+                                    val duration = 300
+                                    if (targetState.ordinal > initialState.ordinal) {
+                                        (slideInHorizontally(animationSpec = tween(duration)) { width -> width } + fadeIn(animationSpec = tween(duration))).togetherWith(
+                                            slideOutHorizontally(animationSpec = tween(duration)) { width -> -width } + fadeOut(animationSpec = tween(duration))
+                                        )
+                                    } else {
+                                        (slideInHorizontally(animationSpec = tween(duration)) { width -> -width } + fadeIn(animationSpec = tween(duration))).togetherWith(
+                                            slideOutHorizontally(animationSpec = tween(duration)) { width -> width } + fadeOut(animationSpec = tween(duration))
+                                        )
+                                    }.using(SizeTransform(clip = false))
+                                },
+                                label = "tab_transition"
+                            ) { targetTab ->
+                                when (targetTab) {
+                                    ScreenTab.Home -> HomeScreen(taskViewModel)
+                                    ScreenTab.Stats -> StatsScreen(viewModel = taskViewModel, onShowPastTasks = { showPastTasks = true })
+                                    ScreenTab.Settings -> SettingsScreen(
+                                        viewModel = taskViewModel, 
+                                        onShowLicenses = { showLicenses = true },
+                                        onShowMITLicense = { showMITLicense = true },
+                                        onShowEditHome = { showEditHome = true },
+                                        onBackup = onExportBackup,
+                                        onRestore = { importLauncher.launch(arrayOf("application/json")) }
                                     )
-                                } else {
-                                    (slideInHorizontally(animationSpec = tween(duration)) { width -> -width } + fadeIn(animationSpec = tween(duration))).togetherWith(
-                                        slideOutHorizontally(animationSpec = tween(duration)) { width -> width } + fadeOut(animationSpec = tween(duration))
-                                    )
-                                }.using(SizeTransform(clip = false))
-                            },
-                            label = "tab_transition"
-                        ) { targetTab ->
-                            when (targetTab) {
-                                ScreenTab.Home -> HomeScreen(taskViewModel)
-                                ScreenTab.Stats -> StatsScreen(viewModel = taskViewModel, onShowPastTasks = { showPastTasks = true })
-                                ScreenTab.Settings -> SettingsScreen(
-                                    viewModel = taskViewModel, 
-                                    onShowLicenses = { showLicenses = true },
-                                    onShowMITLicense = { showMITLicense = true },
-                                    onShowEditHome = { showEditHome = true },
-                                    onBackup = onExportBackup,
-                                    onRestore = { importLauncher.launch(arrayOf("application/json")) }
-                                )
+                                }
                             }
                         }
                     }
-                }
 
-                if (currentTab == ScreenTab.Home) {
-                    Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                        FloatingActionButton(
-                            onClick = { showAddDialog = true },
-                            containerColor = MaterialTheme.colorScheme.onBackground,
-                            contentColor = MaterialTheme.colorScheme.background,
-                            shape = CircleShape,
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .offset { IntOffset(fabOffsetX.roundToInt(), fabOffsetY.roundToInt()) }
-                        ) {
-                            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_task))
+                    // Floating Action Button Layer (Home Only)
+                    if (currentTab == ScreenTab.Home) {
+                        Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                            FloatingActionButton(
+                                onClick = { showAddDialog = true },
+                                containerColor = MaterialTheme.colorScheme.onBackground,
+                                contentColor = MaterialTheme.colorScheme.background,
+                                shape = CircleShape,
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .offset { IntOffset(fabOffsetX.roundToInt(), fabOffsetY.roundToInt()) }
+                            ) {
+                                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_task))
+                            }
                         }
                     }
                 }
             }
-        }
 
-        if (showAddDialog) {
-            AlertDialog(
-                onDismissRequest = { showAddDialog = false },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            if (newTaskTitle.isNotBlank()) {
-                                taskViewModel.addTask(newTaskTitle)
-                                newTaskTitle = ""
-                                showAddDialog = false
-                            }
-                        },
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onBackground)
-                    ) {
-                        Text(stringResource(R.string.add_task), color = MaterialTheme.colorScheme.background)
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showAddDialog = false }) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                },
-                title = { Text(stringResource(R.string.new_task)) },
-                text = {
-                    OutlinedTextField(
-                        value = newTaskTitle,
-                        onValueChange = { newTaskTitle = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text(stringResource(R.string.task_placeholder)) },
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                },
-                shape = RoundedCornerShape(24.dp),
-                containerColor = MaterialTheme.colorScheme.surface
-            )
+            // Dialogs Layer
+            if (showAddDialog) {
+                AlertDialog(
+                    onDismissRequest = { showAddDialog = false },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                if (newTaskTitle.isNotBlank()) {
+                                    taskViewModel.addTask(newTaskTitle)
+                                    newTaskTitle = ""
+                                    showAddDialog = false
+                                }
+                            },
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onBackground)
+                        ) {
+                            Text(stringResource(R.string.add_task), color = MaterialTheme.colorScheme.background)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showAddDialog = false }) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    },
+                    title = { Text(stringResource(R.string.new_task)) },
+                    text = {
+                        OutlinedTextField(
+                            value = newTaskTitle,
+                            onValueChange = { newTaskTitle = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text(stringResource(R.string.task_placeholder)) },
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    },
+                    shape = RoundedCornerShape(24.dp),
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            }
         }
     }
 }
