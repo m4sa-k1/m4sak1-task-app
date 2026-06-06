@@ -21,8 +21,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import com.m4sak1.taskapp.data.PreferenceManager
 import com.m4sak1.taskapp.ui.theme.*
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
 import java.io.File
@@ -35,13 +37,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
+        val prefManager = PreferenceManager(this)
+
         setContent {
-            var themeMode by remember { mutableStateOf(AppThemeMode.System) }
-            var appLanguage by remember { mutableStateOf(AppLanguage.System) }
-            var accentColor by remember { mutableStateOf(AppAccentColor.Default) }
-            var customAccentColor by remember { mutableStateOf(Color.Unspecified) }
+            var themeMode by remember { mutableStateOf(prefManager.themeMode) }
+            var appLanguage by remember { mutableStateOf(prefManager.appLanguage) }
+            var accentColor by remember { mutableStateOf(prefManager.accentColor) }
+            var customAccentColor by remember { mutableStateOf(Color(prefManager.customAccentColor)) }
             val backgroundPath by taskViewModel.backgroundPath.collectAsState()
-            var backgroundBlur by remember { mutableStateOf(0f) }
+            var backgroundBlur by remember { mutableStateOf(prefManager.backgroundBlur) }
 
             val isDarkTheme = when (themeMode) {
                 AppThemeMode.System -> isSystemInDarkTheme()
@@ -52,17 +56,32 @@ class MainActivity : ComponentActivity() {
             val themeController = remember(themeMode, appLanguage, isDarkTheme, accentColor, customAccentColor, backgroundPath, backgroundBlur) {
                 ThemeController(
                     themeMode = themeMode,
-                    setThemeMode = { themeMode = it },
+                    setThemeMode = { 
+                        themeMode = it
+                        prefManager.themeMode = it
+                    },
                     appLanguage = appLanguage,
-                    setAppLanguage = { appLanguage = it },
+                    setAppLanguage = { 
+                        appLanguage = it
+                        prefManager.appLanguage = it
+                    },
                     accentColor = accentColor,
-                    setAccentColor = { accentColor = it },
+                    setAccentColor = { 
+                        accentColor = it
+                        prefManager.accentColor = it
+                    },
                     customAccentColor = customAccentColor,
-                    setCustomAccentColor = { customAccentColor = it },
+                    setCustomAccentColor = { 
+                        customAccentColor = it
+                        prefManager.customAccentColor = it.toArgb()
+                    },
                     backgroundPath = backgroundPath,
                     setBackgroundPath = { taskViewModel.updateBackgroundPath(it) },
                     backgroundBlur = backgroundBlur,
-                    setBackgroundBlur = { backgroundBlur = it },
+                    setBackgroundBlur = { 
+                        backgroundBlur = it
+                        prefManager.backgroundBlur = it
+                    },
                     isDarkTheme = isDarkTheme
                 )
             }
@@ -88,6 +107,9 @@ class MainActivity : ComponentActivity() {
                     }
                     Locale.setDefault(locale)
                     config.setLocale(locale)
+                } else {
+                    val systemLocale = Locale.getDefault()
+                    config.setLocale(systemLocale)
                 }
                 config
             }
@@ -120,36 +142,26 @@ class MainActivity : ComponentActivity() {
 
     fun saveBackgroundImage(uri: Uri, scale: Float, tx: Float, ty: Float): String? {
         return try {
-            val inputStream = contentResolver.openInputStream(uri) ?: return null
-            val original = BitmapFactory.decodeStream(inputStream) ?: return null
-            
-            val displayMetrics = resources.displayMetrics
-            val screenWidth = displayMetrics.widthPixels
-            val screenHeight = displayMetrics.heightPixels
-            
-            val result = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(result)
-            
-            val matrix = Matrix()
-            
-            // 1. Initial centering and fitting
-            val scaleFit = Math.max(
-                screenWidth.toFloat() / original.width,
-                screenHeight.toFloat() / original.height
-            )
-            matrix.postTranslate(-original.width / 2f, -original.height / 2f)
-            matrix.postScale(scaleFit * scale, scaleFit * scale)
-            matrix.postTranslate(screenWidth / 2f + tx, screenHeight / 2f + ty)
-            
-            canvas.drawBitmap(original, matrix, null)
-            
-            val file = File(filesDir, "background.jpg")
-            if (file.exists()) file.delete()
-            
-            FileOutputStream(file).use { output ->
-                result.compress(Bitmap.CompressFormat.JPEG, 90, output)
+            contentResolver.openInputStream(uri)?.use { inputStream ->
+                val original = BitmapFactory.decodeStream(inputStream) ?: return null
+                val displayMetrics = resources.displayMetrics
+                val screenWidth = displayMetrics.widthPixels
+                val screenHeight = displayMetrics.heightPixels
+                val result = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888)
+                val canvas = Canvas(result)
+                val matrix = Matrix()
+                val scaleFit = Math.max(screenWidth.toFloat() / original.width, screenHeight.toFloat() / original.height)
+                matrix.postTranslate(-original.width / 2f, -original.height / 2f)
+                matrix.postScale(scaleFit * scale, scaleFit * scale)
+                matrix.postTranslate(screenWidth / 2f + tx, screenHeight / 2f + ty)
+                canvas.drawBitmap(original, matrix, null)
+                val file = File(filesDir, "background.jpg")
+                if (file.exists()) file.delete()
+                FileOutputStream(file).use { outputStream ->
+                    result.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+                }
+                file.absolutePath
             }
-            file.absolutePath
         } catch (e: Exception) {
             e.printStackTrace()
             null
