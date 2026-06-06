@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.compose.ui.graphics.ImageBitmap
 import kotlin.math.roundToInt
 
 enum class ScreenTab { Home, Stats, Settings, Licenses, MITLicense, PastTasks, EditHome }
@@ -108,67 +109,82 @@ fun MainScreen(
                 ))
             }
 
-            AnimatedContent(
-                targetState = currentTab,
-                transitionSpec = {
-                    val duration = 300
-                    val target = targetState
-                    val initial = initialState
-                    
-                    if (target.ordinal > initial.ordinal) {
-                        (slideInHorizontally(animationSpec = tween(duration)) { width -> width } + fadeIn(animationSpec = tween(duration))).togetherWith(
-                            slideOutHorizontally(animationSpec = tween(duration)) { width -> -width } + fadeOut(animationSpec = tween(duration))
-                        )
-                    } else {
-                        (slideInHorizontally(animationSpec = tween(duration)) { width -> -width } + fadeIn(animationSpec = tween(duration))).togetherWith(
-                            slideOutHorizontally(animationSpec = tween(duration)) { width -> width } + fadeOut(animationSpec = tween(duration))
-                        )
-                    }.using(SizeTransform(clip = false))
-                },
-                label = "screen_transition"
-            ) { targetTab ->
-                when (targetTab) {
-                    ScreenTab.Home -> {
-                        HomeScreenWrapper(
-                            taskViewModel = taskViewModel,
-                            onTabSelected = { currentTab = it },
+            // NAVIGATION STRUCTURE: Keep BottomNav and FAB stable
+            val displayTabs = listOf(ScreenTab.Home, ScreenTab.Stats, ScreenTab.Settings)
+            val isMainTab = currentTab in displayTabs
+
+            Scaffold(
+                containerColor = Color.Transparent,
+                snackbarHost = { SnackbarHost(snackbarHostState) },
+                bottomBar = {
+                    // Only show BottomNav if on main tabs
+                    if (isMainTab) {
+                        FloatingBottomNav(
                             currentTab = currentTab,
-                            fabOffsetX = fabOffsetX,
-                            fabOffsetY = fabOffsetY,
-                            onAddClick = { showAddDialog = true },
-                            snackbarHostState = snackbarHostState
+                            onTabSelected = { currentTab = it }
                         )
                     }
-                    ScreenTab.Stats -> {
-                        StatsScreenWrapper(
-                            taskViewModel = taskViewModel,
-                            onTabSelected = { currentTab = it },
-                            currentTab = currentTab,
-                            onShowPastTasks = { currentTab = ScreenTab.PastTasks },
-                            snackbarHostState = snackbarHostState
-                        )
+                }
+            ) { paddingValues ->
+                Box(modifier = Modifier.fillMaxSize().padding(if (isMainTab) paddingValues else PaddingValues(0.dp))) {
+                    AnimatedContent(
+                        targetState = currentTab,
+                        transitionSpec = {
+                            val duration = 300
+                            val target = targetState
+                            val initial = initialState
+                            
+                            if (target.ordinal > initial.ordinal) {
+                                (slideInHorizontally(animationSpec = tween(duration)) { width -> width } + fadeIn(animationSpec = tween(duration))).togetherWith(
+                                    slideOutHorizontally(animationSpec = tween(duration)) { width -> -width } + fadeOut(animationSpec = tween(duration))
+                                )
+                            } else {
+                                (slideInHorizontally(animationSpec = tween(duration)) { width -> -width } + fadeIn(animationSpec = tween(duration))).togetherWith(
+                                    slideOutHorizontally(animationSpec = tween(duration)) { width -> width } + fadeOut(animationSpec = tween(duration))
+                                )
+                            }.using(SizeTransform(clip = false))
+                        },
+                        label = "screen_transition"
+                    ) { targetTab ->
+                        when (targetTab) {
+                            ScreenTab.Home -> HomeScreen(taskViewModel)
+                            ScreenTab.Stats -> StatsScreen(viewModel = taskViewModel, onShowPastTasks = { currentTab = ScreenTab.PastTasks })
+                            ScreenTab.Settings -> SettingsScreen(
+                                viewModel = taskViewModel, 
+                                onShowLicenses = { currentTab = ScreenTab.Licenses },
+                                onShowMITLicense = { currentTab = ScreenTab.MITLicense },
+                                onShowEditHome = { currentTab = ScreenTab.EditHome },
+                                onBackup = { exportLauncher.launch("m4task_backup.zip") },
+                                onRestore = { importLauncher.launch(arrayOf("application/zip")) },
+                                onPickBackground = { bgLauncher.launch("image/*") }
+                            )
+                            ScreenTab.Licenses -> LicensesScreen(onBack = { currentTab = ScreenTab.Settings })
+                            ScreenTab.MITLicense -> MITLicenseScreen(onBack = { currentTab = ScreenTab.Settings })
+                            ScreenTab.PastTasks -> PastTasksScreen(viewModel = taskViewModel, onBack = { currentTab = ScreenTab.Stats })
+                            ScreenTab.EditHome -> EditHomeScreen(viewModel = taskViewModel, onBack = { currentTab = ScreenTab.Settings })
+                        }
                     }
-                    ScreenTab.Settings -> {
-                        SettingsScreenWrapper(
-                            taskViewModel = taskViewModel,
-                            onTabSelected = { currentTab = it },
-                            currentTab = currentTab,
-                            onShowLicenses = { currentTab = ScreenTab.Licenses },
-                            onShowMITLicense = { currentTab = ScreenTab.MITLicense },
-                            onShowEditHome = { currentTab = ScreenTab.EditHome },
-                            onBackup = { exportLauncher.launch("m4task_backup.zip") },
-                            onRestore = { importLauncher.launch(arrayOf("application/zip")) },
-                            onPickBackground = { bgLauncher.launch("image/*") },
-                            snackbarHostState = snackbarHostState
-                        )
+
+                    // FAB is only on Home Tab, inside the Scaffold content to be stable
+                    if (currentTab == ScreenTab.Home) {
+                        Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                            FloatingActionButton(
+                                onClick = { showAddDialog = true },
+                                containerColor = MaterialTheme.colorScheme.onBackground,
+                                contentColor = MaterialTheme.colorScheme.background,
+                                shape = CircleShape,
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .offset { IntOffset(fabOffsetX.roundToInt(), fabOffsetY.roundToInt()) }
+                            ) {
+                                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_task))
+                            }
+                        }
                     }
-                    ScreenTab.Licenses -> LicensesScreen(onBack = { currentTab = ScreenTab.Settings })
-                    ScreenTab.MITLicense -> MITLicenseScreen(onBack = { currentTab = ScreenTab.Settings })
-                    ScreenTab.PastTasks -> PastTasksScreen(viewModel = taskViewModel, onBack = { currentTab = ScreenTab.Stats })
-                    ScreenTab.EditHome -> EditHomeScreen(viewModel = taskViewModel, onBack = { currentTab = ScreenTab.Settings })
                 }
             }
 
+            // Bg Editor is an overlay outside transition logic
             if (editingBgUri != null) {
                 BackgroundEditorScreen(
                     imageUri = editingBgUri!!,
@@ -221,97 +237,6 @@ fun MainScreen(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun HomeScreenWrapper(
-    taskViewModel: TaskViewModel,
-    currentTab: ScreenTab,
-    onTabSelected: (ScreenTab) -> Unit,
-    fabOffsetX: Float,
-    fabOffsetY: Float,
-    onAddClick: () -> Unit,
-    snackbarHostState: SnackbarHostState
-) {
-    Scaffold(
-        containerColor = Color.Transparent,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            FloatingBottomNav(currentTab = currentTab, onTabSelected = onTabSelected)
-        }
-    ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            HomeScreen(taskViewModel)
-        }
-        Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-            FloatingActionButton(
-                onClick = onAddClick,
-                containerColor = MaterialTheme.colorScheme.onBackground,
-                contentColor = MaterialTheme.colorScheme.background,
-                shape = CircleShape,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .offset { IntOffset(fabOffsetX.roundToInt(), fabOffsetY.roundToInt()) }
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_task))
-            }
-        }
-    }
-}
-
-@Composable
-fun StatsScreenWrapper(
-    taskViewModel: TaskViewModel,
-    currentTab: ScreenTab,
-    onTabSelected: (ScreenTab) -> Unit,
-    onShowPastTasks: () -> Unit,
-    snackbarHostState: SnackbarHostState
-) {
-    Scaffold(
-        containerColor = Color.Transparent,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            FloatingBottomNav(currentTab = currentTab, onTabSelected = onTabSelected)
-        }
-    ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            StatsScreen(viewModel = taskViewModel, onShowPastTasks = onShowPastTasks)
-        }
-    }
-}
-
-@Composable
-fun SettingsScreenWrapper(
-    taskViewModel: TaskViewModel,
-    currentTab: ScreenTab,
-    onTabSelected: (ScreenTab) -> Unit,
-    onShowLicenses: () -> Unit,
-    onShowMITLicense: () -> Unit,
-    onShowEditHome: () -> Unit,
-    onBackup: () -> Unit,
-    onRestore: () -> Unit,
-    onPickBackground: () -> Unit,
-    snackbarHostState: SnackbarHostState
-) {
-    Scaffold(
-        containerColor = Color.Transparent,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            FloatingBottomNav(currentTab = currentTab, onTabSelected = onTabSelected)
-        }
-    ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            SettingsScreen(
-                viewModel = taskViewModel,
-                onShowLicenses = onShowLicenses,
-                onShowMITLicense = onShowMITLicense,
-                onShowEditHome = onShowEditHome,
-                onBackup = onBackup,
-                onRestore = onRestore,
-                onPickBackground = onPickBackground
-            )
         }
     }
 }

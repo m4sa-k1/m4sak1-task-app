@@ -40,11 +40,16 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     val allCompletedTasks: Flow<List<Task>> = taskDao.getAllCompletedTasks()
 
+    // CRITICAL FIX: Ensure no duplicate keys by filtering out tasks that are already in recentlyCompleted
     val uiTasks: StateFlow<List<Task>> = combine(
         taskDao.getIncompleteTasks(),
         _recentlyCompletedTasks
     ) { incomplete, recentlyCompleted ->
-        (incomplete + recentlyCompleted).sortedByDescending { it.id }
+        // Filter out any incomplete tasks from DB that might somehow also be in the memory list
+        // (Though usually they shouldn't overlap if DB is updated first)
+        val recentlyIds = recentlyCompleted.map { it.id }.toSet()
+        val filteredIncomplete = incomplete.filter { it.id !in recentlyIds }
+        (filteredIncomplete + recentlyCompleted).sortedByDescending { it.id }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val totalCompletedCount = allCompletedTasks.map { it.size }
@@ -100,11 +105,15 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         )
 
         viewModelScope.launch {
+            // 1. Update DB immediately
             taskDao.update(updatedTask)
 
             if (newStatus) {
+                // 2. Handle memory list for 15m delay
                 if (!_hideImmediately.value) {
                     val currentList = _recentlyCompletedTasks.value.toMutableList()
+                    // Remove old version if exists (safety)
+                    currentList.removeAll { it.id == task.id }
                     currentList.add(updatedTask)
                     _recentlyCompletedTasks.value = currentList
 
@@ -115,6 +124,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                     _recentlyCompletedTasks.value = listAfterDelay
                 }
             } else {
+                // 3. Reverting completion: remove from memory list so it appears in DB incomplete flow
                 val currentList = _recentlyCompletedTasks.value.toMutableList()
                 currentList.removeAll { it.id == updatedTask.id }
                 _recentlyCompletedTasks.value = currentList
@@ -205,7 +215,6 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                     _fabOffsetY.value = backup.settings.fabOffsetY
                     _hideImmediately.value = backup.settings.hideImmediately
                     
-                    // Persist to prefs
                     prefManager.fabOffsetX = backup.settings.fabOffsetX
                     prefManager.fabOffsetY = backup.settings.fabOffsetY
                     prefManager.hideImmediately = backup.settings.hideImmediately
