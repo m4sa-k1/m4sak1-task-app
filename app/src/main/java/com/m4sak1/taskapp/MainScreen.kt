@@ -1,5 +1,7 @@
 package com.m4sak1.taskapp
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
@@ -12,18 +14,24 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.m4sak1.taskapp.ui.components.FloatingBottomNav
 import com.m4sak1.taskapp.ui.screens.*
+import com.m4sak1.taskapp.ui.theme.LocalThemeController
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
 import kotlin.math.roundToInt
 
 enum class ScreenTab { Home, Stats, Settings }
 
 @Composable
-fun MainScreen(taskViewModel: TaskViewModel) {
+fun MainScreen(
+    taskViewModel: TaskViewModel,
+    onExportBackup: () -> Unit,
+    onImportBackup: () -> Unit // Note: We'll use our own launcher here
+) {
     var currentTab by remember { mutableStateOf(ScreenTab.Home) }
     var showAddDialog by remember { mutableStateOf(false) }
     var showLicenses by remember { mutableStateOf(false) }
@@ -34,6 +42,12 @@ fun MainScreen(taskViewModel: TaskViewModel) {
 
     val fabOffsetX by taskViewModel.fabOffsetX.collectAsState()
     val fabOffsetY by taskViewModel.fabOffsetY.collectAsState()
+    
+    val context = LocalContext.current
+    val themeController = LocalThemeController.current
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { taskViewModel.importBackup(context, it, themeController) }
+    }
 
     if (showLicenses) {
         LicensesScreen(onBack = { showLicenses = false })
@@ -89,16 +103,15 @@ fun MainScreen(taskViewModel: TaskViewModel) {
                             viewModel = taskViewModel, 
                             onShowLicenses = { showLicenses = true },
                             onShowMITLicense = { showMITLicense = true },
-                            onShowEditHome = { showEditHome = true }
+                            onShowEditHome = { showEditHome = true },
+                            onBackup = onExportBackup,
+                            onRestore = { importLauncher.launch(arrayOf("application/json")) }
                         )
                     }
                 }
             }
         }
 
-        // ABSOLUTE POSITIONING: Removed padding(paddingValues) to match the Editor's coordinate system exactly.
-        // The Editor overlays the FAB on the whole screen area (minus top bar), 
-        // so we do the same here for 1:1 parity.
         if (currentTab == ScreenTab.Home) {
             Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                 FloatingActionButton(

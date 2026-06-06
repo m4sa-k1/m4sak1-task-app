@@ -1,37 +1,37 @@
 package com.m4sak1.taskapp.viewmodel
 
 import android.app.Application
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.m4sak1.taskapp.data.AppDatabase
-import com.m4sak1.taskapp.data.Task
+import com.m4sak1.taskapp.data.*
+import com.m4sak1.taskapp.ui.theme.AppLanguage
+import com.m4sak1.taskapp.ui.theme.AppThemeMode
+import com.m4sak1.taskapp.ui.theme.ThemeController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val taskDao = AppDatabase.getDatabase(application).taskDao()
 
-    // 完了直後の一時保持
     private val _recentlyCompletedTasks = MutableStateFlow<List<Task>>(emptyList())
     
-    // 設定：即座に非表示にするか
     private val _hideImmediately = MutableStateFlow(false)
     val hideImmediately = _hideImmediately.asStateFlow()
 
-    // FAB Position (Offsets from bottom-right default)
-    // Default Y is set to -80dp (approx -240px on many screens) to clear the footer
     private val _fabOffsetX = MutableStateFlow(0f)
     val fabOffsetX = _fabOffsetX.asStateFlow()
     private val _fabOffsetY = MutableStateFlow(-240f) 
     val fabOffsetY = _fabOffsetY.asStateFlow()
 
-    // 全完了タスク
     val allCompletedTasks: Flow<List<Task>> = taskDao.getAllCompletedTasks()
 
-    // ホーム表示用
     val uiTasks: StateFlow<List<Task>> = combine(
         taskDao.getIncompleteTasks(),
         _recentlyCompletedTasks
@@ -39,7 +39,6 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         (incomplete + recentlyCompleted).sortedByDescending { it.id }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    // 統計データ
     val totalCompletedCount = allCompletedTasks.map { it.size }
     val quickCompletionRate = allCompletedTasks.map { tasks ->
         if (tasks.isEmpty()) 0f
@@ -99,6 +98,55 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                 val currentList = _recentlyCompletedTasks.value.toMutableList()
                 currentList.removeAll { it.id == updatedTask.id }
                 _recentlyCompletedTasks.value = currentList
+            }
+        }
+    }
+
+    // BACKUP & RESTORE
+    fun exportBackup(context: Context, uri: Uri) {
+        viewModelScope.launch {
+            val allTasks = taskDao.getAllTasksDirect()
+            val backup = AppBackup(
+                tasks = allTasks.map { TaskBackup(it.title, it.isCompleted, it.createdAt, it.completedAt) },
+                settings = SettingsBackup(
+                    themeMode = "NOT_STORED_HERE", // We'll handle this in UI state or separate store later
+                    appLanguage = "NOT_STORED_HERE",
+                    fabOffsetX = _fabOffsetX.value,
+                    fabOffsetY = _fabOffsetY.value,
+                    hideImmediately = _hideImmediately.value
+                )
+            )
+            val json = Json.encodeToString(backup)
+            context.contentResolver.openOutputStream(uri)?.use { 
+                it.write(json.toByteArray())
+            }
+        }
+    }
+
+    fun importBackup(context: Context, uri: Uri, themeController: ThemeController) {
+        viewModelScope.launch {
+            val content = context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                BufferedReader(InputStreamReader(inputStream)).use { it.readText() }
+            } ?: return@launch
+            
+            try {
+                val backup = Json.decodeFromString<AppBackup>(content)
+                
+                // 1. Clear and Restore DB
+                taskDao.deleteAllTasks()
+                taskDao.insertAll(backup.tasks.map { 
+                    Task(title = it.title, isCompleted = it.isCompleted, createdAt = it.createdAt, completedAt = it.completedAt)
+                })
+
+                // 2. Restore Viewmodel State
+                _fabOffsetX.value = backup.settings.fabOffsetX
+                _fabOffsetY.value = backup.settings.fabOffsetY
+                _hideImmediately.value = backup.settings.hideImmediately
+                
+                // Note: themeMode and appLanguage need to be passed back to MainActivity or handled via ThemeController
+                // Since they are state in MainActivity, we might need a better way to persist them permanently
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

@@ -33,4 +33,8 @@
     <string name="settings_mit_license">MITライセンス</string>
     <string name="mit_license_text">MIT License\n\nCopyright (c) 2026 m4sak1\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</string>
     <string name="settings_footer">©2026 m4sak1. Licensed under MIT.</string>
+    <string name="settings_backup">バックアップと復元</string>
+    <string name="settings_export">データをバックアップ (JSON形式で書き出し)</string>
+    <string name="settings_import">データを復元 (JSON形式から読み込み)</string>
+    <string name="restore_warning">注意: データを復元すると、現在のすべてのタスクと設定が上書きされます。この操作は取り消せません。続行してもよろしいですか？</string>
 </resources>

@@ -2,9 +2,11 @@ package com.m4sak1.taskapp
 
 import android.content.Context
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +26,15 @@ import java.util.*
 
 class MainActivity : ComponentActivity() {
     private val taskViewModel: TaskViewModel by viewModels()
+
+    // Activity Result Launchers for File Picking
+    private val createDocument = registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        uri?.let { taskViewModel.exportBackup(this, it) }
+    }
+
+    private val openDocument = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        // Note: importBackup will be called with proper themeController from UI later or handled here
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +61,6 @@ class MainActivity : ComponentActivity() {
             val context = LocalContext.current
             val configuration = LocalConfiguration.current
             
-            // Create a custom configuration based on selected language
             val localizedConfiguration = remember(appLanguage, configuration) {
                 val config = Configuration(configuration)
                 if (appLanguage != AppLanguage.System) {
@@ -73,7 +83,6 @@ class MainActivity : ComponentActivity() {
                 config
             }
 
-            // Create a localized context to provide through LocalContext
             val localizedContext = remember(localizedConfiguration, context) {
                 context.createConfigurationContext(localizedConfiguration)
             }
@@ -88,7 +97,11 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        MainScreen(taskViewModel = taskViewModel)
+                        MainScreen(
+                            taskViewModel = taskViewModel,
+                            onExportBackup = { createDocument.launch("m4task_backup.json") },
+                            onImportBackup = { /* Handled in MainScreen with a launcher */ }
+                        )
                     }
                 }
             }

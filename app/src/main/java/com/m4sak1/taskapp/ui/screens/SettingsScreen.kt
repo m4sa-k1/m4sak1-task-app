@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
 import com.m4sak1.taskapp.R
 import com.m4sak1.taskapp.ui.theme.AppLanguage
 import com.m4sak1.taskapp.ui.theme.AppThemeMode
@@ -26,12 +27,15 @@ fun SettingsScreen(
     viewModel: TaskViewModel, 
     onShowLicenses: () -> Unit, 
     onShowMITLicense: () -> Unit,
-    onShowEditHome: () -> Unit
+    onShowEditHome: () -> Unit,
+    onBackup: () -> Unit,
+    onRestore: () -> Unit
 ) {
     val themeController = LocalThemeController.current
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
+    var showRestoreConfirm by remember { mutableStateOf(false) }
     val hideImmediately by viewModel.hideImmediately.collectAsState()
 
     Column(
@@ -80,6 +84,20 @@ fun SettingsScreen(
             SettingsItem(
                 title = stringResource(R.string.settings_edit_home),
                 modifier = Modifier.clickable { onShowEditHome() }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        SettingsSection(title = stringResource(R.string.settings_backup)) {
+            SettingsItem(
+                title = stringResource(R.string.settings_export),
+                modifier = Modifier.clickable { onBackup() }
+            )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            SettingsItem(
+                title = stringResource(R.string.settings_import),
+                modifier = Modifier.clickable { showRestoreConfirm = true }
             )
         }
 
@@ -197,6 +215,30 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(onClick = { showAboutDialog = false }) {
                     Text("OK")
+                }
+            }
+        )
+    }
+
+    if (showRestoreConfirm) {
+        AlertDialog(
+            onDismissRequest = { showRestoreConfirm = false },
+            title = { Text(stringResource(R.string.confirm)) },
+            text = { Text(stringResource(R.string.restore_warning)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onRestore()
+                        showRestoreConfirm = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.confirm), color = Color.White)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRestoreConfirm = false }) {
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )

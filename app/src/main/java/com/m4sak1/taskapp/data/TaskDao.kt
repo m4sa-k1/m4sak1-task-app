@@ -14,9 +14,18 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE isCompleted = 1 ORDER BY completedAt DESC")
     fun getAllCompletedTasks(): Flow<List<Task>>
 
+    @Query("SELECT * FROM tasks")
+    suspend fun getAllTasksDirect(): List<Task>
+
     @Insert
     suspend fun insert(task: Task)
 
+    @Insert
+    suspend fun insertAll(tasks: List<Task>)
+
     @Update
     suspend fun update(task: Task)
+
+    @Query("DELETE FROM tasks")
+    suspend fun deleteAllTasks()
 }
