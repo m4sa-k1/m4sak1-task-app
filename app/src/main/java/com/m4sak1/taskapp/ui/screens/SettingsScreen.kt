@@ -14,28 +14,37 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import com.m4sak1.taskapp.ui.theme.LocalThemeController
+import androidx.compose.foundation.clickable
+
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(onShowLicenses: () -> Unit) {
+    val themeController = LocalThemeController.current
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
-            .padding(top = 48.dp, start = 16.dp, end = 16.dp, bottom = 100.dp)
+            .padding(horizontal = 24.dp)
     ) {
+        Spacer(modifier = Modifier.height(64.dp))
         Text(
-            text = "設定",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
+            text = "Settings",
+            fontSize = 48.sp,
+            fontWeight = FontWeight.Light,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 32.dp)
         )
 
         SettingsSection(title = "一般") {
             SettingsItem(title = "ダークモード") {
-                Switch(checked = false, onCheckedChange = {})
+                Switch(
+                    checked = themeController.isDarkTheme,
+                    onCheckedChange = { themeController.toggleTheme(it) }
+                )
             }
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(title = "ロード画面の毎回表示") {
                 Switch(checked = true, onCheckedChange = {})
             }
@@ -45,8 +54,12 @@ fun SettingsScreen() {
 
         SettingsSection(title = "アプリ情報") {
             SettingsItem(title = "バージョン", contentText = "1.0.0")
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-            SettingsItem(title = "ライセンス", contentText = "MIT License")
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            SettingsItem(
+                title = "オープンソースライセンス", 
+                contentText = "詳細",
+                modifier = Modifier.clickable { onShowLicenses() }
+            )
         }
     }
 }
@@ -77,10 +90,11 @@ fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) 
 fun SettingsItem(
     title: String,
     contentText: String? = null,
+    modifier: Modifier = Modifier,
     trailingContent: (@Composable () -> Unit)? = null
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,

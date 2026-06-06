@@ -17,14 +17,15 @@ fun StatsScreen() {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(top = 48.dp, start = 16.dp, end = 16.dp, bottom = 100.dp)
+            .padding(horizontal = 24.dp)
     ) {
+        Spacer(modifier = Modifier.height(64.dp))
         Text(
-            text = "統計",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
+            text = "Stats",
+            fontSize = 48.sp,
+            fontWeight = FontWeight.Light,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 32.dp)
         )
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = "統計データがここに表示されます", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))

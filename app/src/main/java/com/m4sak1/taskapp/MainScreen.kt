@@ -1,33 +1,129 @@
 package com.m4sak1.taskapp
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.m4sak1.taskapp.ui.components.FloatingBottomNav
 import com.m4sak1.taskapp.ui.screens.HomeScreen
+import com.m4sak1.taskapp.ui.screens.LicensesScreen
 import com.m4sak1.taskapp.ui.screens.SettingsScreen
 import com.m4sak1.taskapp.ui.screens.StatsScreen
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
 
 enum class ScreenTab { Home, Stats, Settings }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(taskViewModel: TaskViewModel) {
     var currentTab by remember { mutableStateOf(ScreenTab.Home) }
+    var showAddDialog by remember { mutableStateOf(false) }
+    var showLicenses by remember { mutableStateOf(false) }
+    var newTaskTitle by remember { mutableStateOf("") }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        when (currentTab) {
-            ScreenTab.Home -> HomeScreen(taskViewModel)
-            ScreenTab.Stats -> StatsScreen()
-            ScreenTab.Settings -> SettingsScreen()
+    if (showLicenses) {
+        LicensesScreen(onBack = { showLicenses = false })
+        return
+    }
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = {
+            FloatingBottomNav(
+                currentTab = currentTab,
+                onTabSelected = { currentTab = it }
+            )
+        },
+        floatingActionButton = {
+            if (currentTab == ScreenTab.Home) {
+                FloatingActionButton(
+                    onClick = { showAddDialog = true },
+                    containerColor = MaterialTheme.colorScheme.onBackground,
+                    contentColor = MaterialTheme.colorScheme.background,
+                    shape = CircleShape
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "Add Task")
+                }
+            }
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            AnimatedContent(
+                targetState = currentTab,
+                transitionSpec = {
+                    val duration = 300
+                    if (targetState.ordinal > initialState.ordinal) {
+                        (slideInHorizontally(animationSpec = tween(duration)) { width -> width } + fadeIn(animationSpec = tween(duration))).togetherWith(
+                            slideOutHorizontally(animationSpec = tween(duration)) { width -> -width } + fadeOut(animationSpec = tween(duration))
+                        )
+                    } else {
+                        (slideInHorizontally(animationSpec = tween(duration)) { width -> -width } + fadeIn(animationSpec = tween(duration))).togetherWith(
+                            slideOutHorizontally(animationSpec = tween(duration)) { width -> width } + fadeOut(animationSpec = tween(duration))
+                        )
+                    }.using(SizeTransform(clip = false))
+                },
+                label = "tab_transition"
+            ) { targetTab ->
+                when (targetTab) {
+                    ScreenTab.Home -> HomeScreen(taskViewModel)
+                    ScreenTab.Stats -> StatsScreen()
+                    ScreenTab.Settings -> SettingsScreen(onShowLicenses = { showLicenses = true })
+                }
+            }
         }
 
-        FloatingBottomNav(
-            currentTab = currentTab,
-            onTabSelected = { currentTab = it },
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+        if (showAddDialog) {
+            ModalBottomSheet(
+                onDismissRequest = { showAddDialog = false },
+                sheetState = sheetState,
+                containerColor = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 24.dp, end = 24.dp, bottom = 48.dp, top = 16.dp),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    Text(
+                        text = "New Task",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                    )
+                    OutlinedTextField(
+                        value = newTaskTitle,
+                        onValueChange = { newTaskTitle = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("What do you need to do?") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Button(
+                        onClick = {
+                            if (newTaskTitle.isNotBlank()) {
+                                taskViewModel.addTask(newTaskTitle)
+                                newTaskTitle = ""
+                                showAddDialog = false
+                            }
+                        },
+                        shape = CircleShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onBackground)
+                    ) {
+                        Text("Add Task", color = MaterialTheme.colorScheme.background, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                    }
+                }
+            }
+        }
     }
 }

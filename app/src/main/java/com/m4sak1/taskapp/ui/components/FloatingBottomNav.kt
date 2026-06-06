@@ -1,27 +1,59 @@
 package com.m4sak1.taskapp.ui.components
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.m4sak1.taskapp.ScreenTab
+import com.m4sak1.taskapp.ui.theme.LocalThemeController
+
+val PieChartIcon: ImageVector
+    get() = ImageVector.Builder(
+        name = "PieChart",
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 24f,
+        viewportHeight = 24f
+    ).apply {
+        path(
+            stroke = SolidColor(Color.Black), // Wait, stroke color needs to adapt. Let's not hardcode.
+            strokeLineWidth = 2f,
+            strokeLineCap = StrokeCap.Round,
+            strokeLineJoin = StrokeJoin.Round
+        ) {
+            moveTo(12f, 2f)
+            arcToRelative(10f, 10f, 0f, false, false, 0f, 20f)
+            arcToRelative(10f, 10f, 0f, false, false, 0f, -20f)
+            close()
+            moveTo(12f, 2f)
+            lineTo(12f, 22f)
+            moveTo(12f, 12f)
+            lineTo(22f, 12f)
+        }
+    }.build()
 
 @Composable
 fun FloatingBottomNav(
@@ -29,69 +61,77 @@ fun FloatingBottomNav(
     onTabSelected: (ScreenTab) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier
-            .padding(16.dp)
-            .shadow(8.dp, CircleShape)
-            .background(MaterialTheme.colorScheme.surface, CircleShape)
-            .padding(horizontal = 8.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        NavItem(
-            icon = Icons.Outlined.Home,
-            label = "ホーム",
-            isSelected = currentTab == ScreenTab.Home,
-            onClick = { onTabSelected(ScreenTab.Home) },
-            modifier = Modifier.weight(1f)
-        )
-        NavItem(
-            icon = Icons.Outlined.Analytics,
-            label = "統計",
-            isSelected = currentTab == ScreenTab.Stats,
-            onClick = { onTabSelected(ScreenTab.Stats) },
-            modifier = Modifier.weight(1f)
-        )
-        NavItem(
-            icon = Icons.Outlined.Settings,
-            label = "設定",
-            isSelected = currentTab == ScreenTab.Settings,
-            onClick = { onTabSelected(ScreenTab.Settings) },
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
+    val tabs = ScreenTab.values()
+    val selectedIndex = tabs.indexOf(currentTab)
+    val isDarkTheme = LocalThemeController.current.isDarkTheme
 
-@Composable
-private fun NavItem(
-    icon: ImageVector,
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-    
-    Column(
+    Box(
         modifier = modifier
-            .clip(CircleShape)
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .padding(bottom = 32.dp, start = 32.dp, end = 32.dp)
+            .fillMaxWidth()
+            .height(64.dp)
+            .background(
+                if (isDarkTheme) Color(0xFF2A2A2A) else Color(0xFFF0F0F0),
+                RoundedCornerShape(32.dp)
+            )
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            tint = color,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = label,
-            fontSize = 10.sp,
-            color = color
-        )
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val tabWidth = maxWidth / tabs.size
+            val indicatorOffset by animateDpAsState(
+                targetValue = tabWidth * selectedIndex,
+                animationSpec = spring(stiffness = Spring.StiffnessLow),
+                label = "indicatorOffset"
+            )
+
+            // Animated Black Circle
+            Box(
+                modifier = Modifier
+                    .offset(x = indicatorOffset)
+                    .width(tabWidth)
+                    .fillMaxHeight(),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.onBackground)
+                )
+            }
+
+            // Icons
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                tabs.forEachIndexed { index, tab ->
+                    val isSelected = index == selectedIndex
+                    val icon = when(tab) {
+                        ScreenTab.Home -> Icons.Outlined.Home
+                        ScreenTab.Stats -> PieChartIcon
+                        ScreenTab.Settings -> Icons.Outlined.Settings
+                    }
+                    val iconColor = if (isSelected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
+                                onTabSelected(tab)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = iconColor,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
+        }
     }
 }
