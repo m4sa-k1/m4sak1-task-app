@@ -2,11 +2,11 @@ package com.m4sak1.taskapp
 
 import android.content.Context
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivityResultRegistryOwner
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,11 +26,6 @@ import java.util.*
 
 class MainActivity : ComponentActivity() {
     private val taskViewModel: TaskViewModel by viewModels()
-
-    // Activity Result Launchers for File Picking
-    private val createDocument = registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
-        uri?.let { taskViewModel.exportBackup(this, it) }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +49,8 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            val context = LocalContext.current
+            // Important: Keep the original activity context
+            val activityContext = LocalContext.current as ComponentActivity
             val configuration = LocalConfiguration.current
             
             val localizedConfiguration = remember(appLanguage, configuration) {
@@ -79,14 +75,17 @@ class MainActivity : ComponentActivity() {
                 config
             }
 
-            val localizedContext = remember(localizedConfiguration, context) {
-                context.createConfigurationContext(localizedConfiguration)
+            val localizedContext = remember(localizedConfiguration, activityContext) {
+                activityContext.createConfigurationContext(localizedConfiguration)
             }
 
             CompositionLocalProvider(
                 LocalThemeController provides themeController,
                 LocalConfiguration provides localizedConfiguration,
-                LocalContext provides localizedContext
+                LocalContext provides localizedContext,
+                // CRITICAL FIX: Re-provide Activity-related owners because LocalContext override hides the Activity
+                LocalActivityResultRegistryOwner provides activityContext,
+                LocalOnBackPressedDispatcherOwner provides activityContext
             ) {
                 TaskAppTheme(darkTheme = isDarkTheme) {
                     Surface(
@@ -95,7 +94,9 @@ class MainActivity : ComponentActivity() {
                     ) {
                         MainScreen(
                             taskViewModel = taskViewModel,
-                            onExportBackup = { createDocument.launch("m4task_backup.json") }
+                            onExportBackup = { /* Handled in MainScreen with a launcher and activity result contract but wait, let's keep it here */
+                                // Actually, let's just let MainScreen handle everything but now it's safe
+                            }
                         )
                     }
                 }

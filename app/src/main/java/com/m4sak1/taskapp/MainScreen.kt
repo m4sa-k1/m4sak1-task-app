@@ -29,7 +29,7 @@ enum class ScreenTab { Home, Stats, Settings }
 @Composable
 fun MainScreen(
     taskViewModel: TaskViewModel,
-    onExportBackup: () -> Unit
+    onExportBackup: () -> Unit // Note: We'll use our own launcher here but keeping signature for now
 ) {
     var currentTab by remember { mutableStateOf(ScreenTab.Home) }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -44,10 +44,13 @@ fun MainScreen(
     
     val context = LocalContext.current
     val themeController = LocalThemeController.current
-
-    // Launcher MUST be at the top level of the composable, never inside 'when' or 'if' branches
+    
+    // Launcher MUST be registered at the top level of the Composable
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let { taskViewModel.importBackup(context, it, themeController) }
+    }
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        uri?.let { taskViewModel.exportBackup(context, it) }
     }
 
     Surface(
@@ -96,7 +99,7 @@ fun MainScreen(
                                         onShowLicenses = { showLicenses = true },
                                         onShowMITLicense = { showMITLicense = true },
                                         onShowEditHome = { showEditHome = true },
-                                        onBackup = onExportBackup,
+                                        onBackup = { exportLauncher.launch("m4task_backup.json") },
                                         onRestore = { importLauncher.launch(arrayOf("application/json")) }
                                     )
                                 }
