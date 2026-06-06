@@ -19,8 +19,8 @@
     <string name="settings_details">詳細</string>
     <string name="stats_placeholder">統計數據將在此處顯示</string>
     <string name="cancel">取消</string>
-    <string name="stats_total_completed">總完成任務數</string>
-    <string name="stats_quick_rate">24小時內達成率</string>
+    <string name="stats_total_completed">總完成任務数</string>
+    <string name="stats_quick_rate">24小時内達成率</string>
     <string name="past_tasks">歷史任務</string>
     <string name="settings_about">關於此應用</string>
     <string name="settings_immediate_hide">完成后立即隱藏</string>
@@ -33,4 +33,14 @@
     <string name="settings_mit_license">MIT 授權</string>
     <string name="mit_license_text">MIT License\n\nCopyright (c) 2026 m4sak1\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</string>
     <string name="settings_footer">©2026 m4sak1. Licensed under MIT.</string>
+    <string name="settings_backup">備份與恢復</string>
+    <string name="settings_export">備份數據 (導出 JSON)</string>
+    <string name="settings_import">恢復數據 (導入 JSON)</string>
+    <string name="restore_warning">警告：恢復數據將覆蓋所有當前任務和設定。此操作無法撤銷。您確定要繼續嗎？</string>
+    <string name="ok">確定</string>
+    <string name="maintained_by">由 m4sak1 維護</string>
+    <string name="system_default">系統預設</string>
+    <string name="theme_light">淺色模式</string>
+    <string name="theme_dark">深色模式</string>
+    <string name="customize">自定義</string>
 </resources>

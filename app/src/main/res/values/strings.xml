@@ -36,4 +36,10 @@
     <string name="settings_export">Backup Data (Export JSON)</string>
     <string name="settings_import">Restore Data (Import JSON)</string>
     <string name="restore_warning">WARNING: Restoring data will overwrite all your current tasks and settings. This action cannot be undone. Are you sure you want to proceed?</string>
+    <string name="ok">OK</string>
+    <string name="maintained_by">Maintained by m4sak1</string>
+    <string name="system_default">System Default</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="customize">Customize</string>
 </resources>

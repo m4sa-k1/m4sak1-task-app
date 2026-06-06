@@ -81,7 +81,7 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        SettingsSection(title = "Customize") {
+        SettingsSection(title = stringResource(R.string.customize)) {
             SettingsItem(
                 title = stringResource(R.string.settings_edit_home),
                 modifier = Modifier.clickable { onShowEditHome() }
@@ -151,7 +151,7 @@ fun SettingsScreen(
             title = stringResource(R.string.settings_dark_mode),
             onConfirm = { showThemeDialog = false },
             onDismiss = { showThemeDialog = false },
-            confirmText = "OK"
+            confirmText = stringResource(R.string.ok)
         ) {
             Column {
                 AppThemeMode.entries.forEach { mode ->
@@ -179,7 +179,7 @@ fun SettingsScreen(
             title = stringResource(R.string.settings_language),
             onConfirm = { showLanguageDialog = false },
             onDismiss = { showLanguageDialog = false },
-            confirmText = "OK"
+            confirmText = stringResource(R.string.ok)
         ) {
             Column {
                 AppLanguage.entries.forEach { lang ->
@@ -192,10 +192,10 @@ fun SettingsScreen(
                                 showLanguageDialog = false
                             }
                             .padding(vertical = 12.dp)
-                    ) {
+                        ) {
                         RadioButton(selected = themeController.appLanguage == lang, onClick = null)
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(text = getLanguageName(lang))
+                        Text(text = getLanguageLabel(lang))
                     }
                 }
             }
@@ -207,12 +207,12 @@ fun SettingsScreen(
             title = stringResource(R.string.confirm),
             onConfirm = { showAboutDialog = false },
             onDismiss = { showAboutDialog = false },
-            confirmText = "OK"
+            confirmText = stringResource(R.string.ok)
         ) {
             Column {
                 Text("m4 task")
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Maintained by m4sak1")
+                Text(stringResource(R.string.maintained_by))
             }
         }
     }
@@ -236,13 +236,22 @@ fun SettingsScreen(
 
 @Composable
 private fun getThemeModeName(mode: AppThemeMode): String = when (mode) {
-    AppThemeMode.System -> "System Default"
-    AppThemeMode.Light -> "Light"
-    AppThemeMode.Dark -> "Dark"
+    AppThemeMode.System -> stringResource(R.string.system_default)
+    AppThemeMode.Light -> stringResource(R.string.theme_light)
+    AppThemeMode.Dark -> stringResource(R.string.theme_dark)
 }
 
 @Composable
 private fun getLanguageName(language: AppLanguage): String = when (language) {
+    AppLanguage.System -> stringResource(R.string.system_default)
+    AppLanguage.English -> "English"
+    AppLanguage.Japanese -> "日本語"
+    AppLanguage.SimplifiedChinese -> "简体中文"
+    AppLanguage.TraditionalChinese -> "繁體中文"
+}
+
+// Fixed labels that don't change regardless of current app language
+private fun getLanguageLabel(language: AppLanguage): String = when (language) {
     AppLanguage.System -> "System Default"
     AppLanguage.English -> "English"
     AppLanguage.Japanese -> "日本語"
