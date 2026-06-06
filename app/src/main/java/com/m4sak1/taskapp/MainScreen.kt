@@ -44,7 +44,6 @@ fun MainScreen(
     var showMITLicense by remember { mutableStateOf(false) }
     var showPastTasks by remember { mutableStateOf(false) }
     var showEditHome by remember { mutableStateOf(false) }
-    var showBgEditor by remember { mutableStateOf<String?>(null) }
     var newTaskTitle by remember { mutableStateOf("") }
 
     val fabOffsetX by taskViewModel.fabOffsetX.collectAsState()
@@ -78,8 +77,9 @@ fun MainScreen(
     }
     val bgLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
-            val tempPath = (context as MainActivity).copyUriToTemp(it)
-            showBgEditor = tempPath
+            val activity = context.findActivity() as? MainActivity
+            val path = activity?.saveBackgroundImage(it)
+            themeController.setBackgroundPath(path)
         }
     }
 
@@ -115,18 +115,6 @@ fun MainScreen(
             }
 
             when {
-                showBgEditor != null -> {
-                    BackgroundEditorScreen(
-                        tempImagePath = showBgEditor!!,
-                        onSave = { scale, tx, ty, blur ->
-                            val finalPath = (context as MainActivity).processAndSaveBackground(showBgEditor!!, scale, tx, ty)
-                            themeController.setBackgroundPath(finalPath)
-                            themeController.setBackgroundBlur(if (blur) 15f else 0f)
-                            showBgEditor = null
-                        },
-                        onCancel = { showBgEditor = null }
-                    )
-                }
                 showLicenses -> LicensesScreen(onBack = { showLicenses = false })
                 showMITLicense -> MITLicenseScreen(onBack = { showMITLicense = false })
                 showPastTasks -> PastTasksScreen(viewModel = taskViewModel, onBack = { showPastTasks = false })
