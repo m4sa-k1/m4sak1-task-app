@@ -45,4 +45,10 @@
     <string name="backup_success">Backup successful</string>
     <string name="restore_success">Restore successful</string>
     <string name="restore_failed">Restore failed</string>
+    <string name="settings_accent_color">Accent Color</string>
+    <string name="settings_background_image">Background Image</string>
+    <string name="edit_background">Edit Background</string>
+    <string name="blur_on_off">Blur On/Off</string>
+    <string name="clear">Clear</string>
+    <string name="hex_color_hint">Hex Color (e.g. #FF5533)</string>
 </resources>

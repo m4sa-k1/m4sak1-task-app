@@ -1,7 +1,5 @@
 package com.m4sak1.taskapp.ui.screens
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,7 +21,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import com.m4sak1.taskapp.MainActivity
 import com.m4sak1.taskapp.R
-import com.m4sak1.taskapp.findActivity
 import com.m4sak1.taskapp.ui.components.CustomConfirmDialog
 import com.m4sak1.taskapp.ui.theme.AppAccentColor
 import com.m4sak1.taskapp.ui.theme.AppLanguage
@@ -38,10 +35,10 @@ fun SettingsScreen(
     onShowMITLicense: () -> Unit,
     onShowEditHome: () -> Unit,
     onBackup: () -> Unit,
-    onRestore: () -> Unit
+    onRestore: () -> Unit,
+    onPickBackground: () -> Unit
 ) {
     val themeController = LocalThemeController.current
-    val context = LocalContext.current
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showAccentDialog by remember { mutableStateOf(false) }
@@ -49,17 +46,10 @@ fun SettingsScreen(
     var showRestoreConfirm by remember { mutableStateOf(false) }
     val hideImmediately by viewModel.hideImmediately.collectAsState()
 
-    val bgLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let {
-            val activity = context.findActivity() as? MainActivity
-            val path = activity?.saveBackgroundImage(it)
-            themeController.setBackgroundPath(path)
-        }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f))
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
     ) {
@@ -100,7 +90,7 @@ fun SettingsScreen(
 
         SettingsSection(title = stringResource(R.string.customize)) {
             SettingsItem(
-                title = "Accent Color",
+                title = stringResource(R.string.settings_accent_color),
                 contentText = if (themeController.accentColor == AppAccentColor.Custom) {
                     "#" + Integer.toHexString(themeController.customAccentColor.toArgb()).uppercase().takeLast(6)
                 } else {
@@ -116,27 +106,16 @@ fun SettingsScreen(
             )
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
-                title = "Background Image",
-                modifier = Modifier.clickable { bgLauncher.launch("image/*") },
+                title = stringResource(R.string.settings_background_image),
+                modifier = Modifier.clickable { onPickBackground() },
                 trailingContent = {
                     if (themeController.backgroundPath != null) {
                         TextButton(onClick = { themeController.setBackgroundPath(null) }) {
-                            Text("Clear", color = MaterialTheme.colorScheme.error)
+                            Text(stringResource(R.string.clear), color = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
             )
-            if (themeController.backgroundPath != null) {
-                Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Blur Amount", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                    Slider(
-                        value = themeController.backgroundBlur,
-                        onValueChange = { themeController.setBackgroundBlur(it) },
-                        valueRange = 0f..25f
-                    )
-                }
-            }
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
                 title = stringResource(R.string.settings_edit_home),
@@ -199,7 +178,7 @@ fun SettingsScreen(
             )
         }
         
-        Spacer(modifier = Modifier.height(100.dp)) // Extra space for footer
+        Spacer(modifier = Modifier.height(100.dp))
     }
 
     if (showThemeDialog) {
@@ -233,7 +212,7 @@ fun SettingsScreen(
     if (showAccentDialog) {
         var customHex by remember { mutableStateOf("") }
         CustomConfirmDialog(
-            title = "Accent Color",
+            title = stringResource(R.string.settings_accent_color),
             onConfirm = { showAccentDialog = false },
             onDismiss = { showAccentDialog = false },
             confirmText = stringResource(R.string.ok)
@@ -271,7 +250,7 @@ fun SettingsScreen(
                                 }
                             }
                         },
-                        label = { Text("Hex Color (e.g. #FF5533)") },
+                        label = { Text(stringResource(R.string.hex_color_hint)) },
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
                         singleLine = true
                     )
@@ -378,7 +357,7 @@ fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) 
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)) // Semi-transparent for BG visibility
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
                 .padding(vertical = 4.dp)
         ) {
             content()

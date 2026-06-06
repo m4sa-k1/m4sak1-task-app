@@ -1,8 +1,8 @@
 package com.m4sak1.taskapp
 
-import android.content.Context
-import android.content.ContextWrapper
-import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Matrix
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
             val configuration = LocalConfiguration.current
             
             val localizedConfiguration = remember(appLanguage, configuration) {
-                val config = Configuration(configuration)
+                val config = android.content.res.Configuration(configuration)
                 if (appLanguage != AppLanguage.System) {
                     val localeCode = when (appLanguage) {
                         AppLanguage.English -> "en"
@@ -114,16 +114,49 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun saveBackgroundImage(uri: Uri): String? {
+    fun copyUriToTemp(uri: Uri): String? {
         return try {
             val inputStream = contentResolver.openInputStream(uri)
-            val file = File(filesDir, "background.jpg")
-            if (file.exists()) file.delete()
+            val tempFile = File(cacheDir, "temp_bg_edit.jpg")
+            FileOutputStream(tempFile).use { inputStream?.copyTo(it) }
+            tempFile.absolutePath
+        } catch (e: Exception) { null }
+    }
+
+    fun processAndSaveBackground(
+        tempPath: String,
+        scale: Float,
+        tx: Float,
+        ty: Float
+    ): String? {
+        return try {
+            val options = android.graphics.BitmapFactory.Options()
+            val original = android.graphics.BitmapFactory.decodeFile(tempPath, options) ?: return null
             
-            FileOutputStream(file).use { output ->
-                inputStream?.use { input ->
-                    input.copyTo(output)
-                }
+            // Create a bitmap that matches screen size or some high res
+            val displayMetrics = resources.displayMetrics
+            val screenWidth = displayMetrics.widthPixels
+            val screenHeight = displayMetrics.heightPixels
+            
+            val result = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(result)
+            
+            val matrix = Matrix()
+            // Center crop logic based on scale and translation
+            // This is a simplified version, ideally we match Compose's graphicsLayer
+            matrix.postScale(scale, scale, (original.width / 2).toFloat(), (original.height / 2).toFloat())
+            matrix.postTranslate(tx, ty)
+            
+            // Center the image on canvas first
+            val dx = (screenWidth - original.width) / 2f
+            val dy = (screenHeight - original.height) / 2f
+            matrix.preTranslate(dx, dy)
+            
+            canvas.drawBitmap(original, matrix, null)
+            
+            val file = File(filesDir, "background.jpg")
+            FileOutputStream(file).use { 
+                result.compress(Bitmap.CompressFormat.JPEG, 90, it)
             }
             file.absolutePath
         } catch (e: Exception) {
@@ -131,13 +164,4 @@ class MainActivity : ComponentActivity() {
             null
         }
     }
-}
-
-fun Context.findActivity(): ComponentActivity? {
-    var context = this
-    while (context is ContextWrapper) {
-        if (context is ComponentActivity) return context
-        context = context.baseContext
-    }
-    return null
 }

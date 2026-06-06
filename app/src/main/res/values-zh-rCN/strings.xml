@@ -46,4 +46,10 @@
     <string name="backup_success">备份成功</string>
     <string name="restore_success">恢复成功</string>
     <string name="restore_failed">恢复失败</string>
+    <string name="settings_accent_color">强调色</string>
+    <string name="settings_background_image">背景图片</string>
+    <string name="edit_background">编辑背景</string>
+    <string name="blur_on_off">开启/关闭模糊</string>
+    <string name="clear">清除</string>
+    <string name="hex_color_hint">Hex 颜色代码 (例如: #FF5533)</string>
 </resources>
