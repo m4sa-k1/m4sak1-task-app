@@ -67,15 +67,13 @@ fun EditHomeScreen(viewModel: TaskViewModel, onBack: () -> Unit) {
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            // Background preview of the Home Screen
+        // Root Box that mimics MainScreen's outer structure
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            
+            // 1. Preview of the Home Screen Content
             HomeScreen(viewModel = viewModel)
 
-            // Realistic Footer Preview (Non-interactive)
+            // 2. Realistic Footer Preview (mimicking Scaffold's bottomBar)
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.BottomCenter
@@ -87,49 +85,52 @@ fun EditHomeScreen(viewModel: TaskViewModel, onBack: () -> Unit) {
                 )
             }
 
-            // Draggable FAB - Using same padding (16.dp) as MainScreen for 1:1 match
-            Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                FloatingActionButton(
-                    onClick = { /* Preview only */ },
-                    containerColor = MaterialTheme.colorScheme.onBackground,
-                    contentColor = MaterialTheme.colorScheme.background,
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-                        .pointerInput(Unit) {
-                            detectDragGestures { change, dragAmount ->
-                                change.consume()
-                                offsetX += dragAmount.x
-                                offsetY += dragAmount.y
-                            }
-                        }
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = null)
-                }
-            }
-
-            // Reset Button positioned clearly
-            Box(
+            // 3. Draggable FAB - In MainScreen, we now use a Box overlaying the Scaffold.
+            // But here, it's inside Scaffold content. To match 1:1, we must ensure the 
+            // coordinate system is the same. MainScreen uses Box(fillMaxSize).padding(16.dp).
+            // Here paddingValues includes bottom bar height, which causes the offset.
+            
+            // Let's overlay the draggable FAB on top of EVERYTHING including the Scaffold padding.
+        }
+        
+        // OVERLAY BOX: This box is at the same level as the Scaffold's content.
+        // It should match MainScreen's absolute positioning.
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp)) {
+            FloatingActionButton(
+                onClick = { /* Preview only */ },
+                containerColor = MaterialTheme.colorScheme.onBackground,
+                contentColor = MaterialTheme.colorScheme.background,
+                shape = CircleShape,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .align(Alignment.TopCenter)
+                    .align(Alignment.BottomEnd)
+                    .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
+                    .pointerInput(Unit) {
+                        detectDragGestures { change, dragAmount ->
+                            change.consume()
+                            offsetX += dragAmount.x
+                            offsetY += dragAmount.y
+                        }
+                    }
             ) {
-                Button(
-                    onClick = {
-                        offsetX = 0f
-                        offsetY = 0f
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.align(Alignment.Center)
-                ) {
-                    Text(stringResource(R.string.reset_default))
-                }
+                Icon(Icons.Filled.Add, contentDescription = null)
+            }
+        }
+
+        // Reset Button
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            Button(
+                onClick = {
+                    offsetX = 0f
+                    offsetY = 0f
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp)
+            ) {
+                Text(stringResource(R.string.reset_default))
             }
         }
     }

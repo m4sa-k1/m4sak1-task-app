@@ -22,9 +22,10 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     val hideImmediately = _hideImmediately.asStateFlow()
 
     // FAB Position (Offsets from bottom-right default)
+    // Default Y is set to -80dp (approx -240px on many screens) to clear the footer
     private val _fabOffsetX = MutableStateFlow(0f)
     val fabOffsetX = _fabOffsetX.asStateFlow()
-    private val _fabOffsetY = MutableStateFlow(0f)
+    private val _fabOffsetY = MutableStateFlow(-240f) 
     val fabOffsetY = _fabOffsetY.asStateFlow()
 
     // 全完了タスク
@@ -62,7 +63,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     fun resetFabPosition() {
         _fabOffsetX.value = 0f
-        _fabOffsetY.value = 0f
+        _fabOffsetY.value = -240f
     }
 
     fun addTask(title: String) {
