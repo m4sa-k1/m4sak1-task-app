@@ -23,6 +23,7 @@ data class SettingsBackup(
     val themeMode: String,
     val appLanguage: String,
     val accentColor: String = "Default",
+    val customAccentColor: Long = 0xFF000000,
     val fabOffsetX: Float,
     val fabOffsetY: Float,
     val hideImmediately: Boolean

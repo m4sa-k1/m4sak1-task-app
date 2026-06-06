@@ -3,6 +3,8 @@ package com.m4sak1.taskapp.viewmodel
 import android.app.Application
 import android.content.Context
 import android.net.Uri
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.m4sak1.taskapp.data.*
@@ -114,6 +116,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                         themeMode = themeController.themeMode.name,
                         appLanguage = themeController.appLanguage.name,
                         accentColor = themeController.accentColor.name,
+                        customAccentColor = themeController.customAccentColor.toArgb().toLong(),
                         fabOffsetX = _fabOffsetX.value,
                         fabOffsetY = _fabOffsetY.value,
                         hideImmediately = _hideImmediately.value
@@ -158,6 +161,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                     themeController.setThemeMode(AppThemeMode.valueOf(backup.settings.themeMode))
                     themeController.setAppLanguage(AppLanguage.valueOf(backup.settings.appLanguage))
                     themeController.setAccentColor(AppAccentColor.valueOf(backup.settings.accentColor))
+                    themeController.setCustomAccentColor(Color(backup.settings.customAccentColor.toInt()))
                 } catch (e: Exception) { /* Fallback for older backups */ }
                 
                 onSuccess()

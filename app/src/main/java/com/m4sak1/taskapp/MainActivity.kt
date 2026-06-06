@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import com.m4sak1.taskapp.ui.theme.*
@@ -33,6 +34,7 @@ class MainActivity : ComponentActivity() {
             var themeMode by remember { mutableStateOf(AppThemeMode.System) }
             var appLanguage by remember { mutableStateOf(AppLanguage.System) }
             var accentColor by remember { mutableStateOf(AppAccentColor.Default) }
+            var customAccentColor by remember { mutableStateOf(Color.Unspecified) }
 
             val isDarkTheme = when (themeMode) {
                 AppThemeMode.System -> isSystemInDarkTheme()
@@ -40,7 +42,7 @@ class MainActivity : ComponentActivity() {
                 AppThemeMode.Dark -> true
             }
 
-            val themeController = remember(themeMode, appLanguage, isDarkTheme, accentColor) {
+            val themeController = remember(themeMode, appLanguage, isDarkTheme, accentColor, customAccentColor) {
                 ThemeController(
                     themeMode = themeMode,
                     setThemeMode = { themeMode = it },
@@ -48,6 +50,8 @@ class MainActivity : ComponentActivity() {
                     setAppLanguage = { appLanguage = it },
                     accentColor = accentColor,
                     setAccentColor = { accentColor = it },
+                    customAccentColor = customAccentColor,
+                    setCustomAccentColor = { customAccentColor = it },
                     isDarkTheme = isDarkTheme
                 )
             }
@@ -88,7 +92,8 @@ class MainActivity : ComponentActivity() {
                 LocalActivityResultRegistryOwner provides activityContext,
                 LocalOnBackPressedDispatcherOwner provides activityContext
             ) {
-                TaskAppTheme(darkTheme = isDarkTheme, accentColor = accentColor.color) {
+                val effectiveColor = if (accentColor == AppAccentColor.Custom) customAccentColor else accentColor.color
+                TaskAppTheme(darkTheme = isDarkTheme, accentColor = effectiveColor) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background

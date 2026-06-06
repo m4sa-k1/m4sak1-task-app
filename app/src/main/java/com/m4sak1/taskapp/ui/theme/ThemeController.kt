@@ -15,7 +15,8 @@ enum class AppAccentColor(val color: Color, val label: String) {
     Blue(Color(0xFF007AFF), "Blue"),
     Indigo(Color(0xFF5856D6), "Indigo"),
     Purple(Color(0xFFAF52DE), "Purple"),
-    Pink(Color(0xFFFF2D55), "Pink")
+    Pink(Color(0xFFFF2D55), "Pink"),
+    Custom(Color.Unspecified, "Custom")
 }
 
 data class ThemeController(
@@ -25,6 +26,8 @@ data class ThemeController(
     val setAppLanguage: (AppLanguage) -> Unit,
     val accentColor: AppAccentColor,
     val setAccentColor: (AppAccentColor) -> Unit,
+    val customAccentColor: Color,
+    val setCustomAccentColor: (Color) -> Unit,
     val isDarkTheme: Boolean
 )
 

@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.m4sak1.taskapp.R
 import com.m4sak1.taskapp.ui.components.CustomConfirmDialog
 import com.m4sak1.taskapp.ui.theme.AppAccentColor
@@ -66,22 +67,6 @@ fun SettingsScreen(
             )
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
-                title = "Accent Color",
-                contentText = themeController.accentColor.label,
-                modifier = Modifier.clickable { showAccentDialog = true },
-                trailingContent = {
-                    if (themeController.accentColor != AppAccentColor.Default) {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(CircleShape)
-                                .background(themeController.accentColor.color)
-                        )
-                    }
-                }
-            )
-            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-            SettingsItem(
                 title = stringResource(R.string.settings_language),
                 contentText = getLanguageName(themeController.appLanguage),
                 modifier = Modifier.clickable { showLanguageDialog = true }
@@ -101,6 +86,27 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         SettingsSection(title = stringResource(R.string.customize)) {
+            SettingsItem(
+                title = "Accent Color",
+                contentText = if (themeController.accentColor == AppAccentColor.Custom) {
+                    "#" + Integer.toHexString(themeController.customAccentColor.toArgb()).uppercase().takeLast(6)
+                } else {
+                    themeController.accentColor.label
+                },
+                modifier = Modifier.clickable { showAccentDialog = true },
+                trailingContent = {
+                    val color = if (themeController.accentColor == AppAccentColor.Custom) themeController.customAccentColor else themeController.accentColor.color
+                    if (color != Color.Unspecified) {
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(color)
+                        )
+                    }
+                }
+            )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
                 title = stringResource(R.string.settings_edit_home),
                 modifier = Modifier.clickable { onShowEditHome() }
@@ -194,6 +200,8 @@ fun SettingsScreen(
     }
 
     if (showAccentDialog) {
+        var customHex by remember { mutableStateOf("") }
+        
         CustomConfirmDialog(
             title = "Accent Color",
             onConfirm = { showAccentDialog = false },
@@ -208,23 +216,42 @@ fun SettingsScreen(
                             .fillMaxWidth()
                             .clickable {
                                 themeController.setAccentColor(accent)
-                                showAccentDialog = false
+                                if (accent != AppAccentColor.Custom) {
+                                    showAccentDialog = false
+                                }
                             }
                             .padding(vertical = 12.dp)
                     ) {
                         RadioButton(selected = themeController.accentColor == accent, onClick = null)
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(text = accent.label, color = if (accent == AppAccentColor.Default) MaterialTheme.colorScheme.onSurface else accent.color)
-                        if (accent != AppAccentColor.Default) {
+                        Text(text = accent.label, color = if (accent == AppAccentColor.Default || accent == AppAccentColor.Custom) MaterialTheme.colorScheme.onSurface else accent.color)
+                        
+                        if (accent != AppAccentColor.Default && accent != AppAccentColor.Custom) {
                             Spacer(modifier = Modifier.weight(1f))
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(CircleShape)
-                                    .background(accent.color)
-                            )
+                            Box(modifier = Modifier.size(24.dp).clip(CircleShape).background(accent.color))
                         }
                     }
+                }
+                
+                if (themeController.accentColor == AppAccentColor.Custom) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = customHex,
+                        onValueChange = { input ->
+                            if (input.length <= 7) {
+                                customHex = input
+                                if (input.startsWith("#") && input.length == 7) {
+                                    try {
+                                        val color = Color(android.graphics.Color.parseColor(input))
+                                        themeController.setCustomAccentColor(color)
+                                    } catch (e: Exception) {}
+                                }
+                            }
+                        },
+                        label = { Text("Hex Color (e.g. #FF5533)") },
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                        singleLine = true
+                    )
                 }
             }
         }
