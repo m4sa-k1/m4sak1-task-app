@@ -22,7 +22,12 @@ import com.m4sak1.taskapp.ui.theme.LocalThemeController
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
 
 @Composable
-fun SettingsScreen(viewModel: TaskViewModel, onShowLicenses: () -> Unit, onShowMITLicense: () -> Unit) {
+fun SettingsScreen(
+    viewModel: TaskViewModel, 
+    onShowLicenses: () -> Unit, 
+    onShowMITLicense: () -> Unit,
+    onShowEditHome: () -> Unit
+) {
     val themeController = LocalThemeController.current
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
@@ -66,6 +71,15 @@ fun SettingsScreen(viewModel: TaskViewModel, onShowLicenses: () -> Unit, onShowM
                         onCheckedChange = { viewModel.toggleHideImmediately(it) }
                     )
                 }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        SettingsSection(title = "Customize") {
+            SettingsItem(
+                title = stringResource(R.string.settings_edit_home),
+                modifier = Modifier.clickable { onShowEditHome() }
             )
         }
 
@@ -196,7 +210,6 @@ private fun getThemeModeName(mode: AppThemeMode): String = when (mode) {
     AppThemeMode.Dark -> "Dark"
 }
 
-@Composable
 private fun getLanguageName(language: AppLanguage): String = when (language) {
     AppLanguage.System -> "System Default"
     AppLanguage.English -> "English"

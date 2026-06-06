@@ -13,10 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.m4sak1.taskapp.ui.components.FloatingBottomNav
 import com.m4sak1.taskapp.ui.screens.*
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
+import kotlin.math.roundToInt
 
 enum class ScreenTab { Home, Stats, Settings }
 
@@ -27,7 +29,11 @@ fun MainScreen(taskViewModel: TaskViewModel) {
     var showLicenses by remember { mutableStateOf(false) }
     var showMITLicense by remember { mutableStateOf(false) }
     var showPastTasks by remember { mutableStateOf(false) }
+    var showEditHome by remember { mutableStateOf(false) }
     var newTaskTitle by remember { mutableStateOf("") }
+
+    val fabOffsetX by taskViewModel.fabOffsetX.collectAsState()
+    val fabOffsetY by taskViewModel.fabOffsetY.collectAsState()
 
     if (showLicenses) {
         LicensesScreen(onBack = { showLicenses = false })
@@ -41,6 +47,11 @@ fun MainScreen(taskViewModel: TaskViewModel) {
 
     if (showPastTasks) {
         PastTasksScreen(viewModel = taskViewModel, onBack = { showPastTasks = false })
+        return
+    }
+
+    if (showEditHome) {
+        EditHomeScreen(viewModel = taskViewModel, onBack = { showEditHome = false })
         return
     }
 
@@ -58,7 +69,9 @@ fun MainScreen(taskViewModel: TaskViewModel) {
                     onClick = { showAddDialog = true },
                     containerColor = MaterialTheme.colorScheme.onBackground,
                     contentColor = MaterialTheme.colorScheme.background,
-                    shape = CircleShape
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .offset { IntOffset(fabOffsetX.roundToInt(), fabOffsetY.roundToInt()) }
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_task))
                 }
@@ -88,7 +101,8 @@ fun MainScreen(taskViewModel: TaskViewModel) {
                     ScreenTab.Settings -> SettingsScreen(
                         viewModel = taskViewModel, 
                         onShowLicenses = { showLicenses = true },
-                        onShowMITLicense = { showMITLicense = true }
+                        onShowMITLicense = { showMITLicense = true },
+                        onShowEditHome = { showEditHome = true }
                     )
                 }
             }
