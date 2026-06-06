@@ -32,10 +32,6 @@ class MainActivity : ComponentActivity() {
         uri?.let { taskViewModel.exportBackup(this, it) }
     }
 
-    private val openDocument = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        // Note: importBackup will be called with proper themeController from UI later or handled here
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -99,8 +95,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         MainScreen(
                             taskViewModel = taskViewModel,
-                            onExportBackup = { createDocument.launch("m4task_backup.json") },
-                            onImportBackup = { /* Handled in MainScreen with a launcher */ }
+                            onExportBackup = { createDocument.launch("m4task_backup.json") }
                         )
                     }
                 }
