@@ -20,18 +20,22 @@ import com.m4sak1.taskapp.R
 private data class LicenseItem(val name: String, val author: String, val license: String)
 
 private val licenses = listOf(
-    LicenseItem("Kotlin Standard Library", "JetBrains s.r.o.", "Apache License 2.0"),
-    LicenseItem("Kotlinx Coroutines", "JetBrains s.r.o.", "Apache License 2.0"),
+    LicenseItem("Kotlin Standard Library (stdlib)", "JetBrains s.r.o.", "Apache License 2.0"),
+    LicenseItem("Kotlinx Coroutines (Android)", "JetBrains s.r.o.", "Apache License 2.0"),
+    LicenseItem("Kotlinx Serialization (JSON)", "JetBrains s.r.o.", "Apache License 2.0"),
     LicenseItem("AndroidX Core KTX", "Google LLC", "Apache License 2.0"),
-    LicenseItem("AndroidX Lifecycle", "Google LLC", "Apache License 2.0"),
     LicenseItem("AndroidX Activity Compose", "Google LLC", "Apache License 2.0"),
-    LicenseItem("Jetpack Compose UI", "Google LLC", "Apache License 2.0"),
+    LicenseItem("AndroidX Lifecycle (Runtime/ViewModel)", "Google LLC", "Apache License 2.0"),
+    LicenseItem("AndroidX Room (Runtime/KTX/Compiler)", "Google LLC", "Apache License 2.0"),
+    LicenseItem("AndroidX Navigation Compose", "Google LLC", "Apache License 2.0"),
+    LicenseItem("AndroidX SQLite", "Google LLC", "Apache License 2.0"),
+    LicenseItem("Jetpack Compose (UI/Graphics/Tooling)", "Google LLC", "Apache License 2.0"),
     LicenseItem("Jetpack Compose Material 3", "Google LLC", "Apache License 2.0"),
     LicenseItem("Jetpack Compose Foundation", "Google LLC", "Apache License 2.0"),
-    LicenseItem("AndroidX Navigation Compose", "Google LLC", "Apache License 2.0"),
-    LicenseItem("AndroidX Room", "Google LLC", "Apache License 2.0"),
-    LicenseItem("AndroidX SQLite", "Google LLC", "Apache License 2.0"),
-    LicenseItem("Kotlin Symbol Processing (KSP)", "Google LLC", "Apache License 2.0")
+    LicenseItem("Kotlin Symbol Processing (KSP) API", "Google LLC", "Apache License 2.0"),
+    LicenseItem("Material Icons (Outlined/Filled)", "Google LLC", "Apache License 2.0"),
+    LicenseItem("Google Maven Repository Artifacts", "Google LLC", "Apache License 2.0"),
+    LicenseItem("Standard Test Libraries (JUnit/Espresso)", "Various Authors", "EPL 1.0 / Apache 2.0")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
