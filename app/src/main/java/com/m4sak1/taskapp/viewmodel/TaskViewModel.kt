@@ -12,16 +12,40 @@ import kotlinx.coroutines.launch
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val taskDao = AppDatabase.getDatabase(application).taskDao()
 
-    // 完了した直後のタスクをメモリ上で保持するリスト
+    // 完了直後の一時保持
     private val _recentlyCompletedTasks = MutableStateFlow<List<Task>>(emptyList())
+    
+    // 設定：即座に非表示にするか
+    private val _hideImmediately = MutableStateFlow(false)
+    val hideImmediately = _hideImmediately.asStateFlow()
 
-    // UIに表示するタスク（DBの未完了タスク + メモリ上の完了直後タスク）
+    // 全完了タスク
+    val allCompletedTasks: Flow<List<Task>> = taskDao.getAllCompletedTasks()
+
+    // ホーム表示用
     val uiTasks: StateFlow<List<Task>> = combine(
         taskDao.getIncompleteTasks(),
         _recentlyCompletedTasks
-    ) { incomplete, completed ->
-        (incomplete + completed).sortedByDescending { it.id }
+    ) { incomplete, recentlyCompleted ->
+        (incomplete + recentlyCompleted).sortedByDescending { it.id }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    // 統計データ
+    val totalCompletedCount = allCompletedTasks.map { it.size }
+    val quickCompletionRate = allCompletedTasks.map { tasks ->
+        if (tasks.isEmpty()) 0f
+        else {
+            val quickOnes = tasks.count { it.completedAt != null && (it.completedAt - it.createdAt) < 24 * 60 * 60 * 1000L }
+            quickOnes.toFloat() / tasks.size
+        }
+    }
+
+    fun toggleHideImmediately(hide: Boolean) {
+        _hideImmediately.value = hide
+        if (hide) {
+            _recentlyCompletedTasks.value = emptyList()
+        }
+    }
 
     fun addTask(title: String) {
         if (title.isBlank()) return
@@ -32,26 +56,27 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     fun toggleTaskCompletion(task: Task) {
         val newStatus = !task.isCompleted
-        val updatedTask = task.copy(isCompleted = newStatus)
+        val updatedTask = task.copy(
+            isCompleted = newStatus,
+            completedAt = if (newStatus) System.currentTimeMillis() else null
+        )
 
         viewModelScope.launch {
-            // DBを更新
             taskDao.update(updatedTask)
 
             if (newStatus) {
-                // 完了状態になった場合、メモリに追加して15分ディレイを開始
-                val currentList = _recentlyCompletedTasks.value.toMutableList()
-                currentList.add(updatedTask)
-                _recentlyCompletedTasks.value = currentList
+                if (!_hideImmediately.value) {
+                    val currentList = _recentlyCompletedTasks.value.toMutableList()
+                    currentList.add(updatedTask)
+                    _recentlyCompletedTasks.value = currentList
 
-                // 15分（900,000ミリ秒）後にメモリから削除してUIから消す
-                delay(15 * 60 * 1000L)
-                
-                val listAfterDelay = _recentlyCompletedTasks.value.toMutableList()
-                listAfterDelay.removeAll { it.id == updatedTask.id }
-                _recentlyCompletedTasks.value = listAfterDelay
+                    delay(15 * 60 * 1000L)
+                    
+                    val listAfterDelay = _recentlyCompletedTasks.value.toMutableList()
+                    listAfterDelay.removeAll { it.id == updatedTask.id }
+                    _recentlyCompletedTasks.value = listAfterDelay
+                }
             } else {
-                // 未完了に戻された場合、メモリから削除（DBの未完了フローに復活する）
                 val currentList = _recentlyCompletedTasks.value.toMutableList()
                 currentList.removeAll { it.id == updatedTask.id }
                 _recentlyCompletedTasks.value = currentList

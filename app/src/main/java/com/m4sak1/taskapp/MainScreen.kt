@@ -12,14 +12,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
-import com.m4sak1.taskapp.R
+import androidx.compose.ui.unit.dp
 import com.m4sak1.taskapp.ui.components.FloatingBottomNav
-import com.m4sak1.taskapp.ui.screens.HomeScreen
-import com.m4sak1.taskapp.ui.screens.LicensesScreen
-import com.m4sak1.taskapp.ui.screens.SettingsScreen
-import com.m4sak1.taskapp.ui.screens.StatsScreen
+import com.m4sak1.taskapp.ui.screens.*
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
 
 enum class ScreenTab { Home, Stats, Settings }
@@ -29,10 +25,16 @@ fun MainScreen(taskViewModel: TaskViewModel) {
     var currentTab by remember { mutableStateOf(ScreenTab.Home) }
     var showAddDialog by remember { mutableStateOf(false) }
     var showLicenses by remember { mutableStateOf(false) }
+    var showPastTasks by remember { mutableStateOf(false) }
     var newTaskTitle by remember { mutableStateOf("") }
 
     if (showLicenses) {
         LicensesScreen(onBack = { showLicenses = false })
+        return
+    }
+
+    if (showPastTasks) {
+        PastTasksScreen(viewModel = taskViewModel, onBack = { showPastTasks = false })
         return
     }
 
@@ -76,8 +78,8 @@ fun MainScreen(taskViewModel: TaskViewModel) {
             ) { targetTab ->
                 when (targetTab) {
                     ScreenTab.Home -> HomeScreen(taskViewModel)
-                    ScreenTab.Stats -> StatsScreen()
-                    ScreenTab.Settings -> SettingsScreen(onShowLicenses = { showLicenses = true })
+                    ScreenTab.Stats -> StatsScreen(viewModel = taskViewModel, onShowPastTasks = { showPastTasks = true })
+                    ScreenTab.Settings -> SettingsScreen(viewModel = taskViewModel, onShowLicenses = { showLicenses = true })
                 }
             }
         }

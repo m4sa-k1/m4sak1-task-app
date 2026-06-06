@@ -18,4 +18,10 @@
     <string name="settings_details">詳細</string>
     <string name="stats_placeholder">統計データがここに表示されます</string>
     <string name="cancel">キャンセル</string>
+    <string name="stats_total_completed">総完了タスク数</string>
+    <string name="stats_quick_rate">24時間以内達成率</string>
+    <string name="past_tasks">過去のタスク</string>
+    <string name="settings_about">このアプリについて</string>
+    <string name="settings_immediate_hide">完了タスクを即座に非表示</string>
+    <string name="settings_immediate_hide_desc">オフの場合: 15分後または終了時に非表示</string>
 </resources>

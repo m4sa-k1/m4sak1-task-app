@@ -19,12 +19,15 @@ import com.m4sak1.taskapp.R
 import com.m4sak1.taskapp.ui.theme.AppLanguage
 import com.m4sak1.taskapp.ui.theme.AppThemeMode
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
+import com.m4sak1.taskapp.viewmodel.TaskViewModel
 
 @Composable
-fun SettingsScreen(onShowLicenses: () -> Unit) {
+fun SettingsScreen(viewModel: TaskViewModel, onShowLicenses: () -> Unit) {
     val themeController = LocalThemeController.current
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
+    val hideImmediately by viewModel.hideImmediately.collectAsState()
 
     Column(
         modifier = Modifier
@@ -50,9 +53,19 @@ fun SettingsScreen(onShowLicenses: () -> Unit) {
             )
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
-                title = "Language / 言語",
-                contentText = themeController.appLanguage.name,
+                title = "Language / 言語 / 语言",
+                contentText = getLanguageName(themeController.appLanguage),
                 modifier = Modifier.clickable { showLanguageDialog = true }
+            )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            SettingsItem(
+                title = stringResource(R.string.settings_immediate_hide),
+                trailingContent = {
+                    Switch(
+                        checked = hideImmediately,
+                        onCheckedChange = { viewModel.toggleHideImmediately(it) }
+                    )
+                }
             )
         }
 
@@ -65,6 +78,11 @@ fun SettingsScreen(onShowLicenses: () -> Unit) {
                 title = stringResource(R.string.settings_licenses),
                 contentText = stringResource(R.string.settings_details),
                 modifier = Modifier.clickable { onShowLicenses() }
+            )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            SettingsItem(
+                title = stringResource(R.string.settings_about),
+                modifier = Modifier.clickable { showAboutDialog = true }
             )
         }
     }
@@ -100,7 +118,7 @@ fun SettingsScreen(onShowLicenses: () -> Unit) {
     if (showLanguageDialog) {
         AlertDialog(
             onDismissRequest = { showLanguageDialog = false },
-            title = { Text("Language / 言語") },
+            title = { Text("Language / 言語 / 语言") },
             text = {
                 Column {
                     AppLanguage.entries.forEach { lang ->
@@ -116,7 +134,7 @@ fun SettingsScreen(onShowLicenses: () -> Unit) {
                         ) {
                             RadioButton(selected = themeController.appLanguage == lang, onClick = null)
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text(text = lang.name)
+                            Text(text = getLanguageName(lang))
                         }
                     }
                 }
@@ -124,6 +142,35 @@ fun SettingsScreen(onShowLicenses: () -> Unit) {
             confirmButton = {}
         )
     }
+
+    if (showAboutDialog) {
+        AlertDialog(
+            onDismissRequest = { showAboutDialog = false },
+            title = { Text("About Lumina Task") },
+            text = {
+                Column {
+                    Text("Lumina Task v1.0.0")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Maintained by m4sak1")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("A minimal and sophisticated task manager built with Kotlin and Jetpack Compose.", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showAboutDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+}
+
+private fun getLanguageName(language: AppLanguage): String = when (language) {
+    AppLanguage.System -> "System Default"
+    AppLanguage.English -> "English"
+    AppLanguage.Japanese -> "日本語"
+    AppLanguage.SimplifiedChinese -> "简体中文"
+    AppLanguage.TraditionalChinese -> "繁體中文"
 }
 
 @Composable
