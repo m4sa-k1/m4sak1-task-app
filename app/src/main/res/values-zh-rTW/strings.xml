@@ -61,5 +61,7 @@
     <string name="notification_channel_name">任務提醒</string>
     <string name="notification_channel_desc">新增任務的提醒</string>
     <string name="notification_reminder_title">任務提醒</string>
-    <string name="notification_reminder_body">您新增的「%s」已滿1天。</string>
+    <string name="notification_reminder_body">別忘了：%1$s</string>
+    <string name="filter_all">全部 ▼</string>
+    <string name="filter_starred">已加星號 ▼</string>
 </resources>

@@ -21,12 +21,13 @@ import androidx.glance.layout.*
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.text.FontWeight
-import androidx.glance.text.TextOverflow
 import com.m4sak1.taskapp.R
 import com.m4sak1.taskapp.data.AppDatabase
 import com.m4sak1.taskapp.data.PreferenceManager
 import com.m4sak1.taskapp.ui.theme.AppThemeMode
-import com.m4sak1.taskapp.ui.theme.ThemeColors
+import com.m4sak1.taskapp.ui.theme.AppAccentColor
+import com.m4sak1.taskapp.ui.theme.getAppColorScheme
+import androidx.glance.unit.ColorProvider
 import kotlinx.coroutines.flow.first
 
 class TaskAppWidget : GlanceAppWidget() {
@@ -42,7 +43,11 @@ class TaskAppWidget : GlanceAppWidget() {
                     (prefManager.themeMode == AppThemeMode.System && 
                     (context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES))
         
-        val colors = ThemeColors.getColors(prefManager.accentColor, isDark, prefManager.customAccentColor)
+        val accentColorEnum = prefManager.accentColor
+        val customAccentColorStr = prefManager.customAccentColor
+        val customColor = try { Color(android.graphics.Color.parseColor(customAccentColorStr)) } catch(e: Exception) { Color.Unspecified }
+        val effectiveColor = if (accentColorEnum == AppAccentColor.Custom) customColor else accentColorEnum.color
+        val colors = getAppColorScheme(isDark, effectiveColor)
         
         // This is called whenever the widget needs to update.
         // We use provideContent so we can read preferences inside composables.
@@ -95,9 +100,9 @@ class TaskAppWidget : GlanceAppWidget() {
             ) {
                 // Toggle Filter Button
                 Text(
-                    text = if (showStarredOnly) context.getString(R.string.widget_filter_starred) else context.getString(R.string.widget_filter_all),
+                    text = if (showStarredOnly) context.getString(R.string.filter_starred) else context.getString(R.string.filter_all),
                     style = TextStyle(
-                        color = Color(colors.primary.value),
+                        color = ColorProvider(colors.primary),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     ),
@@ -112,16 +117,12 @@ class TaskAppWidget : GlanceAppWidget() {
                 Text(
                     text = "+",
                     style = TextStyle(
-                        color = Color(colors.primary.value),
+                        color = ColorProvider(colors.primary),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
                     ),
                     modifier = GlanceModifier.clickable(
-                        onClick = actionStartActivity(
-                            Intent(context, WidgetAddActivity::class.java).apply {
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            }
-                        )
+                        onClick = actionStartActivity<WidgetAddActivity>()
                     ).padding(8.dp)
                 )
             }
@@ -129,8 +130,8 @@ class TaskAppWidget : GlanceAppWidget() {
             if (tasksToShow.isEmpty()) {
                 Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = context.getString(R.string.widget_no_tasks),
-                        style = TextStyle(color = Color(colors.onSurface.copy(alpha = 0.5f).value), fontSize = 14.sp)
+                        text = context.getString(R.string.no_tasks),
+                        style = TextStyle(color = ColorProvider(colors.onSurface.copy(alpha = 0.5f)), fontSize = 14.sp)
                     )
                 }
             } else {
@@ -151,7 +152,7 @@ class TaskAppWidget : GlanceAppWidget() {
                             Text(
                                 text = if (task.isStarred) "☆" else "○",
                                 style = TextStyle(
-                                    color = Color(colors.onSurface.value),
+                                    color = ColorProvider(colors.onSurface),
                                     fontSize = 18.sp
                                 ),
                                 modifier = GlanceModifier.padding(end = 8.dp)
@@ -160,7 +161,7 @@ class TaskAppWidget : GlanceAppWidget() {
                             Text(
                                 text = task.title,
                                 style = TextStyle(
-                                    color = Color(colors.onSurface.value),
+                                    color = ColorProvider(colors.onSurface),
                                     fontSize = 14.sp
                                 ),
                                 maxLines = 1, // Truncate
