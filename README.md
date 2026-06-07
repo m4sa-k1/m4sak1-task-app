@@ -42,7 +42,9 @@ You can download the latest APK directly from the [Releases](https://github.com/
 ## 🧑‍💻 Development
 
 1. Clone the repository:  
-```git clone https://github.com/masaki-09/m4sak1-task-app.git```
+```  
+git clone https://github.com/masaki-09/m4sak1-task-app.git  
+```
 2. Open the project in **Android Studio**.
 3. Sync Gradle and run the `:app` module.
 
