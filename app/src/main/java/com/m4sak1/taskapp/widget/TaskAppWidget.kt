@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.glance.*
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
@@ -17,6 +18,10 @@ import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.items
 import androidx.glance.appwidget.provideContent
+import androidx.glance.appwidget.cornerRadius
+import androidx.glance.appwidget.appWidgetBackground
+import androidx.glance.appwidget.state.updateAppWidgetState
+import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.layout.*
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -33,7 +38,18 @@ import kotlinx.coroutines.flow.first
 class TaskAppWidget : GlanceAppWidget() {
     companion object {
         val filterKey = booleanPreferencesKey("filter_starred_only")
+        val updateTriggerKey = longPreferencesKey("update_trigger")
         val taskIdKey = ActionParameters.Key<Int>("taskId")
+
+        suspend fun forceUpdate(context: Context) {
+            updateAppWidgetState(context, PreferencesGlanceStateDefinition) { prefs ->
+                val current = prefs[updateTriggerKey] ?: 0L
+                prefs.toMutablePreferences().apply {
+                    this[updateTriggerKey] = current + 1
+                }
+            }
+            TaskAppWidget().updateAll(context)
+        }
     }
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -53,25 +69,14 @@ class TaskAppWidget : GlanceAppWidget() {
         provideContent {
             val prefs = currentState<androidx.datastore.preferences.core.Preferences>()
             val showStarredOnly = prefs[filterKey] ?: false
+            val updateTrigger = prefs[updateTriggerKey] ?: 0L
             
-            // In a real scenario with very frequent DB updates, collecting flows in Glance is tricky,
-            // but for a widget, it's common to fetch the latest state synchronously here, 
-            // or trigger an update intent when the DB changes.
-            // Since we need it to be reactive, we can use `produceState` or just fetch and render.
-            // But Glance composables cannot easily suspend and recompose like normal Compose.
-            // It's better to fetch DB data inside `provideGlance` before `provideContent`, 
-            // OR trigger `updateAll()` from the main app whenever tasks change!
-            
-            // For now, let's just fetch tasks here. Note: provideGlance runs in IO thread usually, 
-            // but inside provideContent we can't suspend easily.
-            // Actually, best is to trigger widget updates from TaskViewModel when data changes.
-            
-            WidgetUI(context, showStarredOnly, colors)
+            WidgetUI(context, showStarredOnly, colors, updateTrigger)
         }
     }
 
     @Composable
-    private fun WidgetUI(context: Context, showStarredOnly: Boolean, colors: androidx.compose.material3.ColorScheme) {
+    private fun WidgetUI(context: Context, showStarredOnly: Boolean, colors: androidx.compose.material3.ColorScheme, updateTrigger: Long) {
         // Fetch tasks synchronously since we update the widget on DB changes
         // Warning: This blocks the composition if not careful, but Glance allows synchronous DB reads here
         val db = AppDatabase.getDatabase(context)
@@ -86,11 +91,10 @@ class TaskAppWidget : GlanceAppWidget() {
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
+                .appWidgetBackground()
                 .background(Color(colors.surface.value))
+                .cornerRadius(16.dp)
                 .padding(16.dp),
-            // Glance modifier for corner radius is usually applied via a drawable or directly in newer Glance versions.
-            // For simplicity, background color covers it. To get rounded corners, we can use an XML drawable.
-            // But standard Glance `background(Color)` with widget host typically handles rounded corners on Android 12+.
         ) {
             // Header
             Row(
@@ -152,7 +156,7 @@ class TaskAppWidget : GlanceAppWidget() {
                                 text = if (task.isStarred) "☆" else "○",
                                 style = TextStyle(
                                     color = ColorProvider(colors.onSurface),
-                                    fontSize = 18.sp
+                                    fontSize = 24.sp
                                 ),
                                 modifier = GlanceModifier.padding(end = 8.dp)
                             )
@@ -161,7 +165,7 @@ class TaskAppWidget : GlanceAppWidget() {
                                 text = task.title,
                                 style = TextStyle(
                                     color = ColorProvider(colors.onSurface),
-                                    fontSize = 14.sp
+                                    fontSize = 18.sp
                                 ),
                                 maxLines = 1, // Truncate
                             )

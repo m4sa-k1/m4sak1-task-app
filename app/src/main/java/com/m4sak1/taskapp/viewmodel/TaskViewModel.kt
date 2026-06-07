@@ -137,11 +137,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         _backgroundVersion.value += 1  // Force bitmap reload in MainScreen
     }
 
-    fun addTask(title: String, isStarred: Boolean = false) {
-        if (title.isBlank()) return
-        viewModelScope.launch {
+    fun addTask(title: String, isStarred: Boolean = false): kotlinx.coroutines.Job? {
+        if (title.isBlank()) return null
+        return viewModelScope.launch {
             taskDao.insert(Task(title = title, isStarred = isStarred))
-            TaskAppWidget().updateAll(getApplication())
+            TaskAppWidget.forceUpdate(getApplication())
             
             if (_notificationsEnabled.value) {
                 val inputData = Data.Builder()
@@ -180,7 +180,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             // 1. Update DB immediately
             taskDao.update(updatedTask)
-            TaskAppWidget().updateAll(getApplication())
+            TaskAppWidget.forceUpdate(getApplication())
 
             if (newStatus) {
                 // 2. Handle memory list for 15m delay
@@ -209,7 +209,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteTasks(tasks: List<Task>) {
         viewModelScope.launch {
             taskDao.deleteTasks(tasks)
-            TaskAppWidget().updateAll(getApplication())
+            TaskAppWidget.forceUpdate(getApplication())
             val deletedIds = tasks.map { it.id }.toSet()
             val currentList = _recentlyCompletedTasks.value.toMutableList()
             currentList.removeAll { deletedIds.contains(it.id) }
