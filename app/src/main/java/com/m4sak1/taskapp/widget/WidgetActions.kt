@@ -33,7 +33,7 @@ class ToggleTaskAction : ActionCallback {
                     dao.update(updatedTask)
                     
                     // Update all widgets
-                    TaskAppWidget().updateAll(context)
+                    TaskAppWidget.forceUpdate(context)
                 }
             }
         }
@@ -47,11 +47,11 @@ class ToggleFilterAction : ActionCallback {
         parameters: ActionParameters
     ) {
         updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
-            val currentFilter = prefs[TaskAppWidget.filterKey] ?: false
+            val current = prefs[TaskAppWidget.filterKey] ?: false
             prefs.toMutablePreferences().apply {
-                this[TaskAppWidget.filterKey] = !currentFilter
+                this[TaskAppWidget.filterKey] = !current
             }
         }
-        TaskAppWidget().update(context, glanceId)
+        TaskAppWidget.forceUpdate(context)
     }
 }

@@ -42,13 +42,15 @@ class TaskAppWidget : GlanceAppWidget() {
         val taskIdKey = ActionParameters.Key<Int>("taskId")
 
         suspend fun forceUpdate(context: Context) {
-            updateAppWidgetState(context, PreferencesGlanceStateDefinition) { prefs ->
-                val current = prefs[updateTriggerKey] ?: 0L
-                prefs.toMutablePreferences().apply {
-                    this[updateTriggerKey] = current + 1
+            val manager = androidx.glance.appwidget.GlanceAppWidgetManager(context)
+            val glanceIds = manager.getGlanceIds(TaskAppWidget::class.java)
+            glanceIds.forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    val current = prefs[updateTriggerKey] ?: 0L
+                    prefs[updateTriggerKey] = current + 1
                 }
+                TaskAppWidget().update(context, glanceId)
             }
-            TaskAppWidget().updateAll(context)
         }
     }
 
