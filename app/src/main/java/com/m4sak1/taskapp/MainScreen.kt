@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.m4sak1.taskapp.ui.components.FloatingBottomNav
 import com.m4sak1.taskapp.ui.screens.*
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
