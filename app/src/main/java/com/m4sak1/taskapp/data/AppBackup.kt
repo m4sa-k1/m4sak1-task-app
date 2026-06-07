@@ -27,5 +27,6 @@ data class SettingsBackup(
     val fabOffsetX: Float,
     val fabOffsetY: Float,
     val hideImmediately: Boolean,
-    val disableAnimations: Boolean = false
+    val disableAnimations: Boolean = false,
+    val enterToAdd: Boolean = true
 )

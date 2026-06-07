@@ -52,4 +52,5 @@
     <string name="clear">Clear</string>
     <string name="hex_color_hint">Hex Color Code (e.g., #FF5533)</string>
     <string name="settings_disable_animations">Disable tab animations</string>
+    <string name="settings_enter_to_add">Add task with Enter key</string>
 </resources>

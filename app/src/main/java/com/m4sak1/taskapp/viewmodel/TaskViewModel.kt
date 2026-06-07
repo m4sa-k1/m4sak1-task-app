@@ -33,6 +33,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _disableAnimations = MutableStateFlow(prefManager.disableAnimations)
     val disableAnimations = _disableAnimations.asStateFlow()
 
+    private val _enterToAdd = MutableStateFlow(prefManager.enterToAdd)
+    val enterToAdd = _enterToAdd.asStateFlow()
+
     private val _fabOffsetX = MutableStateFlow(prefManager.fabOffsetX)
     val fabOffsetX = _fabOffsetX.asStateFlow()
     private val _fabOffsetY = MutableStateFlow(prefManager.fabOffsetY) 
@@ -80,6 +83,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     fun toggleDisableAnimations(disable: Boolean) {
         _disableAnimations.value = disable
         prefManager.disableAnimations = disable
+    }
+
+    fun setEnterToAdd(enabled: Boolean) {
+        _enterToAdd.value = enabled
+        prefManager.enterToAdd = enabled
     }
 
     fun updateFabPosition(x: Float, y: Float) {
@@ -163,7 +171,8 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                         fabOffsetX = _fabOffsetX.value,
                         fabOffsetY = _fabOffsetY.value,
                         hideImmediately = _hideImmediately.value,
-                        disableAnimations = _disableAnimations.value
+                        disableAnimations = _disableAnimations.value,
+                        enterToAdd = _enterToAdd.value
                     )
                 )
                 val json = Json.encodeToString(backupData)
@@ -230,11 +239,13 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                     _fabOffsetY.value = backup.settings.fabOffsetY
                     _hideImmediately.value = backup.settings.hideImmediately
                     _disableAnimations.value = backup.settings.disableAnimations
+                    _enterToAdd.value = backup.settings.enterToAdd
                     
                     prefManager.fabOffsetX = backup.settings.fabOffsetX
                     prefManager.fabOffsetY = backup.settings.fabOffsetY
                     prefManager.hideImmediately = backup.settings.hideImmediately
                     prefManager.disableAnimations = backup.settings.disableAnimations
+                    prefManager.enterToAdd = backup.settings.enterToAdd
                     prefManager.themeMode = AppThemeMode.valueOf(backup.settings.themeMode)
                     prefManager.appLanguage = AppLanguage.valueOf(backup.settings.appLanguage)
                     prefManager.accentColor = AppAccentColor.valueOf(backup.settings.accentColor)

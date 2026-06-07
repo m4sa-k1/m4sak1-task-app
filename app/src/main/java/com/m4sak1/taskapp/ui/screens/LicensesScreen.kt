@@ -30,16 +30,22 @@ fun LicensesScreen(onBack: () -> Unit) {
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        LibrariesContainer(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            colors = LibraryDefaults.libraryColors(
-                backgroundColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onBackground,
-                badgeBackgroundColor = MaterialTheme.colorScheme.surfaceVariant,
-                badgeContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        MaterialTheme(
+            colorScheme = MaterialTheme.colorScheme.copy(
+                primary = MaterialTheme.colorScheme.onBackground
             )
-        )
+        ) {
+            LibrariesContainer(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                colors = LibraryDefaults.libraryColors(
+                    backgroundColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.onBackground,
+                    badgeBackgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                    badgeContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+        }
     }
 }

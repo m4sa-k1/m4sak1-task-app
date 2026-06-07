@@ -234,6 +234,7 @@ fun MainScreen(
                 )
             }
 
+            val enterToAdd by taskViewModel.enterToAdd.collectAsState()
             if (showAddDialog) {
                 AlertDialog(
                     onDismissRequest = { showAddDialog = false },
@@ -265,7 +266,19 @@ fun MainScreen(
                             modifier = Modifier.fillMaxWidth(),
                             placeholder = { Text(stringResource(R.string.task_placeholder)) },
                             singleLine = true,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                                imeAction = if (enterToAdd) androidx.compose.ui.text.input.ImeAction.Done else androidx.compose.ui.text.input.ImeAction.Default
+                            ),
+                            keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                                onDone = {
+                                    if (enterToAdd && newTaskTitle.isNotBlank()) {
+                                        taskViewModel.addTask(newTaskTitle)
+                                        newTaskTitle = ""
+                                        showAddDialog = false
+                                    }
+                                }
+                            )
                         )
                     },
                     shape = RoundedCornerShape(24.dp),

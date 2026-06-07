@@ -53,4 +53,5 @@
     <string name="clear">清除</string>
     <string name="hex_color_hint">Hex 颜色代码 (例如: #FF5533)</string>
     <string name="settings_disable_animations">禁用标签页动画</string>
+    <string name="settings_enter_to_add">按回车键添加任务</string>
 </resources>

@@ -48,6 +48,7 @@ fun SettingsScreen(
     var showRestoreConfirm by remember { mutableStateOf(false) }
     val hideImmediately by viewModel.hideImmediately.collectAsState()
     val disableAnimations by viewModel.disableAnimations.collectAsState()
+    val enterToAdd by viewModel.enterToAdd.collectAsState()
 
     Column(
         modifier = Modifier
@@ -94,6 +95,16 @@ fun SettingsScreen(
                     Switch(
                         checked = disableAnimations,
                         onCheckedChange = { viewModel.toggleDisableAnimations(it) }
+                    )
+                }
+            )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            SettingsItem(
+                title = stringResource(R.string.settings_enter_to_add),
+                trailingContent = {
+                    Switch(
+                        checked = enterToAdd,
+                        onCheckedChange = { viewModel.setEnterToAdd(it) }
                     )
                 }
             )

@@ -50,4 +50,8 @@ class PreferenceManager(context: Context) {
     var disableAnimations: Boolean
         get() = prefs.getBoolean("disable_animations", false)
         set(value) = prefs.edit().putBoolean("disable_animations", value).apply()
+
+    var enterToAdd: Boolean
+        get() = prefs.getBoolean("enter_to_add", true)
+        set(value) = prefs.edit().putBoolean("enter_to_add", value).apply()
 }

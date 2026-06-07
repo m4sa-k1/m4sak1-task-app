@@ -50,7 +50,8 @@
     <string name="settings_background_image">背景画像</string>
     <string name="edit_background">背景を編集</string>
     <string name="blur_on_off">ぼかしのオン/オフ</string>
-    <string name="clear">解除</string>
-    <string name="hex_color_hint">Hexカラーコード (例: #FF5533)</string>
+    <string name="clear">クリア</string>
+    <string name="hex_color_hint">Hex カラーコード (例: #FF5533)</string>
     <string name="settings_disable_animations">タブアニメーションを無効化</string>
+    <string name="settings_enter_to_add">Enterキーでタスクを追加</string>
 </resources>
