@@ -71,7 +71,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         // (Though usually they shouldn't overlap if DB is updated first)
         val recentlyIds = recentlyCompleted.map { it.id }.toSet()
         val filteredIncomplete = incomplete.filter { it.id !in recentlyIds }
-        (filteredIncomplete + recentlyCompleted).sortedByDescending { it.id }
+        (filteredIncomplete + recentlyCompleted).sortedWith(
+            compareByDescending<Task> { it.isStarred }.thenByDescending { it.id }
+        )
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val totalCompletedCount = allCompletedTasks.map { it.size }

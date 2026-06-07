@@ -24,6 +24,16 @@ import androidx.compose.ui.res.stringResource
 import com.m4sak1.taskapp.R
 import androidx.compose.foundation.ExperimentalFoundationApi
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
+import kotlin.math.cos
+import kotlin.math.sin
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(viewModel: TaskViewModel) {
@@ -67,6 +77,25 @@ fun HomeScreen(viewModel: TaskViewModel) {
     }
 }
 
+class StarShape : Shape {
+    override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+        val path = Path()
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val outerRadius = size.width / 2f
+        val innerRadius = outerRadius * 0.382f // Golden ratio roughly for a 5-point star
+        
+        for (i in 0 until 10) {
+            val angle = (Math.PI / 5) * i - Math.PI / 2
+            val radius = if (i % 2 == 0) outerRadius else innerRadius
+            val x = center.x + cos(angle).toFloat() * radius
+            val y = center.y + sin(angle).toFloat() * radius
+            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+        }
+        path.close()
+        return Outline.Generic(path)
+    }
+}
+
 @Composable
 fun TaskItem(task: Task, onToggle: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -79,31 +108,19 @@ fun TaskItem(task: Task, onToggle: () -> Unit) {
                 .padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (task.isStarred) {
-                Box(
-                    modifier = Modifier.size(24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = if (task.isCompleted) "★" else "☆",
-                        fontSize = 20.sp,
-                        color = if (task.isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f) else MaterialTheme.colorScheme.onSurface
+            val shape = if (task.isStarred) StarShape() else CircleShape
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(shape)
+                    .then(
+                        if (task.isCompleted) {
+                            Modifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f))
+                        } else {
+                            Modifier.border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape)
+                        }
                     )
-                }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .then(
-                            if (task.isCompleted) {
-                                Modifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f))
-                            } else {
-                                Modifier.border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), CircleShape)
-                            }
-                        )
-                )
-            }
+            )
             
             Spacer(modifier = Modifier.width(16.dp))
             
