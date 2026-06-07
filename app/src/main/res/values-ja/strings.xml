@@ -25,7 +25,8 @@
     <string name="settings_about">このアプリについて</string>
     <string name="settings_immediate_hide">完了時に即非表示</string>
     <string name="settings_immediate_hide_desc">オフの場合: 15分後または終了時に非表示</string>
-    <string name="confirm">確認</string>
+    <string name="confirm">続行</string>
+    <string name="delete">削除</string>
     <string name="settings_edit_home">ホーム画面を編集</string>
     <string name="save">保存</string>
     <string name="reset_default">デフォルトに戻す</string>

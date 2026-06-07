@@ -28,4 +28,7 @@ interface TaskDao {
 
     @Query("DELETE FROM tasks")
     suspend fun deleteAllTasks()
+
+    @androidx.room.Delete
+    suspend fun deleteTasks(tasks: List<Task>)
 }

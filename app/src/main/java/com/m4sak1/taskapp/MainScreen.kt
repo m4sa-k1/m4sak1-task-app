@@ -6,6 +6,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -38,6 +42,7 @@ import kotlin.math.roundToInt
 
 enum class ScreenTab { Home, Stats, Settings, Licenses, MITLicense, PastTasks, EditHome }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
     taskViewModel: TaskViewModel,
@@ -143,8 +148,47 @@ fun MainScreen(
                 // and subtract padding manually only for the content, NOT the FAB.
                 Box(modifier = Modifier.fillMaxSize()) {
                     Box(modifier = Modifier.fillMaxSize().padding(if (isMainTab) paddingValues else PaddingValues(0.dp))) {
+                        @OptIn(ExperimentalFoundationApi::class)
+                        val pagerState = rememberPagerState { 3 }
+                        
+                        // Sync pager with currentTab
+                        LaunchedEffect(currentTab) {
+                            if (isMainTab) {
+                                val targetPage = when (currentTab) {
+                                    ScreenTab.Home -> 0
+                                    ScreenTab.Stats -> 1
+                                    ScreenTab.Settings -> 2
+                                    else -> 0
+                                }
+                                if (pagerState.currentPage != targetPage) {
+                                    if (disableAnimations) {
+                                        pagerState.scrollToPage(targetPage)
+                                    } else {
+                                        pagerState.animateScrollToPage(targetPage)
+                                    }
+                                }
+                            }
+                        }
+
+                        // Sync currentTab with pager when user swipes
+                        LaunchedEffect(pagerState.currentPage) {
+                            if (isMainTab) {
+                                val newTab = when (pagerState.currentPage) {
+                                    0 -> ScreenTab.Home
+                                    1 -> ScreenTab.Stats
+                                    2 -> ScreenTab.Settings
+                                    else -> ScreenTab.Home
+                                }
+                                if (currentTab != newTab) {
+                                    currentTab = newTab
+                                }
+                            }
+                        }
+
+                        val targetState: Any = if (isMainTab) "MainPager" else currentTab
+
                         AnimatedContent(
-                            targetState = currentTab,
+                            targetState = targetState,
                             transitionSpec = {
                                 if (disableAnimations) {
                                     EnterTransition.None togetherWith ExitTransition.None
@@ -153,7 +197,12 @@ fun MainScreen(
                                     val easing = FastOutSlowInEasing
                                     val target = targetState
                                     val initial = initialState
-                                    if (target.ordinal > initial.ordinal) {
+                                    
+                                    // Use a safe ordinal extraction or default to 0 for "MainPager"
+                                    val targetOrdinal = if (target is ScreenTab) target.ordinal else 0
+                                    val initialOrdinal = if (initial is ScreenTab) initial.ordinal else 0
+
+                                    if (targetOrdinal > initialOrdinal) {
                                         (slideInHorizontally(animationSpec = tween(duration, easing = easing)) { it } +
                                          fadeIn(animationSpec = tween(duration, easing = easing))).togetherWith(
                                             slideOutHorizontally(animationSpec = tween(duration, easing = easing)) { -it } +
@@ -169,19 +218,26 @@ fun MainScreen(
                                 }
                             },
                             label = "screen_transition"
-                        ) { targetTab ->
-                            when (targetTab) {
-                                ScreenTab.Home -> HomeScreen(taskViewModel)
-                                ScreenTab.Stats -> StatsScreen(viewModel = taskViewModel, onShowPastTasks = { currentTab = ScreenTab.PastTasks })
-                                ScreenTab.Settings -> SettingsScreen(
-                                    viewModel = taskViewModel, 
-                                    onShowLicenses = { currentTab = ScreenTab.Licenses },
-                                    onShowMITLicense = { currentTab = ScreenTab.MITLicense },
-                                    onShowEditHome = { currentTab = ScreenTab.EditHome },
-                                    onBackup = { exportLauncher.launch("m4task_backup.zip") },
-                                    onRestore = { importLauncher.launch(arrayOf("application/zip")) },
-                                    onPickBackground = { bgLauncher.launch("image/*") }
-                                )
+                        ) { target ->
+                            when (target) {
+                                "MainPager" -> {
+                                    @OptIn(ExperimentalFoundationApi::class)
+                                    HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+                                        when (page) {
+                                            0 -> HomeScreen(taskViewModel)
+                                            1 -> StatsScreen(viewModel = taskViewModel, onShowPastTasks = { currentTab = ScreenTab.PastTasks })
+                                            2 -> SettingsScreen(
+                                                viewModel = taskViewModel, 
+                                                onShowLicenses = { currentTab = ScreenTab.Licenses },
+                                                onShowMITLicense = { currentTab = ScreenTab.MITLicense },
+                                                onShowEditHome = { currentTab = ScreenTab.EditHome },
+                                                onBackup = { exportLauncher.launch("m4task_backup.zip") },
+                                                onRestore = { importLauncher.launch(arrayOf("application/zip")) },
+                                                onPickBackground = { bgLauncher.launch("image/*") }
+                                            )
+                                        }
+                                    }
+                                }
                                 ScreenTab.Licenses -> {
                                     BackHandler { currentTab = ScreenTab.Settings }
                                     LicensesScreen(onBack = { currentTab = ScreenTab.Settings })

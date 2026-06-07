@@ -25,7 +25,8 @@
     <string name="settings_about">关于此应用</string>
     <string name="settings_immediate_hide">完成后立即隐藏</string>
     <string name="settings_immediate_hide_desc">关闭时：15分后或退出时隐藏</string>
-    <string name="confirm">确认</string>
+    <string name="confirm">继续</string>
+    <string name="delete">删除</string>
     <string name="settings_edit_home">编辑主页</string>
     <string name="save">保存</string>
     <string name="reset_default">恢复默认</string>
