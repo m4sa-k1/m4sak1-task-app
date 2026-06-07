@@ -56,7 +56,7 @@ jobs:
         with:
           tag_name: ${{ env.VERSION_TAG }}
           name: Release ${{ env.NEW_VERSION }}
-          files: app/build/outputs/apk/release/app-release-unsigned.apk
+          files: app/build/outputs/apk/release/app-release.apk
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
