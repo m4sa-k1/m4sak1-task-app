@@ -61,5 +61,7 @@
     <string name="notification_channel_name">任务提醒</string>
     <string name="notification_channel_desc">已添加任务的提醒</string>
     <string name="notification_reminder_title">任务提醒</string>
-    <string name="notification_reminder_body">您添加的“%s”已满1天。</string>
+    <string name="notification_reminder_body">别忘了：%1$s</string>
+    <string name="filter_all">全部 ▼</string>
+    <string name="filter_starred">已加星标 ▼</string>
 </resources>

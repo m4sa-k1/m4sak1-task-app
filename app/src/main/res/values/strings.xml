@@ -60,5 +60,7 @@
     <string name="notification_channel_name">Task Reminders</string>
     <string name="notification_channel_desc">Reminders for added tasks</string>
     <string name="notification_reminder_title">Task Reminder</string>
-    <string name="notification_reminder_body">\"%s\" was added 1 day ago.</string>
+    <string name="notification_reminder_body">Don\'t forget: %1$s</string>
+    <string name="filter_all">All ▼</string>
+    <string name="filter_starred">Starred ▼</string>
 </resources>

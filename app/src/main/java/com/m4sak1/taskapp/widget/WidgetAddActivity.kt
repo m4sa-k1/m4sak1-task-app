@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.appwidget.updateAll
 import com.m4sak1.taskapp.R
-import com.m4sak1.taskapp.ui.theme.M4sak1TaskAppTheme
+import com.m4sak1.taskapp.ui.theme.TaskAppTheme
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
 import kotlinx.coroutines.launch
 
@@ -32,7 +32,7 @@ class WidgetAddActivity : ComponentActivity() {
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
         
         setContent {
-            M4sak1TaskAppTheme {
+            TaskAppTheme {
                 val scope = rememberCoroutineScope()
                 var newTaskTitle by remember { mutableStateOf("") }
                 var isTaskStarred by remember { mutableStateOf(false) }

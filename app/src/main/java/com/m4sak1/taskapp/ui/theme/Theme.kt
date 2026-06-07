@@ -42,19 +42,16 @@ private val LightColorSchemeBase = lightColorScheme(
     onSurface = PureBlack,
 )
 
-@Composable
-fun TaskAppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+fun getAppColorScheme(
+    darkTheme: Boolean,
     accentColor: Color = Color.Unspecified,
-    dynamicColor: Boolean = false, 
-    content: @Composable () -> Unit
-) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
+    dynamicColor: Boolean = false,
+    context: android.content.Context? = null
+): androidx.compose.material3.ColorScheme {
+    return when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && context != null -> {
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> {
             if (accentColor != Color.Unspecified) {
                 DarkColorSchemeBase.copy(primary = accentColor, onBackground = accentColor)
@@ -70,6 +67,17 @@ fun TaskAppTheme(
             }
         }
     }
+}
+
+@Composable
+fun TaskAppTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    accentColor: Color = Color.Unspecified,
+    dynamicColor: Boolean = false, 
+    content: @Composable () -> Unit
+) {
+    val context = LocalContext.current
+    val colorScheme = getAppColorScheme(darkTheme, accentColor, dynamicColor, context)
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {

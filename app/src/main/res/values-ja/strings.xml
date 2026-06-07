@@ -61,5 +61,7 @@
     <string name="notification_channel_name">タスクのリマインダー</string>
     <string name="notification_channel_desc">追加したタスクのリマインダー</string>
     <string name="notification_reminder_title">タスクのリマインダー</string>
-    <string name="notification_reminder_body">「%s」を追加してから1日が経過しました。</string>
+    <string name="notification_reminder_body">「%1$s」をお忘れなく！</string>
+    <string name="filter_all">全て ▼</string>
+    <string name="filter_starred">スター付き ▼</string>
 </resources>
