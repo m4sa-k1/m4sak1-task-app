@@ -3,6 +3,10 @@ package com.m4sak1.taskapp
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -87,6 +91,30 @@ fun MainScreen(
     }
     val bgLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { editingBgUri = it }
+    }
+
+    val hasRequestedNotificationPermission by taskViewModel.hasRequestedNotificationPermission.collectAsState()
+    val initialPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        taskViewModel.setNotificationsEnabled(isGranted)
+        taskViewModel.setHasRequestedNotificationPermission(true)
+    }
+
+    LaunchedEffect(Unit) {
+        if (!hasRequestedNotificationPermission) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                initialPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                taskViewModel.setNotificationsEnabled(true)
+                taskViewModel.setHasRequestedNotificationPermission(true)
+            }
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val permissionStatus = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                if (permissionStatus != PackageManager.PERMISSION_GRANTED) {
+                    taskViewModel.setNotificationsEnabled(false)
+                }
+            }
+        }
     }
 
     Surface(

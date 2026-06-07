@@ -44,6 +44,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _notificationsEnabled = MutableStateFlow(prefManager.notificationsEnabled)
     val notificationsEnabled = _notificationsEnabled.asStateFlow()
 
+    private val _hasRequestedNotificationPermission = MutableStateFlow(prefManager.hasRequestedNotificationPermission)
+    val hasRequestedNotificationPermission = _hasRequestedNotificationPermission.asStateFlow()
+
     private val _fabOffsetX = MutableStateFlow(prefManager.fabOffsetX)
     val fabOffsetX = _fabOffsetX.asStateFlow()
     private val _fabOffsetY = MutableStateFlow(prefManager.fabOffsetY) 
@@ -101,6 +104,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     fun setNotificationsEnabled(enabled: Boolean) {
         _notificationsEnabled.value = enabled
         prefManager.notificationsEnabled = enabled
+    }
+
+    fun setHasRequestedNotificationPermission(requested: Boolean) {
+        _hasRequestedNotificationPermission.value = requested
+        prefManager.hasRequestedNotificationPermission = requested
     }
 
     fun updateFabPosition(x: Float, y: Float) {
