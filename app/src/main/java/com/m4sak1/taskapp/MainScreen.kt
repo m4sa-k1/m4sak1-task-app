@@ -10,6 +10,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.animation.core.tween
+import kotlin.math.abs
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -164,6 +165,11 @@ fun MainScreen(
                                     if (disableAnimations) {
                                         pagerState.scrollToPage(targetPage)
                                     } else {
+                                        if (abs(pagerState.currentPage - targetPage) > 1) {
+                                            // Snap to adjacent page to avoid scrolling through middle page
+                                            val adjacentPage = if (targetPage > pagerState.currentPage) targetPage - 1 else targetPage + 1
+                                            pagerState.scrollToPage(adjacentPage)
+                                        }
                                         pagerState.animateScrollToPage(targetPage)
                                     }
                                 }
@@ -222,7 +228,11 @@ fun MainScreen(
                             when (target) {
                                 "MainPager" -> {
                                     @OptIn(ExperimentalFoundationApi::class)
-                                    HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+                                    HorizontalPager(
+                                        state = pagerState, 
+                                        modifier = Modifier.fillMaxSize(),
+                                        beyondBoundsPageCount = 2
+                                    ) { page ->
                                         when (page) {
                                             0 -> HomeScreen(taskViewModel)
                                             1 -> StatsScreen(viewModel = taskViewModel, onShowPastTasks = { currentTab = ScreenTab.PastTasks })
