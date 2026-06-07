@@ -1,0 +1,174 @@
+package com.m4sak1.taskapp.widget
+
+import android.content.Context
+import android.content.Intent
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.glance.*
+import androidx.glance.action.ActionParameters
+import androidx.glance.action.actionParametersOf
+import androidx.glance.action.actionStartActivity
+import androidx.glance.action.clickable
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.lazy.LazyColumn
+import androidx.glance.appwidget.lazy.items
+import androidx.glance.appwidget.provideContent
+import androidx.glance.layout.*
+import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
+import androidx.glance.text.FontWeight
+import androidx.glance.text.TextOverflow
+import com.m4sak1.taskapp.R
+import com.m4sak1.taskapp.data.AppDatabase
+import com.m4sak1.taskapp.data.PreferenceManager
+import com.m4sak1.taskapp.ui.theme.AppThemeMode
+import com.m4sak1.taskapp.ui.theme.ThemeColors
+import kotlinx.coroutines.flow.first
+
+class TaskAppWidget : GlanceAppWidget() {
+    companion object {
+        val filterKey = booleanPreferencesKey("filter_starred_only")
+        val taskIdKey = ActionParameters.Key<Int>("taskId")
+    }
+
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        // Fetch data
+        val prefManager = PreferenceManager(context)
+        val isDark = prefManager.themeMode == AppThemeMode.Dark || 
+                    (prefManager.themeMode == AppThemeMode.System && 
+                    (context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES))
+        
+        val colors = ThemeColors.getColors(prefManager.accentColor, isDark, prefManager.customAccentColor)
+        
+        // This is called whenever the widget needs to update.
+        // We use provideContent so we can read preferences inside composables.
+        provideContent {
+            val prefs = currentState<androidx.datastore.preferences.core.Preferences>()
+            val showStarredOnly = prefs[filterKey] ?: false
+            
+            // In a real scenario with very frequent DB updates, collecting flows in Glance is tricky,
+            // but for a widget, it's common to fetch the latest state synchronously here, 
+            // or trigger an update intent when the DB changes.
+            // Since we need it to be reactive, we can use `produceState` or just fetch and render.
+            // But Glance composables cannot easily suspend and recompose like normal Compose.
+            // It's better to fetch DB data inside `provideGlance` before `provideContent`, 
+            // OR trigger `updateAll()` from the main app whenever tasks change!
+            
+            // For now, let's just fetch tasks here. Note: provideGlance runs in IO thread usually, 
+            // but inside provideContent we can't suspend easily.
+            // Actually, best is to trigger widget updates from TaskViewModel when data changes.
+            
+            WidgetUI(context, showStarredOnly, colors)
+        }
+    }
+
+    @Composable
+    private fun WidgetUI(context: Context, showStarredOnly: Boolean, colors: androidx.compose.material3.ColorScheme) {
+        // Fetch tasks synchronously since we update the widget on DB changes
+        // Warning: This blocks the composition if not careful, but Glance allows synchronous DB reads here
+        val db = AppDatabase.getDatabase(context)
+        // This is a bit of a hack in Glance: we can read blocking because it's a RemoteViews generation pass
+        val allTasks = kotlinx.coroutines.runBlocking { db.taskDao().getAllTasksDirect() }
+        val incompleteTasks = allTasks.filter { !it.isCompleted }.sortedWith(
+            compareByDescending<com.m4sak1.taskapp.data.Task> { it.isStarred }.thenByDescending { it.id }
+        )
+        
+        val tasksToShow = if (showStarredOnly) incompleteTasks.filter { it.isStarred } else incompleteTasks
+
+        Column(
+            modifier = GlanceModifier
+                .fillMaxSize()
+                .background(Color(colors.surface.value))
+                .padding(16.dp),
+            // Glance modifier for corner radius is usually applied via a drawable or directly in newer Glance versions.
+            // For simplicity, background color covers it. To get rounded corners, we can use an XML drawable.
+            // But standard Glance `background(Color)` with widget host typically handles rounded corners on Android 12+.
+        ) {
+            // Header
+            Row(
+                modifier = GlanceModifier.fillMaxWidth().padding(bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Toggle Filter Button
+                Text(
+                    text = if (showStarredOnly) context.getString(R.string.widget_filter_starred) else context.getString(R.string.widget_filter_all),
+                    style = TextStyle(
+                        color = Color(colors.primary.value),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    modifier = GlanceModifier
+                        .clickable(onClick = actionRunCallback<ToggleFilterAction>())
+                        .padding(8.dp)
+                )
+
+                Spacer(modifier = GlanceModifier.defaultWeight())
+
+                // Add Button
+                Text(
+                    text = "+",
+                    style = TextStyle(
+                        color = Color(colors.primary.value),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    modifier = GlanceModifier.clickable(
+                        onClick = actionStartActivity(
+                            Intent(context, WidgetAddActivity::class.java).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            }
+                        )
+                    ).padding(8.dp)
+                )
+            }
+
+            if (tasksToShow.isEmpty()) {
+                Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = context.getString(R.string.widget_no_tasks),
+                        style = TextStyle(color = Color(colors.onSurface.copy(alpha = 0.5f).value), fontSize = 14.sp)
+                    )
+                }
+            } else {
+                LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
+                    items(tasksToShow) { task ->
+                        Row(
+                            modifier = GlanceModifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .clickable(
+                                    onClick = actionRunCallback<ToggleTaskAction>(
+                                        parameters = actionParametersOf(taskIdKey to task.id)
+                                    )
+                                ),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Star or Circle text
+                            Text(
+                                text = if (task.isStarred) "☆" else "○",
+                                style = TextStyle(
+                                    color = Color(colors.onSurface.value),
+                                    fontSize = 18.sp
+                                ),
+                                modifier = GlanceModifier.padding(end = 8.dp)
+                            )
+                            
+                            Text(
+                                text = task.title,
+                                style = TextStyle(
+                                    color = Color(colors.onSurface.value),
+                                    fontSize = 14.sp
+                                ),
+                                maxLines = 1, // Truncate
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
