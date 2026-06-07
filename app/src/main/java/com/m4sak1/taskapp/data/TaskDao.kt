@@ -17,6 +17,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks")
     suspend fun getAllTasksDirect(): List<Task>
 
+    @Query("SELECT * FROM tasks WHERE id = :taskId LIMIT 1")
+    suspend fun getTaskById(taskId: Int): Task?
+
     @Insert
     suspend fun insert(task: Task)
 
