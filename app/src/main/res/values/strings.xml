@@ -63,4 +63,6 @@
     <string name="notification_reminder_body">Don\'t forget: %1$s</string>
     <string name="filter_all">All ▼</string>
     <string name="filter_starred">Starred ▼</string>
+    <string name="settings_disclaimer">Disclaimer</string>
+    <string name="disclaimer_text">The creator assumes no responsibility for any damage, loss, or trouble caused by the use of this app. Use at your own risk.</string>
 </resources>
