@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.24"
+    id("com.mikepenz.aboutlibraries.plugin")
 }
 
 val versionPropsFile = rootProject.file("version.properties")
@@ -81,6 +82,9 @@ dependencies {
 
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+    // Open Source Licenses (AboutLibraries)
+    implementation("com.mikepenz:aboutlibraries-compose-m3:11.2.2")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

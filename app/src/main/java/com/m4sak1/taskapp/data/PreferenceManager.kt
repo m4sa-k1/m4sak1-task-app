@@ -46,4 +46,8 @@ class PreferenceManager(context: Context) {
     var hideImmediately: Boolean
         get() = prefs.getBoolean("hide_immediately", false)
         set(value) = prefs.edit().putBoolean("hide_immediately", value).apply()
+
+    var disableAnimations: Boolean
+        get() = prefs.getBoolean("disable_animations", false)
+        set(value) = prefs.edit().putBoolean("disable_animations", value).apply()
 }

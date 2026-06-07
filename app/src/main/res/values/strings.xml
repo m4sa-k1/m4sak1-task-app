@@ -50,5 +50,6 @@
     <string name="edit_background">Edit Background</string>
     <string name="blur_on_off">Blur On/Off</string>
     <string name="clear">Clear</string>
-    <string name="hex_color_hint">Hex Color (e.g. #FF5533)</string>
+    <string name="hex_color_hint">Hex Color Code (e.g., #FF5533)</string>
+    <string name="settings_disable_animations">Disable tab animations</string>
 </resources>

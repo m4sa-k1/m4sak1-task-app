@@ -30,6 +30,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _hideImmediately = MutableStateFlow(prefManager.hideImmediately)
     val hideImmediately = _hideImmediately.asStateFlow()
 
+    private val _disableAnimations = MutableStateFlow(prefManager.disableAnimations)
+    val disableAnimations = _disableAnimations.asStateFlow()
+
     private val _fabOffsetX = MutableStateFlow(prefManager.fabOffsetX)
     val fabOffsetX = _fabOffsetX.asStateFlow()
     private val _fabOffsetY = MutableStateFlow(prefManager.fabOffsetY) 
@@ -37,6 +40,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _backgroundPath = MutableStateFlow(prefManager.backgroundPath)
     val backgroundPath = _backgroundPath.asStateFlow()
+
+    // Version counter: increments every time background image is updated (even if path is the same)
+    // This forces bitmap reloading in MainScreen even when the file is overwritten at the same path
+    private val _backgroundVersion = MutableStateFlow(0)
+    val backgroundVersion = _backgroundVersion.asStateFlow()
 
     val allCompletedTasks: Flow<List<Task>> = taskDao.getAllCompletedTasks()
 
@@ -69,6 +77,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun toggleDisableAnimations(disable: Boolean) {
+        _disableAnimations.value = disable
+        prefManager.disableAnimations = disable
+    }
+
     fun updateFabPosition(x: Float, y: Float) {
         _fabOffsetX.value = x
         _fabOffsetY.value = y
@@ -88,6 +101,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     fun updateBackgroundPath(path: String?) {
         _backgroundPath.value = path
         prefManager.backgroundPath = path
+        _backgroundVersion.value += 1  // Force bitmap reload in MainScreen
     }
 
     fun addTask(title: String) {
@@ -148,7 +162,8 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                         hasBackground = _backgroundPath.value != null,
                         fabOffsetX = _fabOffsetX.value,
                         fabOffsetY = _fabOffsetY.value,
-                        hideImmediately = _hideImmediately.value
+                        hideImmediately = _hideImmediately.value,
+                        disableAnimations = _disableAnimations.value
                     )
                 )
                 val json = Json.encodeToString(backupData)
@@ -214,10 +229,12 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                     _fabOffsetX.value = backup.settings.fabOffsetX
                     _fabOffsetY.value = backup.settings.fabOffsetY
                     _hideImmediately.value = backup.settings.hideImmediately
+                    _disableAnimations.value = backup.settings.disableAnimations
                     
                     prefManager.fabOffsetX = backup.settings.fabOffsetX
                     prefManager.fabOffsetY = backup.settings.fabOffsetY
                     prefManager.hideImmediately = backup.settings.hideImmediately
+                    prefManager.disableAnimations = backup.settings.disableAnimations
                     prefManager.themeMode = AppThemeMode.valueOf(backup.settings.themeMode)
                     prefManager.appLanguage = AppLanguage.valueOf(backup.settings.appLanguage)
                     prefManager.accentColor = AppAccentColor.valueOf(backup.settings.accentColor)
@@ -239,6 +256,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                         _backgroundPath.value = null
                         prefManager.backgroundPath = null
                     }
+                    _backgroundVersion.value += 1  // Force bitmap reload after restore
                     
                     onSuccess()
                 }

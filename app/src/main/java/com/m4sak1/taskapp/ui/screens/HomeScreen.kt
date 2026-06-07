@@ -32,10 +32,10 @@ fun HomeScreen(viewModel: TaskViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp)
     ) {
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.statusBarsPadding())
+        Spacer(modifier = Modifier.height(16.dp))
         
         Text(
             text = stringResource(R.string.title_tasks),

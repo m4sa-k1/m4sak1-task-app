@@ -52,4 +52,5 @@
     <string name="blur_on_off">ぼかしのオン/オフ</string>
     <string name="clear">解除</string>
     <string name="hex_color_hint">Hexカラーコード (例: #FF5533)</string>
+    <string name="settings_disable_animations">タブアニメーションを無効化</string>
 </resources>

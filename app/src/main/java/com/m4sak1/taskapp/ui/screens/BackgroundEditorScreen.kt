@@ -81,13 +81,13 @@ fun BackgroundEditorScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Preview Area
+            // Preview Area - matches actual display exactly
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .pointerInput(Unit) {
                         detectTransformGestures { _, pan, zoom, _ ->
-                            scale *= zoom
+                            scale = (scale * zoom).coerceIn(0.5f, 5f)
                             offsetX += pan.x
                             offsetY += pan.y
                         }
@@ -106,9 +106,15 @@ fun BackgroundEditorScreen(
                                 translationY = offsetY
                             )
                             .then(if (blurEnabled) Modifier.blur(15.dp) else Modifier),
-                        contentScale = ContentScale.Fit
+                        contentScale = ContentScale.Crop   // Match actual display (was Fit)
                     )
                 }
+                // Same overlay as MainScreen for accurate preview
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.45f))
+                )
             }
 
             // Controls

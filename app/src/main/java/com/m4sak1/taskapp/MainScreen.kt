@@ -1,8 +1,10 @@
 package com.m4sak1.taskapp
 
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -38,12 +40,15 @@ enum class ScreenTab { Home, Stats, Settings, Licenses, MITLicense, PastTasks, E
 
 @Composable
 fun MainScreen(
-    taskViewModel: TaskViewModel
+    taskViewModel: TaskViewModel,
+    activity: MainActivity
 ) {
     var currentTab by remember { mutableStateOf(ScreenTab.Home) }
     var showAddDialog by remember { mutableStateOf(false) }
     var newTaskTitle by remember { mutableStateOf("") }
     var editingBgUri by remember { mutableStateOf<Uri?>(null) }
+    
+    val disableAnimations by taskViewModel.disableAnimations.collectAsState()
 
     val fabOffsetX by taskViewModel.fabOffsetX.collectAsState()
     val fabOffsetY by taskViewModel.fabOffsetY.collectAsState()
@@ -85,7 +90,8 @@ fun MainScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             // BACKGROUND IMAGE LAYER
             val bgPath by taskViewModel.backgroundPath.collectAsState()
-            val bitmap = remember(bgPath) {
+            val backgroundVersion by taskViewModel.backgroundVersion.collectAsState()
+            val bitmap = remember(bgPath, backgroundVersion) {
                 if (bgPath != null) {
                     try {
                         val file = File(bgPath)
@@ -94,6 +100,9 @@ fun MainScreen(
                 } else null
             }
             
+            // Base background color (for when no image is set)
+            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+
             bitmap?.let {
                 Image(
                     bitmap = it.asImageBitmap(),
@@ -103,9 +112,13 @@ fun MainScreen(
                         .blur(themeController.backgroundBlur.dp),
                     contentScale = ContentScale.Crop
                 )
+            }
+
+            // Uniform overlay across the entire screen (including behind nav bar)
+            if (bitmap != null) {
                 Box(modifier = Modifier.fillMaxSize().background(
-                    if (themeController.isDarkTheme) Color.Black.copy(alpha = 0.3f)
-                    else Color.White.copy(alpha = 0.3f)
+                    if (themeController.isDarkTheme) Color.Black.copy(alpha = 0.45f)
+                    else Color.White.copy(alpha = 0.45f)
                 ))
             }
 
@@ -115,6 +128,7 @@ fun MainScreen(
 
             Scaffold(
                 containerColor = Color.Transparent,
+                contentWindowInsets = WindowInsets(0),
                 snackbarHost = { SnackbarHost(snackbarHostState) },
                 bottomBar = {
                     if (isMainTab) {
@@ -132,18 +146,27 @@ fun MainScreen(
                         AnimatedContent(
                             targetState = currentTab,
                             transitionSpec = {
-                                val duration = 300
-                                val target = targetState
-                                val initial = initialState
-                                if (target.ordinal > initial.ordinal) {
-                                    (slideInHorizontally(animationSpec = tween(duration)) { width -> width } + fadeIn(animationSpec = tween(duration))).togetherWith(
-                                        slideOutHorizontally(animationSpec = tween(duration)) { width -> -width } + fadeOut(animationSpec = tween(duration))
-                                    )
+                                if (disableAnimations) {
+                                    EnterTransition.None togetherWith ExitTransition.None
                                 } else {
-                                    (slideInHorizontally(animationSpec = tween(duration)) { width -> -width } + fadeIn(animationSpec = tween(duration))).togetherWith(
-                                        slideOutHorizontally(animationSpec = tween(duration)) { width -> width } + fadeOut(animationSpec = tween(duration))
-                                    )
-                                }.using(SizeTransform(clip = false))
+                                    val duration = 240
+                                    val easing = FastOutSlowInEasing
+                                    val target = targetState
+                                    val initial = initialState
+                                    if (target.ordinal > initial.ordinal) {
+                                        (slideInHorizontally(animationSpec = tween(duration, easing = easing)) { it } +
+                                         fadeIn(animationSpec = tween(duration, easing = easing))).togetherWith(
+                                            slideOutHorizontally(animationSpec = tween(duration, easing = easing)) { -it } +
+                                            fadeOut(animationSpec = tween(duration / 2))
+                                        )
+                                    } else {
+                                        (slideInHorizontally(animationSpec = tween(duration, easing = easing)) { -it } +
+                                         fadeIn(animationSpec = tween(duration, easing = easing))).togetherWith(
+                                            slideOutHorizontally(animationSpec = tween(duration, easing = easing)) { it } +
+                                            fadeOut(animationSpec = tween(duration / 2))
+                                        )
+                                    }.using(SizeTransform(clip = true))
+                                }
                             },
                             label = "screen_transition"
                         ) { targetTab ->
@@ -159,10 +182,22 @@ fun MainScreen(
                                     onRestore = { importLauncher.launch(arrayOf("application/zip")) },
                                     onPickBackground = { bgLauncher.launch("image/*") }
                                 )
-                                ScreenTab.Licenses -> LicensesScreen(onBack = { currentTab = ScreenTab.Settings })
-                                ScreenTab.MITLicense -> MITLicenseScreen(onBack = { currentTab = ScreenTab.Settings })
-                                ScreenTab.PastTasks -> PastTasksScreen(viewModel = taskViewModel, onBack = { currentTab = ScreenTab.Stats })
-                                ScreenTab.EditHome -> EditHomeScreen(viewModel = taskViewModel, onBack = { currentTab = ScreenTab.Settings })
+                                ScreenTab.Licenses -> {
+                                    BackHandler { currentTab = ScreenTab.Settings }
+                                    LicensesScreen(onBack = { currentTab = ScreenTab.Settings })
+                                }
+                                ScreenTab.MITLicense -> {
+                                    BackHandler { currentTab = ScreenTab.Settings }
+                                    MITLicenseScreen(onBack = { currentTab = ScreenTab.Settings })
+                                }
+                                ScreenTab.PastTasks -> {
+                                    BackHandler { currentTab = ScreenTab.Stats }
+                                    PastTasksScreen(viewModel = taskViewModel, onBack = { currentTab = ScreenTab.Stats })
+                                }
+                                ScreenTab.EditHome -> {
+                                    BackHandler { currentTab = ScreenTab.Settings }
+                                    EditHomeScreen(viewModel = taskViewModel, onBack = { currentTab = ScreenTab.Settings })
+                                }
                             }
                         }
                     }
@@ -190,8 +225,7 @@ fun MainScreen(
                 BackgroundEditorScreen(
                     imageUri = editingBgUri!!,
                     onSave = { scale, tx, ty, blurEnabled ->
-                        val activity = context.findActivity() as? MainActivity
-                        val finalPath = activity?.saveBackgroundImage(editingBgUri!!, scale, tx, ty)
+                        val finalPath = activity.saveBackgroundImage(editingBgUri!!, scale, tx, ty)
                         taskViewModel.updateBackgroundPath(finalPath)
                         themeController.setBackgroundBlur(if (blurEnabled) 15f else 0f)
                         editingBgUri = null
