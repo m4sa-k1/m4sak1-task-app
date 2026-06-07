@@ -65,7 +65,8 @@ fun FloatingBottomNav(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(bottom = 32.dp),
+            .navigationBarsPadding()
+            .padding(bottom = 16.dp),
         contentAlignment = Alignment.Center
     ) {
         Box(

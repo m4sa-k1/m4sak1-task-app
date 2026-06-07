@@ -118,6 +118,14 @@ class MainActivity : ComponentActivity() {
                 activityContext.createConfigurationContext(localizedConfiguration)
             }
 
+            // Apply locale to the Activity's resources as well so that Dialog windows use the correct language
+            SideEffect {
+                activityContext.resources.updateConfiguration(
+                    localizedConfiguration,
+                    activityContext.resources.displayMetrics
+                )
+            }
+
             CompositionLocalProvider(
                 LocalThemeController provides themeController,
                 LocalConfiguration provides localizedConfiguration,
@@ -129,10 +137,11 @@ class MainActivity : ComponentActivity() {
                 TaskAppTheme(darkTheme = isDarkTheme, accentColor = effectiveColor) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
+                        color = Color.Transparent
                     ) {
                         MainScreen(
-                            taskViewModel = taskViewModel
+                            taskViewModel = taskViewModel,
+                            activity = activityContext
                         )
                     }
                 }

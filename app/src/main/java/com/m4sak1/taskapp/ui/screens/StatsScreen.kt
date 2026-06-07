@@ -22,10 +22,10 @@ fun StatsScreen(viewModel: TaskViewModel, onShowPastTasks: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp)
     ) {
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.statusBarsPadding())
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(R.string.tab_stats),
             fontSize = 48.sp,

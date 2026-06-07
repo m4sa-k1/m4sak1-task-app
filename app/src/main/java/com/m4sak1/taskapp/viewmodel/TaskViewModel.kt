@@ -30,6 +30,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _hideImmediately = MutableStateFlow(prefManager.hideImmediately)
     val hideImmediately = _hideImmediately.asStateFlow()
 
+    private val _disableAnimations = MutableStateFlow(prefManager.disableAnimations)
+    val disableAnimations = _disableAnimations.asStateFlow()
+
     private val _fabOffsetX = MutableStateFlow(prefManager.fabOffsetX)
     val fabOffsetX = _fabOffsetX.asStateFlow()
     private val _fabOffsetY = MutableStateFlow(prefManager.fabOffsetY) 
@@ -38,13 +41,23 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _backgroundPath = MutableStateFlow(prefManager.backgroundPath)
     val backgroundPath = _backgroundPath.asStateFlow()
 
+    // Version counter: increments every time background image is updated (even if path is the same)
+    // This forces bitmap reloading in MainScreen even when the file is overwritten at the same path
+    private val _backgroundVersion = MutableStateFlow(0)
+    val backgroundVersion = _backgroundVersion.asStateFlow()
+
     val allCompletedTasks: Flow<List<Task>> = taskDao.getAllCompletedTasks()
 
+    // CRITICAL FIX: Ensure no duplicate keys by filtering out tasks that are already in recentlyCompleted
     val uiTasks: StateFlow<List<Task>> = combine(
         taskDao.getIncompleteTasks(),
         _recentlyCompletedTasks
     ) { incomplete, recentlyCompleted ->
-        (incomplete + recentlyCompleted).sortedByDescending { it.id }
+        // Filter out any incomplete tasks from DB that might somehow also be in the memory list
+        // (Though usually they shouldn't overlap if DB is updated first)
+        val recentlyIds = recentlyCompleted.map { it.id }.toSet()
+        val filteredIncomplete = incomplete.filter { it.id !in recentlyIds }
+        (filteredIncomplete + recentlyCompleted).sortedByDescending { it.id }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val totalCompletedCount = allCompletedTasks.map { it.size }
@@ -62,6 +75,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         if (hide) {
             _recentlyCompletedTasks.value = emptyList()
         }
+    }
+
+    fun toggleDisableAnimations(disable: Boolean) {
+        _disableAnimations.value = disable
+        prefManager.disableAnimations = disable
     }
 
     fun updateFabPosition(x: Float, y: Float) {
@@ -83,6 +101,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     fun updateBackgroundPath(path: String?) {
         _backgroundPath.value = path
         prefManager.backgroundPath = path
+        _backgroundVersion.value += 1  // Force bitmap reload in MainScreen
     }
 
     fun addTask(title: String) {
@@ -100,11 +119,15 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         )
 
         viewModelScope.launch {
+            // 1. Update DB immediately
             taskDao.update(updatedTask)
 
             if (newStatus) {
+                // 2. Handle memory list for 15m delay
                 if (!_hideImmediately.value) {
                     val currentList = _recentlyCompletedTasks.value.toMutableList()
+                    // Remove old version if exists (safety)
+                    currentList.removeAll { it.id == task.id }
                     currentList.add(updatedTask)
                     _recentlyCompletedTasks.value = currentList
 
@@ -115,6 +138,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                     _recentlyCompletedTasks.value = listAfterDelay
                 }
             } else {
+                // 3. Reverting completion: remove from memory list so it appears in DB incomplete flow
                 val currentList = _recentlyCompletedTasks.value.toMutableList()
                 currentList.removeAll { it.id == updatedTask.id }
                 _recentlyCompletedTasks.value = currentList
@@ -138,7 +162,8 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                         hasBackground = _backgroundPath.value != null,
                         fabOffsetX = _fabOffsetX.value,
                         fabOffsetY = _fabOffsetY.value,
-                        hideImmediately = _hideImmediately.value
+                        hideImmediately = _hideImmediately.value,
+                        disableAnimations = _disableAnimations.value
                     )
                 )
                 val json = Json.encodeToString(backupData)
@@ -204,11 +229,12 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                     _fabOffsetX.value = backup.settings.fabOffsetX
                     _fabOffsetY.value = backup.settings.fabOffsetY
                     _hideImmediately.value = backup.settings.hideImmediately
+                    _disableAnimations.value = backup.settings.disableAnimations
                     
-                    // Persist to prefs
                     prefManager.fabOffsetX = backup.settings.fabOffsetX
                     prefManager.fabOffsetY = backup.settings.fabOffsetY
                     prefManager.hideImmediately = backup.settings.hideImmediately
+                    prefManager.disableAnimations = backup.settings.disableAnimations
                     prefManager.themeMode = AppThemeMode.valueOf(backup.settings.themeMode)
                     prefManager.appLanguage = AppLanguage.valueOf(backup.settings.appLanguage)
                     prefManager.accentColor = AppAccentColor.valueOf(backup.settings.accentColor)
@@ -230,6 +256,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                         _backgroundPath.value = null
                         prefManager.backgroundPath = null
                     }
+                    _backgroundVersion.value += 1  // Force bitmap reload after restore
                     
                     onSuccess()
                 }

@@ -19,8 +19,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import com.m4sak1.taskapp.BuildConfig
 import com.m4sak1.taskapp.MainActivity
 import com.m4sak1.taskapp.R
+import com.m4sak1.taskapp.findActivity
 import com.m4sak1.taskapp.ui.components.CustomConfirmDialog
 import com.m4sak1.taskapp.ui.theme.AppAccentColor
 import com.m4sak1.taskapp.ui.theme.AppLanguage
@@ -45,15 +47,16 @@ fun SettingsScreen(
     var showAboutDialog by remember { mutableStateOf(false) }
     var showRestoreConfirm by remember { mutableStateOf(false) }
     val hideImmediately by viewModel.hideImmediately.collectAsState()
+    val disableAnimations by viewModel.disableAnimations.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f))
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
     ) {
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.statusBarsPadding())
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(R.string.tab_settings),
             fontSize = 48.sp,
@@ -81,6 +84,16 @@ fun SettingsScreen(
                     Switch(
                         checked = hideImmediately,
                         onCheckedChange = { viewModel.toggleHideImmediately(it) }
+                    )
+                }
+            )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            SettingsItem(
+                title = stringResource(R.string.settings_disable_animations),
+                trailingContent = {
+                    Switch(
+                        checked = disableAnimations,
+                        onCheckedChange = { viewModel.toggleDisableAnimations(it) }
                     )
                 }
             )
@@ -140,7 +153,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         SettingsSection(title = stringResource(R.string.settings_app_info)) {
-            SettingsItem(title = stringResource(R.string.settings_version), contentText = "1.0.0")
+            SettingsItem(title = stringResource(R.string.settings_version), contentText = BuildConfig.VERSION_NAME)
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
                 title = stringResource(R.string.settings_licenses),
