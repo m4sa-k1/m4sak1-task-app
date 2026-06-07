@@ -154,6 +154,16 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun deleteTasks(tasks: List<Task>) {
+        viewModelScope.launch {
+            taskDao.deleteTasks(tasks)
+            val deletedIds = tasks.map { it.id }.toSet()
+            val currentList = _recentlyCompletedTasks.value.toMutableList()
+            currentList.removeAll { deletedIds.contains(it.id) }
+            _recentlyCompletedTasks.value = currentList
+        }
+    }
+
     // ZIP BACKUP & RESTORE
     fun exportBackupZip(context: Context, uri: Uri, themeController: ThemeController, onSuccess: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {

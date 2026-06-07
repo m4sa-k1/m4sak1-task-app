@@ -24,7 +24,8 @@
     <string name="settings_about">About</string>
     <string name="settings_immediate_hide">Hide completed tasks now</string>
     <string name="settings_immediate_hide_desc">Off: Hide after 15m or app close</string>
-    <string name="confirm">Confirm</string>
+    <string name="confirm">Continue</string>
+    <string name="delete">Delete</string>
     <string name="settings_edit_home">Edit Home Screen</string>
     <string name="save">Save</string>
     <string name="reset_default">Reset to Default</string>
@@ -35,7 +36,7 @@
     <string name="settings_backup">Backup &amp; Restore</string>
     <string name="settings_export">Backup Data (Export ZIP)</string>
     <string name="settings_import">Restore Data (Import ZIP)</string>
-    <string name="restore_warning">WARNING: Restoring data will overwrite all your current tasks and settings. This action cannot be undone. Are you sure you want to proceed?</string>
+    <string name="restore_warning">Restoring a backup will overwrite all current tasks and settings. This action cannot be undone. Are you sure you want to continue?</string>
     <string name="ok">OK</string>
     <string name="maintained_by">Maintained by m4sak1</string>
     <string name="system_default">System Default</string>
