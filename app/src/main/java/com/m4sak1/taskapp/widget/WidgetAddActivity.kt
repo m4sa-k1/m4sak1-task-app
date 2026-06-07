@@ -43,12 +43,10 @@ class WidgetAddActivity : ComponentActivity() {
                         Button(
                             onClick = {
                                 if (newTaskTitle.isNotBlank()) {
-                                    taskViewModel.addTask(newTaskTitle, isTaskStarred)
-                                    // Trigger widget update
                                     scope.launch {
-                                        TaskAppWidget().updateAll(applicationContext)
+                                        taskViewModel.addTask(newTaskTitle, isTaskStarred)?.join()
+                                        finish()
                                     }
-                                    finish()
                                 }
                             },
                             shape = CircleShape,
