@@ -27,6 +27,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -327,6 +329,12 @@ fun MainScreen(
             val enterToAdd by taskViewModel.enterToAdd.collectAsState()
             if (showAddDialog) {
                 var isTaskStarred by remember { mutableStateOf(false) }
+                val focusRequester = remember { FocusRequester() }
+                
+                LaunchedEffect(Unit) {
+                    focusRequester.requestFocus()
+                }
+                
                 AlertDialog(
                     onDismissRequest = { showAddDialog = false },
                     confirmButton = {
@@ -354,7 +362,9 @@ fun MainScreen(
                         OutlinedTextField(
                             value = newTaskTitle,
                             onValueChange = { newTaskTitle = it },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequester),
                             placeholder = { Text(stringResource(R.string.task_placeholder)) },
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),

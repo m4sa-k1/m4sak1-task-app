@@ -14,6 +14,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.glance.appwidget.updateAll
 import com.m4sak1.taskapp.R
 import com.m4sak1.taskapp.ui.theme.TaskAppTheme
@@ -36,6 +38,11 @@ class WidgetAddActivity : ComponentActivity() {
                 val scope = rememberCoroutineScope()
                 var newTaskTitle by remember { mutableStateOf("") }
                 var isTaskStarred by remember { mutableStateOf(false) }
+                val focusRequester = remember { FocusRequester() }
+                
+                LaunchedEffect(Unit) {
+                    focusRequester.requestFocus()
+                }
 
                 AlertDialog(
                     onDismissRequest = { finish() },
@@ -65,7 +72,9 @@ class WidgetAddActivity : ComponentActivity() {
                         OutlinedTextField(
                             value = newTaskTitle,
                             onValueChange = { newTaskTitle = it },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequester),
                             placeholder = { Text(stringResource(R.string.task_placeholder)) },
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),

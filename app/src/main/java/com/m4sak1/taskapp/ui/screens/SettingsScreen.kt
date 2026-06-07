@@ -51,6 +51,7 @@ fun SettingsScreen(
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showAccentDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
+    var showDisclaimerDialog by remember { mutableStateOf(false) }
     var showRestoreConfirm by remember { mutableStateOf(false) }
     val hideImmediately by viewModel.hideImmediately.collectAsState()
     val disableAnimations by viewModel.disableAnimations.collectAsState()
@@ -235,6 +236,11 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_about),
                 modifier = Modifier.clickable { showAboutDialog = true }
             )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            SettingsItem(
+                title = stringResource(R.string.settings_disclaimer),
+                modifier = Modifier.clickable { showDisclaimerDialog = true }
+            )
         }
 
         Spacer(modifier = Modifier.height(48.dp))
@@ -378,6 +384,19 @@ fun SettingsScreen(
                 Text(stringResource(R.string.maintained_by))
             }
         }
+    }
+
+    if (showDisclaimerDialog) {
+        AlertDialog(
+            onDismissRequest = { showDisclaimerDialog = false },
+            title = { Text(text = stringResource(R.string.settings_disclaimer), fontWeight = FontWeight.Bold) },
+            text = { Text(text = stringResource(R.string.disclaimer_text)) },
+            confirmButton = {
+                TextButton(onClick = { showDisclaimerDialog = false }) {
+                    Text(text = "OK")
+                }
+            }
+        )
     }
 
     if (showRestoreConfirm) {

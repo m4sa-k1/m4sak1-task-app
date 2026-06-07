@@ -64,4 +64,6 @@
     <string name="notification_reminder_body">「%1$s」をお忘れなく！</string>
     <string name="filter_all">全て ▼</string>
     <string name="filter_starred">スター付き ▼</string>
+    <string name="settings_disclaimer">免責事項</string>
+    <string name="disclaimer_text">本アプリの利用により生じた損害やトラブルについて、作者は一切の責任を負いません。自己責任でご利用ください。</string>
 </resources>

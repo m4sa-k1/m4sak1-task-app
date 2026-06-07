@@ -117,7 +117,8 @@ fun TaskItem(task: Task, onToggle: () -> Unit) {
                         if (task.isCompleted) {
                             Modifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f))
                         } else {
-                            Modifier.border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape)
+                            val borderThickness = if (task.isStarred) 1.5.dp else 1.dp
+                            Modifier.border(borderThickness, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape)
                         }
                     )
             )

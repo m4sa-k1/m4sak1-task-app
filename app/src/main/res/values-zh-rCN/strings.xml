@@ -64,4 +64,6 @@
     <string name="notification_reminder_body">别忘了：%1$s</string>
     <string name="filter_all">全部 ▼</string>
     <string name="filter_starred">已加星标 ▼</string>
+    <string name="settings_disclaimer">免责声明</string>
+    <string name="disclaimer_text">作者对使用本应用造成的任何损坏、丢失或麻烦不承担任何责任。请自行承担风险。</string>
 </resources>
