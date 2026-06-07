@@ -41,7 +41,12 @@ class WidgetAddActivity : ComponentActivity() {
                 val focusRequester = remember { FocusRequester() }
                 
                 LaunchedEffect(Unit) {
-                    focusRequester.requestFocus()
+                    kotlinx.coroutines.delay(100)
+                    try {
+                        focusRequester.requestFocus()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
 
                 AlertDialog(

@@ -126,9 +126,9 @@ class TaskAppWidget : GlanceAppWidget() {
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
                     ),
-                    modifier = GlanceModifier.clickable(
+                    modifier = GlanceModifier.padding(8.dp).clickable(
                         onClick = actionStartActivity<WidgetAddActivity>()
-                    ).padding(8.dp)
+                    )
                 )
             }
 
