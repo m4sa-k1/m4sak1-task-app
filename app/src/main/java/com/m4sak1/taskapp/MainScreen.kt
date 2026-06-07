@@ -165,11 +165,6 @@ fun MainScreen(
                                     if (disableAnimations) {
                                         pagerState.scrollToPage(targetPage)
                                     } else {
-                                        if (abs(pagerState.currentPage - targetPage) > 1) {
-                                            // Snap to adjacent page to avoid scrolling through middle page
-                                            val adjacentPage = if (targetPage > pagerState.currentPage) targetPage - 1 else targetPage + 1
-                                            pagerState.scrollToPage(adjacentPage)
-                                        }
                                         pagerState.animateScrollToPage(targetPage)
                                     }
                                 }
@@ -177,9 +172,9 @@ fun MainScreen(
                         }
 
                         // Sync currentTab with pager when user swipes
-                        LaunchedEffect(pagerState.currentPage) {
-                            if (isMainTab) {
-                                val newTab = when (pagerState.currentPage) {
+                        LaunchedEffect(pagerState.targetPage, pagerState.isScrollInProgress) {
+                            if (isMainTab && pagerState.isScrollInProgress) {
+                                val newTab = when (pagerState.targetPage) {
                                     0 -> ScreenTab.Home
                                     1 -> ScreenTab.Stats
                                     2 -> ScreenTab.Settings
