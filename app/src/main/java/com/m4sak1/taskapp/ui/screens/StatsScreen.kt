@@ -60,6 +60,8 @@ fun StatsScreen(viewModel: TaskViewModel, onShowPastTasks: () -> Unit) {
         ) {
             Text(stringResource(R.string.past_tasks), modifier = Modifier.padding(vertical = 8.dp))
         }
+        
+        Spacer(modifier = Modifier.height(120.dp))
     }
 }
 

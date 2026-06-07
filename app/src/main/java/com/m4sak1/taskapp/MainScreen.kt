@@ -135,20 +135,12 @@ fun MainScreen(
             Scaffold(
                 containerColor = Color.Transparent,
                 contentWindowInsets = WindowInsets(0),
-                snackbarHost = { SnackbarHost(snackbarHostState) },
-                bottomBar = {
-                    if (isMainTab) {
-                        FloatingBottomNav(
-                            currentTab = currentTab,
-                            onTabSelected = { currentTab = it }
-                        )
-                    }
-                }
+                snackbarHost = { SnackbarHost(snackbarHostState) }
             ) { paddingValues ->
                 // To solve the FAB position mismatch, we wrap everything in an outer box 
                 // and subtract padding manually only for the content, NOT the FAB.
                 Box(modifier = Modifier.fillMaxSize()) {
-                    Box(modifier = Modifier.fillMaxSize().padding(if (isMainTab) paddingValues else PaddingValues(0.dp))) {
+                    Box(modifier = Modifier.fillMaxSize()) {
                         @OptIn(ExperimentalFoundationApi::class)
                         val pagerState = rememberPagerState { 3 }
                         
@@ -222,23 +214,31 @@ fun MainScreen(
                         ) { target ->
                             when (target) {
                                 "MainPager" -> {
-                                    @OptIn(ExperimentalFoundationApi::class)
-                                    HorizontalPager(
-                                        state = pagerState, 
-                                        modifier = Modifier.fillMaxSize(),
-                                        beyondBoundsPageCount = 2
-                                    ) { page ->
-                                        when (page) {
-                                            0 -> HomeScreen(taskViewModel)
-                                            1 -> StatsScreen(viewModel = taskViewModel, onShowPastTasks = { currentTab = ScreenTab.PastTasks })
-                                            2 -> SettingsScreen(
-                                                viewModel = taskViewModel, 
-                                                onShowLicenses = { currentTab = ScreenTab.Licenses },
-                                                onShowMITLicense = { currentTab = ScreenTab.MITLicense },
-                                                onShowEditHome = { currentTab = ScreenTab.EditHome },
-                                                onBackup = { exportLauncher.launch("m4task_backup.zip") },
-                                                onRestore = { importLauncher.launch(arrayOf("application/zip")) },
-                                                onPickBackground = { bgLauncher.launch("image/*") }
+                                    Box(modifier = Modifier.fillMaxSize()) {
+                                        @OptIn(ExperimentalFoundationApi::class)
+                                        HorizontalPager(
+                                            state = pagerState, 
+                                            modifier = Modifier.fillMaxSize(),
+                                            beyondBoundsPageCount = 2
+                                        ) { page ->
+                                            when (page) {
+                                                0 -> HomeScreen(taskViewModel)
+                                                1 -> StatsScreen(viewModel = taskViewModel, onShowPastTasks = { currentTab = ScreenTab.PastTasks })
+                                                2 -> SettingsScreen(
+                                                    viewModel = taskViewModel, 
+                                                    onShowLicenses = { currentTab = ScreenTab.Licenses },
+                                                    onShowMITLicense = { currentTab = ScreenTab.MITLicense },
+                                                    onShowEditHome = { currentTab = ScreenTab.EditHome },
+                                                    onBackup = { exportLauncher.launch("m4task_backup.zip") },
+                                                    onRestore = { importLauncher.launch(arrayOf("application/zip")) },
+                                                    onPickBackground = { bgLauncher.launch("image/*") }
+                                                )
+                                            }
+                                        }
+                                        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+                                            FloatingBottomNav(
+                                                currentTab = currentTab,
+                                                onTabSelected = { currentTab = it }
                                             )
                                         }
                                     }

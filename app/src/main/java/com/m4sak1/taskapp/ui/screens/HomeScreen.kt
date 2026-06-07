@@ -51,7 +51,8 @@ fun HomeScreen(viewModel: TaskViewModel) {
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 120.dp)
             ) {
                 items(tasks, key = { it.id }) { task ->
                     Box(modifier = Modifier.animateItemPlacement()) {
