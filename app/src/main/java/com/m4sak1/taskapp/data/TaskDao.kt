@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {
-    @Query("SELECT * FROM tasks WHERE isCompleted = 0 ORDER BY id DESC")
+    @Query("SELECT * FROM tasks WHERE isCompleted = 0 ORDER BY isStarred DESC, id DESC")
     fun getIncompleteTasks(): Flow<List<Task>>
 
-    @Query("SELECT * FROM tasks WHERE isCompleted = 1 ORDER BY completedAt DESC")
+    @Query("SELECT * FROM tasks WHERE isCompleted = 1 ORDER BY isStarred DESC, completedAt DESC")
     fun getAllCompletedTasks(): Flow<List<Task>>
 
     @Query("SELECT * FROM tasks")

@@ -125,10 +125,10 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         _backgroundVersion.value += 1  // Force bitmap reload in MainScreen
     }
 
-    fun addTask(title: String) {
+    fun addTask(title: String, isStarred: Boolean = false) {
         if (title.isBlank()) return
         viewModelScope.launch {
-            taskDao.insert(Task(title = title))
+            taskDao.insert(Task(title = title, isStarred = isStarred))
             
             if (_notificationsEnabled.value) {
                 val inputData = Data.Builder()

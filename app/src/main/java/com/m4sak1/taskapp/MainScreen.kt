@@ -297,13 +297,14 @@ fun MainScreen(
 
             val enterToAdd by taskViewModel.enterToAdd.collectAsState()
             if (showAddDialog) {
+                var isTaskStarred by remember { mutableStateOf(false) }
                 AlertDialog(
                     onDismissRequest = { showAddDialog = false },
                     confirmButton = {
                         Button(
                             onClick = {
                                 if (newTaskTitle.isNotBlank()) {
-                                    taskViewModel.addTask(newTaskTitle)
+                                    taskViewModel.addTask(newTaskTitle, isTaskStarred)
                                     newTaskTitle = ""
                                     showAddDialog = false
                                 }
@@ -328,13 +329,22 @@ fun MainScreen(
                             placeholder = { Text(stringResource(R.string.task_placeholder)) },
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),
+                            trailingIcon = {
+                                IconButton(onClick = { isTaskStarred = !isTaskStarred }) {
+                                    Text(
+                                        text = if (isTaskStarred) "★" else "☆",
+                                        fontSize = 24.sp,
+                                        color = if (isTaskStarred) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                    )
+                                }
+                            },
                             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                                 imeAction = if (enterToAdd) androidx.compose.ui.text.input.ImeAction.Done else androidx.compose.ui.text.input.ImeAction.Default
                             ),
                             keyboardActions = androidx.compose.foundation.text.KeyboardActions(
                                 onDone = {
                                     if (enterToAdd && newTaskTitle.isNotBlank()) {
-                                        taskViewModel.addTask(newTaskTitle)
+                                        taskViewModel.addTask(newTaskTitle, isTaskStarred)
                                         newTaskTitle = ""
                                         showAddDialog = false
                                     }

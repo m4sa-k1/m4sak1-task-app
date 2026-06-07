@@ -9,6 +9,7 @@ data class Task(
     val id: Int = 0,
     val title: String,
     val isCompleted: Boolean = false,
+    val isStarred: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
     val completedAt: Long? = null
 )

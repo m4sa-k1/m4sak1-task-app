@@ -79,18 +79,31 @@ fun TaskItem(task: Task, onToggle: () -> Unit) {
                 .padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .then(
-                        if (task.isCompleted) {
-                            Modifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f))
-                        } else {
-                            Modifier.border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), CircleShape)
-                        }
+            if (task.isStarred) {
+                Box(
+                    modifier = Modifier.size(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (task.isCompleted) "★" else "☆",
+                        fontSize = 20.sp,
+                        color = if (task.isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f) else MaterialTheme.colorScheme.onSurface
                     )
-            )
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .then(
+                            if (task.isCompleted) {
+                                Modifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f))
+                            } else {
+                                Modifier.border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), CircleShape)
+                            }
+                        )
+                )
+            }
             
             Spacer(modifier = Modifier.width(16.dp))
             
