@@ -44,8 +44,7 @@ class TaskAppWidget : GlanceAppWidget() {
                     (context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES))
         
         val accentColorEnum = prefManager.accentColor
-        val customAccentColorStr = prefManager.customAccentColor
-        val customColor = try { Color(android.graphics.Color.parseColor(customAccentColorStr)) } catch(e: Exception) { Color.Unspecified }
+        val customColor = try { Color(prefManager.customAccentColor) } catch(e: Exception) { Color.Unspecified }
         val effectiveColor = if (accentColorEnum == AppAccentColor.Custom) customColor else accentColorEnum.color
         val colors = getAppColorScheme(isDark, effectiveColor)
         
