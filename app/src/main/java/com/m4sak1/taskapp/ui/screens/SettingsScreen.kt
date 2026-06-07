@@ -19,8 +19,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import com.m4sak1.taskapp.BuildConfig
 import com.m4sak1.taskapp.MainActivity
 import com.m4sak1.taskapp.R
+import com.m4sak1.taskapp.findActivity
 import com.m4sak1.taskapp.ui.components.CustomConfirmDialog
 import com.m4sak1.taskapp.ui.theme.AppAccentColor
 import com.m4sak1.taskapp.ui.theme.AppLanguage
@@ -140,7 +142,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         SettingsSection(title = stringResource(R.string.settings_app_info)) {
-            SettingsItem(title = stringResource(R.string.settings_version), contentText = "1.0.0")
+            SettingsItem(title = stringResource(R.string.settings_version), contentText = BuildConfig.VERSION_NAME)
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
                 title = stringResource(R.string.settings_licenses),
