@@ -1,5 +1,11 @@
 package com.m4sak1.taskapp.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -144,6 +150,54 @@ fun SettingsScreen(
             SettingsItem(
                 title = stringResource(R.string.settings_edit_home),
                 modifier = Modifier.clickable { onShowEditHome() }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        val notificationsEnabled by viewModel.notificationsEnabled.collectAsState()
+        val context = LocalContext.current
+        val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                viewModel.setNotificationsEnabled(true)
+            } else {
+                viewModel.setNotificationsEnabled(false)
+            }
+        }
+
+        SettingsSection(title = stringResource(R.string.settings_notifications)) {
+            SettingsItem(
+                title = stringResource(R.string.settings_notifications_enable),
+                trailingContent = {
+                    Switch(
+                        checked = notificationsEnabled,
+                        onCheckedChange = { checked ->
+                            if (checked) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    val permissionStatus = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                                    if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
+                                        viewModel.setNotificationsEnabled(true)
+                                    } else {
+                                        permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    }
+                                } else {
+                                    viewModel.setNotificationsEnabled(true)
+                                }
+                            } else {
+                                viewModel.setNotificationsEnabled(false)
+                            }
+                        }
+                    )
+                }
+            )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            SettingsItem(
+                title = stringResource(R.string.settings_notifications_test),
+                modifier = Modifier.clickable { 
+                    if (notificationsEnabled) {
+                        viewModel.sendTestNotification()
+                    }
+                }
             )
         }
 

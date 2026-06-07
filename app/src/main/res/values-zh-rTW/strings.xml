@@ -54,5 +54,12 @@
     <string name="clear">清除</string>
     <string name="hex_color_hint">Hex 顏色代碼 (例如: #FF5533)</string>
     <string name="settings_disable_animations">停用標籤頁動畫</string>
-    <string name="settings_enter_to_add">按 Enter 鍵新增任務</string>
+    <string name="settings_enter_to_add">使用Enter鍵新增任務</string>
+    <string name="settings_notifications">推播通知</string>
+    <string name="settings_notifications_enable">啟用推播通知</string>
+    <string name="settings_notifications_test">傳送測試通知</string>
+    <string name="notification_channel_name">任務提醒</string>
+    <string name="notification_channel_desc">新增任務的提醒</string>
+    <string name="notification_reminder_title">任務提醒</string>
+    <string name="notification_reminder_body">您新增的「%s」已滿1天。</string>
 </resources>

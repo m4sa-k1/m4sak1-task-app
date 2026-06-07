@@ -54,4 +54,11 @@
     <string name="hex_color_hint">Hex Color Code (e.g., #FF5533)</string>
     <string name="settings_disable_animations">Disable tab animations</string>
     <string name="settings_enter_to_add">Add task with Enter key</string>
+    <string name="settings_notifications">Push Notifications</string>
+    <string name="settings_notifications_enable">Enable Push Notifications</string>
+    <string name="settings_notifications_test">Send Test Notification</string>
+    <string name="notification_channel_name">Task Reminders</string>
+    <string name="notification_channel_desc">Reminders for added tasks</string>
+    <string name="notification_reminder_title">Task Reminder</string>
+    <string name="notification_reminder_body">\"%s\" was added 1 day ago.</string>
 </resources>

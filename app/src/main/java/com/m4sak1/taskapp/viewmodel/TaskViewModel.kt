@@ -20,6 +20,11 @@ import java.io.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import java.util.concurrent.TimeUnit
+import com.m4sak1.taskapp.worker.NotificationWorker
 
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val taskDao = AppDatabase.getDatabase(application).taskDao()
@@ -35,6 +40,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _enterToAdd = MutableStateFlow(prefManager.enterToAdd)
     val enterToAdd = _enterToAdd.asStateFlow()
+
+    private val _notificationsEnabled = MutableStateFlow(prefManager.notificationsEnabled)
+    val notificationsEnabled = _notificationsEnabled.asStateFlow()
 
     private val _fabOffsetX = MutableStateFlow(prefManager.fabOffsetX)
     val fabOffsetX = _fabOffsetX.asStateFlow()
@@ -90,6 +98,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         prefManager.enterToAdd = enabled
     }
 
+    fun setNotificationsEnabled(enabled: Boolean) {
+        _notificationsEnabled.value = enabled
+        prefManager.notificationsEnabled = enabled
+    }
+
     fun updateFabPosition(x: Float, y: Float) {
         _fabOffsetX.value = x
         _fabOffsetY.value = y
@@ -116,7 +129,32 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         if (title.isBlank()) return
         viewModelScope.launch {
             taskDao.insert(Task(title = title))
+            
+            if (_notificationsEnabled.value) {
+                val inputData = Data.Builder()
+                    .putString("task_title", title)
+                    .build()
+                
+                val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+                    .setInitialDelay(1, TimeUnit.DAYS)
+                    .setInputData(inputData)
+                    .build()
+                    
+                WorkManager.getInstance(getApplication()).enqueue(workRequest)
+            }
         }
+    }
+
+    fun sendTestNotification() {
+        val inputData = Data.Builder()
+            .putString("task_title", "Test Task")
+            .build()
+            
+        val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+            .setInputData(inputData)
+            .build()
+            
+        WorkManager.getInstance(getApplication()).enqueue(workRequest)
     }
 
     fun toggleTaskCompletion(task: Task) {

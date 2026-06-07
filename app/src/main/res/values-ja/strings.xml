@@ -54,5 +54,12 @@
     <string name="clear">クリア</string>
     <string name="hex_color_hint">Hex カラーコード (例: #FF5533)</string>
     <string name="settings_disable_animations">タブアニメーションを無効化</string>
-    <string name="settings_enter_to_add">Enterキーでタスクを追加</string>
+    <string name="settings_enter_to_add">エンターキーでタスクを追加</string>
+    <string name="settings_notifications">プッシュ通知</string>
+    <string name="settings_notifications_enable">プッシュ通知を有効にする</string>
+    <string name="settings_notifications_test">テスト通知を送信</string>
+    <string name="notification_channel_name">タスクのリマインダー</string>
+    <string name="notification_channel_desc">追加したタスクのリマインダー</string>
+    <string name="notification_reminder_title">タスクのリマインダー</string>
+    <string name="notification_reminder_body">「%s」を追加してから1日が経過しました。</string>
 </resources>

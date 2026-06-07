@@ -54,4 +54,8 @@ class PreferenceManager(context: Context) {
     var enterToAdd: Boolean
         get() = prefs.getBoolean("enter_to_add", true)
         set(value) = prefs.edit().putBoolean("enter_to_add", value).apply()
+
+    var notificationsEnabled: Boolean
+        get() = prefs.getBoolean("notifications_enabled", true)
+        set(value) = prefs.edit().putBoolean("notifications_enabled", value).apply()
 }
