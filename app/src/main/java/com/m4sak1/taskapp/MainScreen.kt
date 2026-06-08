@@ -38,8 +38,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.m4sak1.taskapp.ui.components.FloatingBottomNav
-import com.m4sak1.taskapp.ui.components.CustomAddDialog
+import com.m4sak1.taskapp.BuildConfig
+import com.m4sak1.taskapp.ui.components.*
 import com.m4sak1.taskapp.ui.screens.*
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
@@ -81,7 +81,10 @@ fun MainScreen(
     
     LaunchedEffect(latestRelease, releaseNotificationsEnabled) {
         if (latestRelease != null && releaseNotificationsEnabled && !hasDismissedReleaseDialog) {
-            showNewReleaseDialog = true
+            val releaseVersion = latestRelease!!.tagName.removePrefix("v")
+            if (releaseVersion != BuildConfig.VERSION_NAME) {
+                showNewReleaseDialog = true
+            }
         }
     }
 
@@ -359,6 +362,17 @@ fun MainScreen(
                 style = addDialogStyle,
                 disableAnimations = disableAnimations
             )
+            if (latestRelease != null) {
+                NewReleaseDialog(
+                    release = latestRelease!!,
+                    visible = showNewReleaseDialog,
+                    onDismissRequest = {
+                        showNewReleaseDialog = false
+                        hasDismissedReleaseDialog = true
+                    },
+                    disableAnimations = disableAnimations
+                )
+            }
         }
     }
 }
