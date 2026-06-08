@@ -19,6 +19,16 @@ class NotificationWorker(
             return Result.success()
         }
 
+        val taskId = inputData.getInt("task_id", -1)
+        if (taskId != -1) {
+            val db = com.m4sak1.taskapp.data.AppDatabase.getDatabase(applicationContext)
+            val task = db.taskDao().getTaskById(taskId)
+            // If the task was deleted or is completed, don't show notification
+            if (task == null || task.isCompleted) {
+                return Result.success()
+            }
+        }
+
         val taskTitle = inputData.getString("task_title") ?: return Result.failure()
         val hour = inputData.getInt("notification_hour", 24)
         

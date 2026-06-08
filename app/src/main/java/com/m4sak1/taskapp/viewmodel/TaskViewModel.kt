@@ -267,7 +267,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             TaskAppWidget.forceUpdate(getApplication())
             val workManager = WorkManager.getInstance(getApplication())
             tasks.forEach { task ->
-                workManager.cancelUniqueWork("task_${task.id}")
+                workManager.cancelAllWorkByTag("task_${task.id}")
             }
             val deletedIds = tasks.map { it.id }.toSet()
             val currentList = _recentlyCompletedTasks.value.toMutableList()
@@ -284,6 +284,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             val inputData = Data.Builder()
                 .putString("task_title", title)
                 .putInt("notification_hour", hours)
+                .putInt("task_id", taskId)
                 .build()
             
             val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
