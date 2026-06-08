@@ -66,4 +66,5 @@
     <string name="filter_starred">スター付き ▼</string>
     <string name="settings_disclaimer">免責事項</string>
     <string name="disclaimer_text">本アプリの利用により生じた損害やトラブルについて、作者は一切の責任を負いません。自己責任でご利用ください。</string>
+    <string name="settings_glass_mode">ガラスモード</string>
 </resources>

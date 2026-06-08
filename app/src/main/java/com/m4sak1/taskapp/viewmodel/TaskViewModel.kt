@@ -47,6 +47,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _notificationsEnabled = MutableStateFlow(prefManager.notificationsEnabled)
     val notificationsEnabled = _notificationsEnabled.asStateFlow()
 
+    private val _isGlassModeEnabled = MutableStateFlow(prefManager.isGlassModeEnabled)
+    val isGlassModeEnabled = _isGlassModeEnabled.asStateFlow()
+
     private val _hasRequestedNotificationPermission = MutableStateFlow(prefManager.hasRequestedNotificationPermission)
     val hasRequestedNotificationPermission = _hasRequestedNotificationPermission.asStateFlow()
 
@@ -109,6 +112,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     fun setNotificationsEnabled(enabled: Boolean) {
         _notificationsEnabled.value = enabled
         prefManager.notificationsEnabled = enabled
+    }
+
+    fun setGlassModeEnabled(enabled: Boolean) {
+        _isGlassModeEnabled.value = enabled
+        prefManager.isGlassModeEnabled = enabled
     }
 
     fun setHasRequestedNotificationPermission(requested: Boolean) {

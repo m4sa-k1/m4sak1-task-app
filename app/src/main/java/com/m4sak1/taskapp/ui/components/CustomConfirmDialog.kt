@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.m4sak1.taskapp.ui.theme.LocalThemeController
+import androidx.compose.foundation.border
 
 @Composable
 fun CustomConfirmDialog(
@@ -28,17 +30,35 @@ fun CustomConfirmDialog(
     confirmColor: Color = MaterialTheme.colorScheme.primary,
     content: @Composable () -> Unit
 ) {
+    val themeController = LocalThemeController.current
+    val isGlass = themeController.isGlassModeEnabled
+
+    val modifier = if (isGlass) {
+        Modifier
+            .fillMaxWidth(0.85f)
+            .wrapContentHeight()
+            .clip(RoundedCornerShape(28.dp))
+            .background(if (themeController.isDarkTheme) Color.Black.copy(alpha = 0.85f) else Color.White.copy(alpha = 0.9f))
+            .border(
+                1.dp,
+                if (themeController.isDarkTheme) Color.White.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.3f),
+                RoundedCornerShape(28.dp)
+            )
+    } else {
+        Modifier
+            .fillMaxWidth(0.85f)
+            .wrapContentHeight()
+            .clip(RoundedCornerShape(28.dp))
+    }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
-            modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .wrapContentHeight()
-                .clip(RoundedCornerShape(28.dp)),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 6.dp
+            modifier = modifier,
+            color = if (isGlass) Color.Transparent else MaterialTheme.colorScheme.surface,
+            tonalElevation = if (isGlass) 0.dp else 6.dp
         ) {
             Column(
                 modifier = Modifier.padding(24.dp)

@@ -27,6 +27,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import dev.chrisbanes.haze.haze
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -120,23 +121,31 @@ fun MainScreen(
         }
     }
 
+    val hazeState = LocalHazeState.current
+    
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.Transparent
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // BACKGROUND IMAGE LAYER
-            val bgPath by taskViewModel.backgroundPath.collectAsState()
-            val backgroundVersion by taskViewModel.backgroundVersion.collectAsState()
-            val bitmap = remember(bgPath, backgroundVersion) {
-                if (bgPath != null) {
-                    try {
-                        val file = File(bgPath)
-                        if (file.exists()) BitmapFactory.decodeFile(bgPath) else null
-                    } catch (e: Exception) { null }
-                } else null
-            }
-            
+        // BACKGROUND IMAGE LAYER
+        val bgPath by taskViewModel.backgroundPath.collectAsState()
+        val backgroundVersion by taskViewModel.backgroundVersion.collectAsState()
+        val bitmap = remember(bgPath, backgroundVersion) {
+            if (bgPath != null) {
+                try {
+                    val file = File(bgPath)
+                    if (file.exists()) BitmapFactory.decodeFile(bgPath) else null
+                } catch (e: Exception) { null }
+            } else null
+        }
+        
+        val isGlass = themeController.isGlassModeEnabled && bitmap != null && hazeState != null
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(if (isGlass) Modifier.haze(state = hazeState!!) else Modifier)
+        ) {
             // Base background color (for when no image is set)
             Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
 
@@ -152,7 +161,7 @@ fun MainScreen(
             }
 
             // Uniform overlay across the entire screen (including behind nav bar)
-            if (bitmap != null) {
+            if (bitmap != null && !isGlass) {
                 Box(modifier = Modifier.fillMaxSize().background(
                     if (themeController.isDarkTheme) Color.Black.copy(alpha = 0.45f)
                     else Color.White.copy(alpha = 0.45f)

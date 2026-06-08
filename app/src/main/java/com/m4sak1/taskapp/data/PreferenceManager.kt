@@ -62,4 +62,8 @@ class PreferenceManager(context: Context) {
     var hasRequestedNotificationPermission: Boolean
         get() = prefs.getBoolean("has_requested_notification_permission", false)
         set(value) = prefs.edit().putBoolean("has_requested_notification_permission", value).apply()
+
+    var isGlassModeEnabled: Boolean
+        get() = prefs.getBoolean("is_glass_mode_enabled", false)
+        set(value) = prefs.edit().putBoolean("is_glass_mode_enabled", value).apply()
 }
