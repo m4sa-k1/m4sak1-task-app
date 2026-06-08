@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.m4sak1.taskapp.R
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun CustomAddDialog(
     visible: Boolean,

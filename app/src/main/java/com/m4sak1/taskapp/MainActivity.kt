@@ -48,7 +48,6 @@ class MainActivity : ComponentActivity() {
             var customAccentColor by remember { mutableStateOf(Color(prefManager.customAccentColor)) }
             val backgroundPath by taskViewModel.backgroundPath.collectAsState()
             var backgroundBlur by remember { mutableStateOf(prefManager.backgroundBlur) }
-            val isGlassModeEnabled by taskViewModel.isGlassModeEnabled.collectAsState()
 
             val isDarkTheme = when (themeMode) {
                 AppThemeMode.System -> isSystemInDarkTheme()
@@ -85,8 +84,6 @@ class MainActivity : ComponentActivity() {
                         backgroundBlur = it
                         prefManager.backgroundBlur = it
                     },
-                    isGlassModeEnabled = isGlassModeEnabled,
-                    setGlassModeEnabled = { taskViewModel.setGlassModeEnabled(it) },
                     isDarkTheme = isDarkTheme
                 )
             }
