@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import com.m4sak1.taskapp.BuildConfig
@@ -33,7 +34,6 @@ import com.m4sak1.taskapp.ui.components.CustomInfoDialog
 import com.m4sak1.taskapp.ui.theme.AppAccentColor
 import com.m4sak1.taskapp.ui.theme.AppLanguage
 import com.m4sak1.taskapp.ui.theme.AppThemeMode
-import com.m4sak1.taskapp.ui.theme.LocalThemeController
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
 import androidx.compose.foundation.border
@@ -57,6 +57,7 @@ fun SettingsScreen(
     var showDisclaimerDialog by remember { mutableStateOf(false) }
     var showChangelogDialog by remember { mutableStateOf(false) }
     var showRestoreConfirm by remember { mutableStateOf(false) }
+    var showCustomColorDialog by remember { mutableStateOf(false) }
     val hideImmediately by viewModel.hideImmediately.collectAsState()
     val disableAnimations by viewModel.disableAnimations.collectAsState()
     val enterToAdd by viewModel.enterToAdd.collectAsState()
@@ -336,51 +337,73 @@ fun SettingsScreen(
     }
 
     if (showAccentDialog) {
-        var customHex by remember { mutableStateOf("") }
         CustomConfirmDialog(
             title = stringResource(R.string.settings_accent_color),
             onConfirm = { showAccentDialog = false },
             onDismiss = { showAccentDialog = false },
             confirmText = stringResource(R.string.ok)
         ) {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                AppAccentColor.entries.forEach { accent ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                val accents = AppAccentColor.entries
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    accents.take(5).forEach { accent ->
+                        AccentColorCircle(
+                            accent = accent,
+                            isSelected = themeController.accentColor == accent,
+                            onClick = {
                                 themeController.setAccentColor(accent)
                                 if (accent != AppAccentColor.Custom) showAccentDialog = false
                             }
-                            .padding(vertical = 12.dp)
-                    ) {
-                        RadioButton(selected = themeController.accentColor == accent, onClick = null)
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(text = accent.label, color = if (accent == AppAccentColor.Default || accent == AppAccentColor.Custom) MaterialTheme.colorScheme.onSurface else accent.color)
-                        if (accent != AppAccentColor.Default && accent != AppAccentColor.Custom) {
-                            Spacer(modifier = Modifier.weight(1f))
-                            Box(modifier = Modifier.size(24.dp).clip(CircleShape).background(accent.color))
-                        }
+                        )
                     }
                 }
-                if (themeController.accentColor == AppAccentColor.Custom) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = customHex,
-                        onValueChange = { input ->
-                            if (input.length <= 7) {
-                                customHex = input
-                                if (input.startsWith("#") && input.length == 7) {
-                                    try { themeController.setCustomAccentColor(Color(android.graphics.Color.parseColor(input))) } catch (e: Exception) {}
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    accents.drop(5).take(5).forEach { accent ->
+                        AccentColorCircle(
+                            accent = accent,
+                            isSelected = themeController.accentColor == accent,
+                            onClick = {
+                                if (accent == AppAccentColor.Custom) {
+                                    showCustomColorDialog = true
+                                } else {
+                                    themeController.setAccentColor(accent)
+                                    showAccentDialog = false
                                 }
                             }
-                        },
-                        label = { Text(stringResource(R.string.hex_color_hint)) },
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-                        singleLine = true
-                    )
+                        )
+                    }
                 }
+            }
+        }
+    }
+
+    if (showCustomColorDialog) {
+        var customHex by remember { mutableStateOf("") }
+        CustomConfirmDialog(
+            title = "カスタム色",
+            onConfirm = { 
+                try { 
+                    themeController.setCustomAccentColor(Color(android.graphics.Color.parseColor(customHex)))
+                    themeController.setAccentColor(AppAccentColor.Custom)
+                    showCustomColorDialog = false
+                    showAccentDialog = false
+                } catch (e: Exception) {}
+            },
+            onDismiss = { showCustomColorDialog = false },
+            confirmText = stringResource(R.string.ok)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                OutlinedTextField(
+                    value = customHex,
+                    onValueChange = { if (it.length <= 7) customHex = it },
+                    label = { Text("#RRGGBB") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
             }
         }
     }
@@ -524,31 +547,58 @@ fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) 
 @Composable
 fun SettingsItem(
     title: String,
-    contentText: String? = null,
     modifier: Modifier = Modifier,
-    trailingContent: (@Composable () -> Unit)? = null
+    contentText: String? = null,
+    trailingContent: @Composable (() -> Unit)? = null
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Normal
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            if (contentText != null) {
+                Text(
+                    text = contentText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+            }
+        }
         if (trailingContent != null) {
             trailingContent()
-        } else if (contentText != null) {
-            Text(
-                text = contentText,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        }
+    }
+}
+
+@Composable
+fun AccentColorCircle(accent: AppAccentColor, isSelected: Boolean, onClick: () -> Unit) {
+    val modifier = Modifier
+        .size(36.dp)
+        .clip(CircleShape)
+        .clickable { onClick() }
+        .then(
+            if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, CircleShape)
+            else Modifier
+        )
+    
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        if (accent == AppAccentColor.Custom) {
+            val rainbowBrush = Brush.sweepGradient(
+                listOf(Color.Red, Color(0xFFFF9500), Color.Yellow, Color.Green, Color.Blue, Color(0xFF5856D6), Color(0xFFAF52DE), Color.Red)
             )
+            Box(modifier = Modifier.fillMaxSize().background(rainbowBrush))
+        } else if (accent == AppAccentColor.Default) {
+            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)))
+        } else {
+            Box(modifier = Modifier.fillMaxSize().background(accent.color))
         }
     }
 }

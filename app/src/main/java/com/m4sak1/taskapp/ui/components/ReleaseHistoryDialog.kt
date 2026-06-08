@@ -103,9 +103,15 @@ fun ReleaseHistoryDialog(
             } else {
                 val listState = androidx.compose.foundation.lazy.rememberLazyListState()
                 
-                LaunchedEffect(listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index) {
-                    val lastIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-                    if (lastIndex != null && releases != null && lastIndex >= releases!!.size - 2 && hasMore && !isLoading) {
+                val isScrolledToEnd by androidx.compose.runtime.remember {
+                    androidx.compose.runtime.derivedStateOf {
+                        val lastIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                        lastIndex != null && releases != null && lastIndex >= releases!!.size - 2
+                    }
+                }
+                
+                LaunchedEffect(isScrolledToEnd) {
+                    if (isScrolledToEnd && hasMore && !isLoading) {
                         page++
                     }
                 }
