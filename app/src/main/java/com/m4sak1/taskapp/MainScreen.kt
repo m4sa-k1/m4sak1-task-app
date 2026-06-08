@@ -274,7 +274,8 @@ fun MainScreen(
                                         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
                                             FloatingBottomNav(
                                                 currentTab = currentTab,
-                                                onTabSelected = { currentTab = it }
+                                                onTabSelected = { currentTab = it },
+                                                disableAnimations = disableAnimations
                                             )
                                         }
                                     }
@@ -332,6 +333,7 @@ fun MainScreen(
             }
 
             val enterToAdd by taskViewModel.enterToAdd.collectAsState()
+            val addDialogStyle by taskViewModel.addDialogStyle.collectAsState()
             CustomAddDialog(
                 visible = showAddDialog,
                 onDismissRequest = { showAddDialog = false },
@@ -339,7 +341,9 @@ fun MainScreen(
                     taskViewModel.addTask(title, starred)
                     showAddDialog = false
                 },
-                enterToAdd = enterToAdd
+                enterToAdd = enterToAdd,
+                style = addDialogStyle,
+                disableAnimations = disableAnimations
             )
         }
     }

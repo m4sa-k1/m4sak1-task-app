@@ -3,6 +3,7 @@ package com.m4sak1.taskapp.ui.components
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -55,7 +56,8 @@ val BarChartIcon: ImageVector
 fun FloatingBottomNav(
     currentTab: ScreenTab,
     onTabSelected: (ScreenTab) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    disableAnimations: Boolean = false
 ) {
     // Only show Home, Stats, Settings in the bottom nav
     val displayTabs = listOf(ScreenTab.Home, ScreenTab.Stats, ScreenTab.Settings)
@@ -90,7 +92,7 @@ fun FloatingBottomNav(
                 val tabWidth = constraintsScope.maxWidth / displayTabs.size
                 val indicatorOffset by animateDpAsState(
                     targetValue = tabWidth * selectedIndex,
-                    animationSpec = spring(stiffness = Spring.StiffnessLow),
+                    animationSpec = if (disableAnimations) snap() else spring(stiffness = Spring.StiffnessLow),
                     label = "indicatorOffset"
                 )
 

@@ -63,4 +63,9 @@ class PreferenceManager(context: Context) {
         get() = prefs.getBoolean("has_requested_notification_permission", false)
         set(value) = prefs.edit().putBoolean("has_requested_notification_permission", value).apply()
 
+    var addDialogStyle: AppAddDialogStyle
+        get() = AppAddDialogStyle.valueOf(prefs.getString("add_dialog_style", AppAddDialogStyle.Center.name) ?: AppAddDialogStyle.Center.name)
+        set(value) = prefs.edit().putString("add_dialog_style", value.name).apply()
 }
+
+enum class AppAddDialogStyle { Center, BottomSheet }
