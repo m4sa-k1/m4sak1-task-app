@@ -21,6 +21,7 @@
         <activity
             android:name=".widget.WidgetAddActivity"
             android:theme="@style/Theme.TransparentPopup"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false"
             android:excludeFromRecents="true"
             android:taskAffinity="" />
