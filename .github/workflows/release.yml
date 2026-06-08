@@ -66,6 +66,6 @@ jobs:
           tag_name: ${{ env.VERSION_TAG }}
           name: Release ${{ env.NEW_VERSION }}
           files: app/build/outputs/apk/release/app-release.apk
-          generate_release_notes: true
+          body_path: LATEST_RELEASE_NOTES.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
