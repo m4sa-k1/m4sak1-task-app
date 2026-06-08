@@ -53,8 +53,9 @@ fun ReleaseHistoryDialog(
     var hasMore by remember { mutableStateOf(true) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var retryTrigger by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(visible, page) {
+    LaunchedEffect(visible, page, retryTrigger) {
         if (visible && hasMore) {
             if (page == 1) isLoading = true
             errorMessage = null
@@ -68,7 +69,12 @@ fun ReleaseHistoryDialog(
                     if (fetchedReleases.size < 20) hasMore = false
                 }
             } catch (e: Exception) {
-                if (page == 1) errorMessage = "Failed to load release history."
+                val msg = e.message ?: ""
+                errorMessage = if (msg.contains("403")) {
+                    "APIの制限に達したため読み込みに失敗しました。\nしばらく時間をおいてから再試行してください。"
+                } else {
+                    "読み込みに失敗しました。"
+                }
             } finally {
                 isLoading = false
             }
@@ -90,11 +96,20 @@ fun ReleaseHistoryDialog(
             if (isLoading && page == 1) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (errorMessage != null) {
-                Text(
-                    text = errorMessage ?: "",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = errorMessage ?: "",
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { retryTrigger++ }) {
+                        Text("再読み込み")
+                    }
+                }
             } else if (releases.isNullOrEmpty()) {
                 Text(
                     text = "リリースが見つかりませんでした。",

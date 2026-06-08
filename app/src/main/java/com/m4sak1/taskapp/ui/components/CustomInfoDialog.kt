@@ -40,6 +40,7 @@ fun CustomInfoDialog(
     LaunchedEffect(visible) {
         if (visible) {
             showDialog = true
+            delay(50) // Wait for Dialog to attach before starting animation
             animateIn = true
         } else {
             animateIn = false
@@ -49,13 +50,23 @@ fun CustomInfoDialog(
     }
 
     if (showDialog) {
-        androidx.compose.ui.window.Popup(
+        Dialog(
             onDismissRequest = {
                 animateIn = false
                 if (disableAnimations) onDismissRequest() else onDismissRequest()
             },
-            properties = androidx.compose.ui.window.PopupProperties(clippingEnabled = false)
+            properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
         ) {
+            val view = androidx.compose.ui.platform.LocalView.current
+            LaunchedEffect(view) {
+                val window = (view.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window
+                window?.let {
+                    androidx.core.view.WindowCompat.setDecorFitsSystemWindows(it, false)
+                    it.navigationBarColor = android.graphics.Color.TRANSPARENT
+                    it.statusBarColor = android.graphics.Color.TRANSPARENT
+                }
+            }
+
             AnimatedVisibility(
                 visible = animateIn,
                 enter = if (disableAnimations) EnterTransition.None else fadeIn(animationSpec = tween(250)),
