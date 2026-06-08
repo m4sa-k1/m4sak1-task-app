@@ -47,7 +47,8 @@ fun SettingsScreen(
     onBackup: () -> Unit,
     onRestore: () -> Unit,
     onPickBackground: () -> Unit,
-    scrollState: androidx.compose.foundation.ScrollState = androidx.compose.foundation.rememberScrollState()
+    scrollState: androidx.compose.foundation.ScrollState = androidx.compose.foundation.rememberScrollState(),
+    onDialogVisibilityChanged: (Boolean) -> Unit = {}
 ) {
     val themeController = LocalThemeController.current
     var showThemeDialog by remember { mutableStateOf(false) }
@@ -61,6 +62,11 @@ fun SettingsScreen(
     val hideImmediately by viewModel.hideImmediately.collectAsState()
     val disableAnimations by viewModel.disableAnimations.collectAsState()
     val enterToAdd by viewModel.enterToAdd.collectAsState()
+
+    val anyDialogVisible = showThemeDialog || showLanguageDialog || showAccentDialog || showAboutDialog || showDisclaimerDialog || showChangelogDialog || showRestoreConfirm || showCustomColorDialog
+    LaunchedEffect(anyDialogVisible) {
+        onDialogVisibilityChanged(anyDialogVisible)
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(

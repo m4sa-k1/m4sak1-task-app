@@ -60,6 +60,7 @@ fun MainScreen(
 ) {
     var currentTab by remember { mutableStateOf(ScreenTab.Home) }
     var showAddDialog by remember { mutableStateOf(false) }
+    var settingsDialogVisible by remember { mutableStateOf(false) }
     var newTaskTitle by remember { mutableStateOf("") }
     var editingBgUri by remember { mutableStateOf<Uri?>(null) }
     
@@ -285,16 +286,19 @@ fun MainScreen(
                                                     onBackup = { exportLauncher.launch("m4task_backup.zip") },
                                                     onRestore = { importLauncher.launch(arrayOf("application/zip")) },
                                                     onPickBackground = { bgLauncher.launch("image/*") },
-                                                    scrollState = settingsScrollState
+                                                    scrollState = settingsScrollState,
+                                                    onDialogVisibilityChanged = { settingsDialogVisible = it }
                                                 )
                                             }
                                         }
-                                        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-                                            FloatingBottomNav(
-                                                currentTab = currentTab,
-                                                onTabSelected = { currentTab = it },
-                                                disableAnimations = disableAnimations
-                                            )
+                                        if (!settingsDialogVisible) {
+                                            Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+                                                FloatingBottomNav(
+                                                    currentTab = currentTab,
+                                                    onTabSelected = { currentTab = it },
+                                                    disableAnimations = disableAnimations
+                                                )
+                                            }
                                         }
                                     }
                                 }
