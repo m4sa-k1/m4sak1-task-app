@@ -157,8 +157,8 @@ fun MainScreen(
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                // Base background color (for when no image is set)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // Base background color (for when no image is set)
                 Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
     
                 bitmap?.let {
