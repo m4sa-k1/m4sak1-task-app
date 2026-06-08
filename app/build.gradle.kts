@@ -109,8 +109,6 @@ dependencies {
     implementation("androidx.glance:glance-appwidget:1.0.0")
     implementation("androidx.glance:glance-material3:1.0.0")
     
-    // Haze for Glassmorphism
-    implementation("dev.chrisbanes.haze:haze:0.7.1")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

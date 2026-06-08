@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.LocalContext
 import com.m4sak1.taskapp.data.PreferenceManager
 import com.m4sak1.taskapp.ui.theme.*
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
-import dev.chrisbanes.haze.HazeState
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
@@ -57,7 +56,7 @@ class MainActivity : ComponentActivity() {
                 AppThemeMode.Dark -> true
             }
 
-            val themeController = remember(themeMode, appLanguage, isDarkTheme, accentColor, customAccentColor, backgroundPath, backgroundBlur, isGlassModeEnabled) {
+            val themeController = remember(themeMode, appLanguage, isDarkTheme, accentColor, customAccentColor, backgroundPath, backgroundBlur) {
                 ThemeController(
                     themeMode = themeMode,
                     setThemeMode = { 
@@ -132,11 +131,8 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            val hazeState = remember { HazeState() }
-
             CompositionLocalProvider(
                 LocalThemeController provides themeController,
-                LocalHazeState provides hazeState,
                 LocalConfiguration provides localizedConfiguration,
                 LocalContext provides localizedContext,
                 LocalActivityResultRegistryOwner provides activityContext,
