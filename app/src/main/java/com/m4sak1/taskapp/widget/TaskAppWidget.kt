@@ -98,11 +98,11 @@ class TaskAppWidget : GlanceAppWidget() {
                 .background(Color(colors.surface.value))
                 .cornerRadius(16.dp)
                 .clickable(onClick = actionStartActivity<MainActivity>())
-                .padding(16.dp),
+                // .padding(16.dp) removed so LazyColumn hits edges
         ) {
             // Header
             Row(
-                modifier = GlanceModifier.fillMaxWidth().padding(bottom = 12.dp),
+                modifier = GlanceModifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Toggle Filter Button
@@ -135,7 +135,7 @@ class TaskAppWidget : GlanceAppWidget() {
             }
 
             if (tasksToShow.isEmpty()) {
-                Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(modifier = GlanceModifier.fillMaxSize().padding(horizontal = 16.dp), contentAlignment = Alignment.Center) {
                     Text(
                         text = context.getString(R.string.no_tasks),
                         style = TextStyle(color = ColorProvider(colors.onSurface.copy(alpha = 0.5f)), fontSize = 14.sp)
@@ -147,7 +147,7 @@ class TaskAppWidget : GlanceAppWidget() {
                         Row(
                             modifier = GlanceModifier
                                 .fillMaxWidth()
-                                .padding(vertical = 8.dp)
+                                .padding(vertical = 8.dp, horizontal = 16.dp)
                                 .clickable(
                                     onClick = actionRunCallback<ToggleTaskAction>(
                                         parameters = actionParametersOf(taskIdKey to task.id)
