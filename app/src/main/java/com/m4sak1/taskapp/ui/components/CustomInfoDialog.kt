@@ -23,17 +23,23 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
 
+import androidx.compose.ui.res.stringResource
+import com.m4sak1.taskapp.R
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun CustomInfoDialog(
     visible: Boolean,
     onDismissRequest: () -> Unit,
     title: String,
-    confirmText: String = "OK",
+    confirmText: String? = null,
+    disableAnimations: Boolean = false,
     content: @Composable () -> Unit
 ) {
     var showDialog by remember(visible) { mutableStateOf(visible) }
     var animateIn by remember { mutableStateOf(false) }
+
+    val actualConfirmText = confirmText ?: stringResource(id = R.string.close)
 
     LaunchedEffect(visible) {
         if (visible) {
@@ -41,7 +47,7 @@ fun CustomInfoDialog(
             animateIn = true
         } else {
             animateIn = false
-            delay(250) // wait for exit animation
+            if (!disableAnimations) delay(250)
             showDialog = false
         }
     }
@@ -50,15 +56,18 @@ fun CustomInfoDialog(
         Dialog(
             onDismissRequest = {
                 animateIn = false
-                onDismissRequest()
+                if (disableAnimations) onDismissRequest() else onDismissRequest()
             },
             properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
         ) {
+            val dialogWindowProvider = androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider
+            dialogWindowProvider?.window?.setWindowAnimations(-1)
+
             // Full screen overlay with fade
             AnimatedVisibility(
                 visible = animateIn,
-                enter = fadeIn(animationSpec = tween(250)),
-                exit = fadeOut(animationSpec = tween(250))
+                enter = if (disableAnimations) EnterTransition.None else fadeIn(animationSpec = tween(250)),
+                exit = if (disableAnimations) ExitTransition.None else fadeOut(animationSpec = tween(250))
             ) {
                 Box(
                     modifier = Modifier
@@ -78,11 +87,11 @@ fun CustomInfoDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .animateEnterExit(
-                                enter = slideInVertically(
+                                enter = if (disableAnimations) EnterTransition.None else slideInVertically(
                                     initialOffsetY = { it },
                                     animationSpec = tween(250)
                                 ),
-                                exit = slideOutVertically(
+                                exit = if (disableAnimations) ExitTransition.None else slideOutVertically(
                                     targetOffsetY = { it },
                                     animationSpec = tween(200)
                                 )
@@ -127,14 +136,13 @@ fun CustomInfoDialog(
                             
                             Button(
                                 onClick = {
-                                    animateIn = false
                                     onDismissRequest()
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(16.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                             ) {
-                                Text(text = confirmText, color = MaterialTheme.colorScheme.onPrimary)
+                                Text(text = actualConfirmText, color = MaterialTheme.colorScheme.onPrimary)
                             }
                         }
                     }

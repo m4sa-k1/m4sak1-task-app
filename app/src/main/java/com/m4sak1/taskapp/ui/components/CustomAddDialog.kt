@@ -32,7 +32,9 @@ fun CustomAddDialog(
     visible: Boolean,
     onDismissRequest: () -> Unit,
     onAddTask: (String, Boolean) -> Unit,
-    enterToAdd: Boolean
+    enterToAdd: Boolean,
+    style: com.m4sak1.taskapp.data.AppAddDialogStyle = com.m4sak1.taskapp.data.AppAddDialogStyle.Center,
+    disableAnimations: Boolean = false
 ) {
     var newTaskTitle by remember { mutableStateOf("") }
     var isTaskStarred by remember { mutableStateOf(false) }
@@ -52,8 +54,8 @@ fun CustomAddDialog(
     // Full screen overlay with fade
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn(animationSpec = tween(200)),
-        exit = fadeOut(animationSpec = tween(200))
+        enter = if (disableAnimations) EnterTransition.None else fadeIn(animationSpec = tween(200)),
+        exit = if (disableAnimations) ExitTransition.None else fadeOut(animationSpec = tween(200))
     ) {
         Box(
             modifier = Modifier
@@ -64,40 +66,57 @@ fun CustomAddDialog(
                     indication = null,
                     onClick = onDismissRequest
                 ),
-            contentAlignment = Alignment.Center
+            contentAlignment = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) Alignment.BottomCenter else Alignment.Center
         ) {
-            // Dialog content with bounce scale
+            // Dialog content
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.85f)
+                    .fillMaxWidth(if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) 1f else 0.85f)
                     .animateEnterExit(
-                        enter = scaleIn(
-                            initialScale = 0.8f,
-                            animationSpec = spring(
-                                dampingRatio = 0.7f,
-                                stiffness = Spring.StiffnessLow
-                            )
-                        ) + fadeIn(animationSpec = tween(300)),
-                        exit = scaleOut(
-                            targetScale = 0.8f,
-                            animationSpec = tween(150)
-                        ) + fadeOut(animationSpec = tween(150))
+                        enter = if (disableAnimations) EnterTransition.None else {
+                            if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) {
+                                slideInVertically(initialOffsetY = { it }, animationSpec = tween(250))
+                            } else {
+                                scaleIn(initialScale = 0.8f, animationSpec = spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
+                            }
+                        },
+                        exit = if (disableAnimations) ExitTransition.None else {
+                            slideOutVertically(targetOffsetY = { it }, animationSpec = tween(200)) + fadeOut(animationSpec = tween(150))
+                        }
                     )
-                    .clip(RoundedCornerShape(28.dp))
+                    .clip(
+                        if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) 
+                            RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp) 
+                        else 
+                            RoundedCornerShape(28.dp)
+                    )
                     .background(MaterialTheme.colorScheme.surface)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
                         onClick = {} // Consume clicks so they don't dismiss the dialog
                     )
-                    .padding(24.dp)
+                    .padding(horizontal = 24.dp, vertical = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) 32.dp else 24.dp)
+                    .let { if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) it.navigationBarsPadding() else it }
             ) {
-                Column {
+                Column(horizontalAlignment = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) Alignment.CenterHorizontally else Alignment.Start) {
+                    if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) {
+                        // Small drag handle visual
+                        Box(
+                            modifier = Modifier
+                                .width(40.dp)
+                                .height(4.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
                     Text(
                         text = stringResource(R.string.new_task),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) Modifier.fillMaxWidth() else Modifier
                     )
                     
                     Spacer(modifier = Modifier.height(16.dp))

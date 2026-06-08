@@ -53,7 +53,7 @@
     <string name="blur_on_off">开启/关闭模糊</string>
     <string name="clear">清除</string>
     <string name="hex_color_hint">Hex 颜色代码 (例如: #FF5533)</string>
-    <string name="settings_disable_animations">禁用标签页动画</string>
+    <string name="settings_disable_animations">禁用动画</string>
     <string name="settings_enter_to_add">按回车键添加任务</string>
     <string name="settings_notifications">推送通知</string>
     <string name="settings_notifications_enable">启用推送通知</string>
@@ -66,4 +66,8 @@
     <string name="filter_starred">已加星标 ▼</string>
     <string name="settings_disclaimer">免责声明</string>
     <string name="disclaimer_text">作者对使用本应用造成的任何损坏、丢失或麻烦不承担任何责任。请自行承担风险。</string>
+    <string name="close">关闭</string>
+    <string name="add_task_dialog_style">添加任务样式</string>
+    <string name="dialog_style_center">居中</string>
+    <string name="dialog_style_bottom_sheet">底部弹窗</string>
 </resources>
