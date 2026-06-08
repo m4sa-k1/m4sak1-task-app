@@ -120,13 +120,6 @@ fun SettingsScreen(
                 }
             )
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-            val addDialogStyle by viewModel.addDialogStyle.collectAsState()
-            SettingsItem(
-                title = stringResource(R.string.add_task_dialog_style),
-                contentText = if (addDialogStyle == com.m4sak1.taskapp.data.AppAddDialogStyle.Center) stringResource(R.string.dialog_style_center) else stringResource(R.string.dialog_style_bottom_sheet),
-                modifier = Modifier.clickable { viewModel.setAddDialogStyle(if (addDialogStyle == com.m4sak1.taskapp.data.AppAddDialogStyle.Center) com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet else com.m4sak1.taskapp.data.AppAddDialogStyle.Center) }
-            )
-            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             val highlightOldTasks by viewModel.highlightOldTasks.collectAsState()
             SettingsItem(
                 title = stringResource(R.string.settings_highlight_old_tasks),
@@ -137,6 +130,13 @@ fun SettingsScreen(
                         onCheckedChange = { viewModel.setHighlightOldTasks(it) }
                     )
                 }
+            )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            val addDialogStyle by viewModel.addDialogStyle.collectAsState()
+            SettingsItem(
+                title = stringResource(R.string.add_task_dialog_style),
+                contentText = if (addDialogStyle == com.m4sak1.taskapp.data.AppAddDialogStyle.Center) stringResource(R.string.dialog_style_center) else stringResource(R.string.dialog_style_bottom_sheet),
+                modifier = Modifier.clickable { viewModel.setAddDialogStyle(if (addDialogStyle == com.m4sak1.taskapp.data.AppAddDialogStyle.Center) com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet else com.m4sak1.taskapp.data.AppAddDialogStyle.Center) }
             )
         }
 

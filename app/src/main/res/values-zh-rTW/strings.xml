@@ -69,5 +69,7 @@
     <string name="close">關閉</string>
     <string name="add_task_dialog_style">新增任務樣式</string>
     <string name="dialog_style_center">置中</string>
-    <string name="dialog_style_bottom_sheet">底部彈出視窗</string>
+    <string name="dialog_style_bottom_sheet">底部面板</string>
+    <string name="settings_highlight_old_tasks">突顯舊任務</string>
+    <string name="settings_highlight_old_tasks_desc">突顯顯示24小時前新增的任務背景</string>
 </resources>
