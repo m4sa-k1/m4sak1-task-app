@@ -115,16 +115,7 @@ fun TaskItem(task: Task, highlightOldTasks: Boolean, onToggle: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .then(
-                if (isOldTask) {
-                    Modifier
-                        .padding(horizontal = 4.dp, vertical = 2.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f))
-                } else {
-                    Modifier.padding(horizontal = 16.dp)
-                }
-            )
+            .padding(horizontal = 16.dp)
     ) {
         Row(
             modifier = rowModifier,
@@ -146,16 +137,19 @@ fun TaskItem(task: Task, highlightOldTasks: Boolean, onToggle: () -> Unit) {
             )
             
             Spacer(modifier = Modifier.width(16.dp))
-            
+            val textColor = when {
+                task.isCompleted -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                isOldTask -> MaterialTheme.colorScheme.error
+                else -> MaterialTheme.colorScheme.onSurface
+            }
             Text(
                 text = task.title,
+                modifier = Modifier.weight(1f),
                 fontSize = 18.sp,
-                color = if (task.isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f) else MaterialTheme.colorScheme.onSurface,
+                color = textColor,
                 textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None
             )
         }
-        if (!isOldTask) {
-            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-        }
+        Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
     }
 }

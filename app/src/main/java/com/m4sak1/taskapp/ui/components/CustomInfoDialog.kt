@@ -49,12 +49,12 @@ fun CustomInfoDialog(
     }
 
     if (showDialog) {
-        Dialog(
+        androidx.compose.ui.window.Popup(
             onDismissRequest = {
                 animateIn = false
                 if (disableAnimations) onDismissRequest() else onDismissRequest()
             },
-            properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+            properties = androidx.compose.ui.window.PopupProperties(clippingEnabled = false)
         ) {
             AnimatedVisibility(
                 visible = animateIn,
