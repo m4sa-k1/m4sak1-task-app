@@ -30,6 +30,8 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import com.m4sak1.taskapp.ScreenTab
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
+import com.m4sak1.taskapp.ui.theme.LocalHazeState
+import dev.chrisbanes.haze.hazeChild
 
 val BarChartIcon: ImageVector
     get() = ImageVector.Builder(
@@ -60,7 +62,41 @@ fun FloatingBottomNav(
     // Only show Home, Stats, Settings in the bottom nav
     val displayTabs = listOf(ScreenTab.Home, ScreenTab.Stats, ScreenTab.Settings)
     val selectedIndex = displayTabs.indexOf(currentTab).coerceAtLeast(0)
-    val isDarkTheme = LocalThemeController.current.isDarkTheme
+    val themeController = LocalThemeController.current
+    val isDarkTheme = themeController.isDarkTheme
+    val hazeState = LocalHazeState.current
+    val isGlass = themeController.isGlassModeEnabled && hazeState != null
+
+    val navModifier = if (isGlass) {
+        Modifier
+            .fillMaxWidth(0.75f)
+            .height(64.dp)
+            .clip(RoundedCornerShape(32.dp))
+            .hazeChild(state = hazeState!!)
+            .background(
+                if (isDarkTheme) Color.Black.copy(alpha = 0.25f)
+                else Color.White.copy(alpha = 0.4f),
+                RoundedCornerShape(32.dp)
+            )
+            .border(
+                width = 1.dp,
+                color = if (isDarkTheme) Color.White.copy(alpha = 0.1f) else Color.White.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(32.dp)
+            )
+    } else {
+        Modifier
+            .fillMaxWidth(0.75f)
+            .height(64.dp)
+            .border(
+                width = 1.dp,
+                color = if (isDarkTheme) Color.Transparent else Color.LightGray.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(32.dp)
+            )
+            .background(
+                if (isDarkTheme) Color(0xFF2A2A2A) else Color(0xFFFAFAFA),
+                RoundedCornerShape(32.dp)
+            )
+    }
 
     Box(
         modifier = modifier
@@ -69,20 +105,7 @@ fun FloatingBottomNav(
             .padding(bottom = 16.dp),
         contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.75f)
-                .height(64.dp)
-                .border(
-                    width = 1.dp,
-                    color = if (isDarkTheme) Color.Transparent else Color.LightGray.copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(32.dp)
-                )
-                .background(
-                    if (isDarkTheme) Color(0xFF2A2A2A) else Color(0xFFFAFAFA),
-                    RoundedCornerShape(32.dp)
-                )
-        ) {
+        Box(modifier = navModifier) {
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 val constraintsScope = this
                 val tabWidth = constraintsScope.maxWidth / displayTabs.size

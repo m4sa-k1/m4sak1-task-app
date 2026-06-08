@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.m4sak1.taskapp.data.PreferenceManager
 import com.m4sak1.taskapp.ui.theme.*
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
+import dev.chrisbanes.haze.HazeState
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
@@ -48,6 +49,7 @@ class MainActivity : ComponentActivity() {
             var customAccentColor by remember { mutableStateOf(Color(prefManager.customAccentColor)) }
             val backgroundPath by taskViewModel.backgroundPath.collectAsState()
             var backgroundBlur by remember { mutableStateOf(prefManager.backgroundBlur) }
+            val isGlassModeEnabled by taskViewModel.isGlassModeEnabled.collectAsState()
 
             val isDarkTheme = when (themeMode) {
                 AppThemeMode.System -> isSystemInDarkTheme()
@@ -84,6 +86,8 @@ class MainActivity : ComponentActivity() {
                         backgroundBlur = it
                         prefManager.backgroundBlur = it
                     },
+                    isGlassModeEnabled = isGlassModeEnabled,
+                    setGlassModeEnabled = { taskViewModel.setGlassModeEnabled(it) },
                     isDarkTheme = isDarkTheme
                 )
             }
@@ -128,8 +132,11 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
+            val hazeState = remember { HazeState() }
+
             CompositionLocalProvider(
                 LocalThemeController provides themeController,
+                LocalHazeState provides hazeState,
                 LocalConfiguration provides localizedConfiguration,
                 LocalContext provides localizedContext,
                 LocalActivityResultRegistryOwner provides activityContext,

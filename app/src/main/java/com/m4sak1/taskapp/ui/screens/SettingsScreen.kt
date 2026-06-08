@@ -34,7 +34,10 @@ import com.m4sak1.taskapp.ui.theme.AppAccentColor
 import com.m4sak1.taskapp.ui.theme.AppLanguage
 import com.m4sak1.taskapp.ui.theme.AppThemeMode
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
+import com.m4sak1.taskapp.ui.theme.LocalHazeState
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
+import dev.chrisbanes.haze.hazeChild
+import androidx.compose.foundation.border
 
 @Composable
 fun SettingsScreen(
@@ -141,10 +144,25 @@ fun SettingsScreen(
                 modifier = Modifier.clickable { onPickBackground() },
                 trailingContent = {
                     if (themeController.backgroundPath != null) {
-                        TextButton(onClick = { themeController.setBackgroundPath(null) }) {
+                        TextButton(onClick = { 
+                            themeController.setBackgroundPath(null)
+                            // Disable glass mode automatically when background is cleared
+                            themeController.setGlassModeEnabled(false)
+                        }) {
                             Text(stringResource(R.string.clear), color = MaterialTheme.colorScheme.error)
                         }
                     }
+                }
+            )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            SettingsItem(
+                title = stringResource(R.string.settings_glass_mode),
+                trailingContent = {
+                    Switch(
+                        checked = themeController.isGlassModeEnabled,
+                        onCheckedChange = { themeController.setGlassModeEnabled(it) },
+                        enabled = themeController.backgroundPath != null
+                    )
                 }
             )
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
@@ -442,6 +460,33 @@ private fun getLanguageLabel(language: AppLanguage): String = when (language) {
 
 @Composable
 fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
+    val themeController = LocalThemeController.current
+    val hazeState = LocalHazeState.current
+    val isGlass = themeController.isGlassModeEnabled && hazeState != null
+
+    val containerModifier = if (isGlass) {
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .hazeChild(state = hazeState!!)
+            .background(
+                if (themeController.isDarkTheme) Color.Black.copy(alpha = 0.25f)
+                else Color.White.copy(alpha = 0.4f)
+            )
+            .border(
+                1.dp,
+                if (themeController.isDarkTheme) Color.White.copy(alpha = 0.1f) else Color.White.copy(alpha = 0.5f),
+                RoundedCornerShape(16.dp)
+            )
+            .padding(vertical = 4.dp)
+    } else {
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
+            .padding(vertical = 4.dp)
+    }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = title,
@@ -451,11 +496,7 @@ fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) 
             modifier = Modifier.padding(start = 12.dp, bottom = 8.dp)
         )
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
-                .padding(vertical = 4.dp)
+            modifier = containerModifier
         ) {
             content()
         }

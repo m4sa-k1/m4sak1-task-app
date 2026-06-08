@@ -65,4 +65,5 @@
     <string name="filter_starred">Starred ▼</string>
     <string name="settings_disclaimer">Disclaimer</string>
     <string name="disclaimer_text">The creator assumes no responsibility for any damage, loss, or trouble caused by the use of this app. Use at your own risk.</string>
+    <string name="settings_glass_mode">Glass Mode</string>
 </resources>

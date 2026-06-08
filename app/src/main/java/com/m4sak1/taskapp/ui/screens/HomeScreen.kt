@@ -23,6 +23,11 @@ import com.m4sak1.taskapp.viewmodel.TaskViewModel
 import androidx.compose.ui.res.stringResource
 import com.m4sak1.taskapp.R
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
+import com.m4sak1.taskapp.ui.theme.LocalThemeController
+import com.m4sak1.taskapp.ui.theme.LocalHazeState
+import dev.chrisbanes.haze.hazeChild
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -99,13 +104,37 @@ class StarShape : Shape {
 @Composable
 fun TaskItem(task: Task, onToggle: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
+    val themeController = LocalThemeController.current
+    val hazeState = LocalHazeState.current
+    val isGlass = themeController.isGlassModeEnabled && hazeState != null
+    
+    val rowModifier = if (isGlass) {
+        Modifier
+            .padding(vertical = 6.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .hazeChild(state = hazeState!!)
+            .background(
+                if (themeController.isDarkTheme) Color.Black.copy(alpha = 0.25f)
+                else Color.White.copy(alpha = 0.4f)
+            )
+            .border(
+                1.dp,
+                if (themeController.isDarkTheme) Color.White.copy(alpha = 0.1f) else Color.White.copy(alpha = 0.5f),
+                RoundedCornerShape(16.dp)
+            )
+            .clickable(interactionSource = interactionSource, indication = null) { onToggle() }
+            .padding(horizontal = 16.dp, vertical = 16.dp)
+    } else {
+        Modifier
+            .fillMaxWidth()
+            .clickable(interactionSource = interactionSource, indication = null) { onToggle() }
+            .padding(vertical = 16.dp)
+    }
     
     Column {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(interactionSource = interactionSource, indication = null) { onToggle() }
-                .padding(vertical = 16.dp),
+            modifier = rowModifier,
             verticalAlignment = Alignment.CenterVertically
         ) {
             val shape = if (task.isStarred) StarShape() else CircleShape
@@ -132,6 +161,8 @@ fun TaskItem(task: Task, onToggle: () -> Unit) {
                 textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None
             )
         }
-        Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+        if (!isGlass) {
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+        }
     }
 }
