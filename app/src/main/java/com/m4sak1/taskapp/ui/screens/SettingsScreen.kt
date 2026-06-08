@@ -54,6 +54,7 @@ fun SettingsScreen(
     var showAccentDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
     var showDisclaimerDialog by remember { mutableStateOf(false) }
+    var showChangelogDialog by remember { mutableStateOf(false) }
     var showRestoreConfirm by remember { mutableStateOf(false) }
     val hideImmediately by viewModel.hideImmediately.collectAsState()
     val disableAnimations by viewModel.disableAnimations.collectAsState()
@@ -232,7 +233,11 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         SettingsSection(title = stringResource(R.string.settings_app_info)) {
-            SettingsItem(title = stringResource(R.string.settings_version), contentText = BuildConfig.VERSION_NAME)
+            SettingsItem(
+                title = stringResource(R.string.settings_version), 
+                contentText = BuildConfig.VERSION_NAME,
+                modifier = Modifier.clickable { showChangelogDialog = true }
+            )
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
                 title = stringResource(R.string.settings_licenses),
@@ -414,10 +419,17 @@ fun SettingsScreen(
     ) {
         Text(
             text = stringResource(R.string.disclaimer_text),
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-            lineHeight = 22.sp
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
+
+    com.m4sak1.taskapp.ui.components.ReleaseHistoryDialog(
+        visible = showChangelogDialog,
+        onDismissRequest = { showChangelogDialog = false },
+        disableAnimations = disableAnimations
+    )
 
     if (showRestoreConfirm) {
         CustomConfirmDialog(
