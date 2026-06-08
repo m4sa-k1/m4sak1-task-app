@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -143,23 +144,26 @@ fun ReleaseItem(
                 )
                 if (isNewUpdate) {
                     Spacer(modifier = Modifier.width(8.dp))
-                    Surface(
-                        color = MaterialTheme.colorScheme.errorContainer,
-                        shape = MaterialTheme.shapes.small
-                    ) {
-                        Text(
-                            text = "New Update!",
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "New Update",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
+                val formattedTime = remember(release.publishedAt) {
+                    try {
+                        val instant = java.time.Instant.parse(release.publishedAt)
+                        val formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm").withZone(java.time.ZoneId.systemDefault())
+                        formatter.format(instant)
+                    } catch (e: Exception) {
+                        release.publishedAt.take(16).replace("T", " ")
+                    }
+                }
                 Text(
-                    text = release.publishedAt.take(10), // YYYY-MM-DD
+                    text = formattedTime,
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

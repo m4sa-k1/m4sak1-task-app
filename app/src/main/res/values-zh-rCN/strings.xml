@@ -69,5 +69,7 @@
     <string name="close">关闭</string>
     <string name="add_task_dialog_style">添加任务样式</string>
     <string name="dialog_style_center">居中</string>
-    <string name="dialog_style_bottom_sheet">底部弹窗</string>
+    <string name="dialog_style_bottom_sheet">底部面板</string>
+    <string name="settings_highlight_old_tasks">高亮旧任务</string>
+    <string name="settings_highlight_old_tasks_desc">高亮显示24小时前添加的任务背景</string>
 </resources>
