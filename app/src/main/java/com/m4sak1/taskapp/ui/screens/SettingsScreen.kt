@@ -227,6 +227,17 @@ fun SettingsScreen(
                     }
                 }
             )
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            val releaseEnabled by viewModel.releaseNotificationsEnabled.collectAsState()
+            SettingsItem(
+                title = stringResource(R.string.settings_release_notifications),
+                trailingContent = {
+                    Switch(
+                        checked = releaseEnabled,
+                        onCheckedChange = { viewModel.setReleaseNotificationsEnabled(it) }
+                    )
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))

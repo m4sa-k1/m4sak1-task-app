@@ -161,6 +161,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         prefManager.notificationsEnabled = enabled
     }
 
+    fun setReleaseNotificationsEnabled(enabled: Boolean) {
+        _releaseNotificationsEnabled.value = enabled
+        prefManager.releaseNotificationsEnabled = enabled
+    }
+
     fun setHasRequestedNotificationPermission(requested: Boolean) {
         _hasRequestedNotificationPermission.value = requested
         prefManager.hasRequestedNotificationPermission = requested
