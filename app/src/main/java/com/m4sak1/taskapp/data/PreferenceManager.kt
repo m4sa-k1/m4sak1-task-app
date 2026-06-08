@@ -59,6 +59,10 @@ class PreferenceManager(context: Context) {
         get() = prefs.getBoolean("notifications_enabled", true)
         set(value) = prefs.edit().putBoolean("notifications_enabled", value).apply()
 
+    var releaseNotificationsEnabled: Boolean
+        get() = prefs.getBoolean("release_notifications_enabled", true)
+        set(value) = prefs.edit().putBoolean("release_notifications_enabled", value).apply()
+
     var hasRequestedNotificationPermission: Boolean
         get() = prefs.getBoolean("has_requested_notification_permission", false)
         set(value) = prefs.edit().putBoolean("has_requested_notification_permission", value).apply()

@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import com.m4sak1.taskapp.ui.components.NewReleaseDialog
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -71,6 +72,18 @@ fun MainScreen(
     val themeController = LocalThemeController.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val settingsScrollState = androidx.compose.foundation.rememberScrollState()
+    
+    val latestRelease by taskViewModel.latestRelease.collectAsState()
+    val releaseNotificationsEnabled by taskViewModel.releaseNotificationsEnabled.collectAsState()
+    var hasDismissedReleaseDialog by remember { mutableStateOf(false) }
+    var showNewReleaseDialog by remember { mutableStateOf(false) }
+    
+    LaunchedEffect(latestRelease, releaseNotificationsEnabled) {
+        if (latestRelease != null && releaseNotificationsEnabled && !hasDismissedReleaseDialog) {
+            showNewReleaseDialog = true
+        }
+    }
 
     val backupSuccessMsg = stringResource(R.string.backup_success)
     val restoreSuccessMsg = stringResource(R.string.restore_success)
@@ -267,7 +280,8 @@ fun MainScreen(
                                                     onShowEditHome = { currentTab = ScreenTab.EditHome },
                                                     onBackup = { exportLauncher.launch("m4task_backup.zip") },
                                                     onRestore = { importLauncher.launch(arrayOf("application/zip")) },
-                                                    onPickBackground = { bgLauncher.launch("image/*") }
+                                                    onPickBackground = { bgLauncher.launch("image/*") },
+                                                    scrollState = settingsScrollState
                                                 )
                                             }
                                         }

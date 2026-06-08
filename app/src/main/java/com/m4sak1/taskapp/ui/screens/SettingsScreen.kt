@@ -46,7 +46,8 @@ fun SettingsScreen(
     onShowEditHome: () -> Unit,
     onBackup: () -> Unit,
     onRestore: () -> Unit,
-    onPickBackground: () -> Unit
+    onPickBackground: () -> Unit,
+    scrollState: androidx.compose.foundation.ScrollState = androidx.compose.foundation.rememberScrollState()
 ) {
     val themeController = LocalThemeController.current
     var showThemeDialog by remember { mutableStateOf(false) }
@@ -64,7 +65,7 @@ fun SettingsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(horizontal = 24.dp)
         ) {
         Spacer(modifier = Modifier.statusBarsPadding())

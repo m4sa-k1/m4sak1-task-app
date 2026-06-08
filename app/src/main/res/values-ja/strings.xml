@@ -55,8 +55,9 @@
     <string name="hex_color_hint">Hex カラーコード (例: #FF5533)</string>
     <string name="settings_disable_animations">アニメーションを無効化</string>
     <string name="settings_enter_to_add">エンターキーでタスクを追加</string>
-    <string name="settings_notifications">プッシュ通知</string>
-    <string name="settings_notifications_enable">プッシュ通知を有効にする</string>
+    <string name="settings_notifications">通知</string>
+    <string name="settings_notifications_enable">リマインダー通知を有効にする</string>
+    <string name="settings_release_notifications">新バージョンのアプリ内通知</string>
     <string name="settings_notifications_test">テスト通知を送信</string>
     <string name="notification_channel_name">タスクのリマインダー</string>
     <string name="notification_channel_desc">追加したタスクのリマインダー</string>
@@ -71,4 +72,25 @@
     <string name="add_task_dialog_style">タスク追加スタイル</string>
     <string name="dialog_style_center">中央</string>
     <string name="dialog_style_bottom_sheet">ボトムシート</string>
+
+    <string-array name="notification_messages_24h">
+        <item>タスクのリマインダー|「%1$s」をお忘れなく！</item>
+        <item>24時間が経過しました|「%1$s」は順調ですか？</item>
+        <item>タスクの確認|そろそろ「%1$s」に着手しましょう！</item>
+    </string-array>
+    
+    <string-array name="notification_messages_48h">
+        <item>追加から2日経過|「%1$s」があなたを待っています！</item>
+        <item>進捗いかがですか？|「%1$s」を少しでも進めてみませんか？</item>
+        <item>リマインド|「%1$s」を片付けてスッキリしましょう！</item>
+    </string-array>
+    
+    <string-array name="notification_messages_72h">
+        <item>3日前のタスクです|「%1$s」はもう終わりましたか？</item>
+        <item>そろそろ片付けませんか？|ずっと残っている「%1$s」、今日やりましょう！</item>
+        <item>タスク整理のすすめ|「%1$s」を完了するか、不要なら削除しましょう。</item>
+    </string-array>
+
+    <string name="settings_highlight_old_tasks">古いタスクを強調</string>
+    <string name="settings_highlight_old_tasks_desc">追加から24時間以上経過したタスクの背景をハイライトします</string>
 </resources>

@@ -49,18 +49,26 @@ fun ReleaseHistoryDialog(
     if (!visible && disableAnimations) return
 
     var releases by remember { mutableStateOf<List<GithubRelease>?>(null) }
+    var page by remember { mutableIntStateOf(1) }
+    var hasMore by remember { mutableStateOf(true) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(visible) {
-        if (visible) {
-            isLoading = true
+    LaunchedEffect(visible, page) {
+        if (visible && hasMore) {
+            if (page == 1) isLoading = true
             errorMessage = null
             try {
-                val fetchedReleases = fetchReleases()
-                releases = fetchedReleases
+                val fetchedReleases = fetchReleases(page)
+                if (fetchedReleases.isEmpty()) {
+                    hasMore = false
+                } else {
+                    val currentList = releases ?: emptyList()
+                    releases = currentList + fetchedReleases
+                    if (fetchedReleases.size < 20) hasMore = false
+                }
             } catch (e: Exception) {
-                errorMessage = "Failed to load release history."
+                if (page == 1) errorMessage = "Failed to load release history."
             } finally {
                 isLoading = false
             }
@@ -79,7 +87,7 @@ fun ReleaseHistoryDialog(
                 .fillMaxWidth()
                 .heightIn(min = 200.dp, max = 500.dp)
         ) {
-            if (isLoading) {
+            if (isLoading && page == 1) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (errorMessage != null) {
                 Text(
@@ -93,7 +101,17 @@ fun ReleaseHistoryDialog(
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
+                val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+                
+                LaunchedEffect(listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index) {
+                    val lastIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                    if (lastIndex != null && releases != null && lastIndex >= releases!!.size - 2 && hasMore && !isLoading) {
+                        page++
+                    }
+                }
+                
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier.fillMaxSize()
                 ) {
                     itemsIndexed(releases!!) { index, release ->
@@ -107,6 +125,13 @@ fun ReleaseHistoryDialog(
                                 modifier = Modifier.padding(vertical = 8.dp),
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
                             )
+                        }
+                    }
+                    if (isLoading && page > 1) {
+                        item {
+                            Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator()
+                            }
                         }
                     }
                 }
@@ -269,8 +294,8 @@ fun parseBoldMarkdown(text: String) = buildAnnotatedString {
     }
 }
 
-private suspend fun fetchReleases(): List<GithubRelease> = withContext(Dispatchers.IO) {
-    val url = URL("https://api.github.com/repos/masaki-09/m4sak1-task-app/releases")
+private suspend fun fetchReleases(page: Int): List<GithubRelease> = withContext(Dispatchers.IO) {
+    val url = URL("https://api.github.com/repos/masaki-09/m4sak1-task-app/releases?per_page=20&page=$page")
     val connection = url.openConnection() as HttpURLConnection
     connection.requestMethod = "GET"
     connection.setRequestProperty("Accept", "application/vnd.github.v3+json")

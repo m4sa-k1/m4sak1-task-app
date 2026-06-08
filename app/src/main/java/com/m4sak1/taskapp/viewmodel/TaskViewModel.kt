@@ -53,6 +53,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _notificationsEnabled = MutableStateFlow(prefManager.notificationsEnabled)
     val notificationsEnabled = _notificationsEnabled.asStateFlow()
 
+    private val _releaseNotificationsEnabled = MutableStateFlow(prefManager.releaseNotificationsEnabled)
+    val releaseNotificationsEnabled = _releaseNotificationsEnabled.asStateFlow()
+
     private val _hasRequestedNotificationPermission = MutableStateFlow(prefManager.hasRequestedNotificationPermission)
     val hasRequestedNotificationPermission = _hasRequestedNotificationPermission.asStateFlow()
 
@@ -68,6 +71,37 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     // This forces bitmap reloading in MainScreen even when the file is overwritten at the same path
     private val _backgroundVersion = MutableStateFlow(0)
     val backgroundVersion = _backgroundVersion.asStateFlow()
+
+    private val _latestRelease = MutableStateFlow<com.m4sak1.taskapp.ui.components.GithubRelease?>(null)
+    val latestRelease: StateFlow<com.m4sak1.taskapp.ui.components.GithubRelease?> = _latestRelease
+    
+    init {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val url = java.net.URL("https://api.github.com/repos/masaki-09/m4sak1-task-app/releases?per_page=1")
+                val connection = url.openConnection() as java.net.HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
+                if (connection.responseCode == java.net.HttpURLConnection.HTTP_OK) {
+                    val response = connection.inputStream.bufferedReader().use { it.readText() }
+                    val jsonArray = org.json.JSONArray(response)
+                    if (jsonArray.length() > 0) {
+                        val obj = jsonArray.getJSONObject(0)
+                        val tagName = obj.optString("tag_name", "")
+                        val isNewUpdate = tagName.removePrefix("v") != com.m4sak1.taskapp.BuildConfig.VERSION_NAME
+                        if (isNewUpdate) {
+                            _latestRelease.value = com.m4sak1.taskapp.ui.components.GithubRelease(
+                                name = obj.optString("name", ""),
+                                tagName = tagName,
+                                publishedAt = obj.optString("published_at", ""),
+                                body = obj.optString("body", "")
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {}
+        }
+    }
 
     val allCompletedTasks: Flow<List<Task>> = taskDao.getAllCompletedTasks()
 

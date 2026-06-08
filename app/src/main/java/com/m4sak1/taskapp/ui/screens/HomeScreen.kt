@@ -87,7 +87,7 @@ class StarShape : Shape {
         val path = Path()
         val center = Offset(size.width / 2f, size.height / 2f)
         val outerRadius = size.width / 2f
-        val innerRadius = outerRadius * 0.382f // Golden ratio roughly for a 5-point star
+        val innerRadius = outerRadius * 0.45f // Fatter star
         
         for (i in 0 until 10) {
             val angle = (Math.PI / 5) * i - Math.PI / 2
@@ -139,8 +139,8 @@ fun TaskItem(task: Task, highlightOldTasks: Boolean, onToggle: () -> Unit) {
                         if (task.isCompleted) {
                             Modifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f))
                         } else {
-                            val borderThickness = if (task.isStarred) 1.5.dp else 1.dp
-                            Modifier.border(borderThickness, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape)
+                            val borderThickness = 1.5.dp
+                            Modifier.border(borderThickness, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), shape)
                         }
                     )
             )
