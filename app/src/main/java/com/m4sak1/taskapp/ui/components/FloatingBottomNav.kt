@@ -65,8 +65,16 @@ fun FloatingBottomNav(
     val navModifier = Modifier
         .fillMaxWidth(0.75f)
         .height(64.dp)
+        .border(
+            width = 1.dp,
+            color = if (isDarkTheme) Color.Transparent else Color.LightGray.copy(alpha = 0.5f),
+            shape = RoundedCornerShape(32.dp)
+        )
+        .background(
+            if (isDarkTheme) Color(0xFF2A2A2A) else Color(0xFFFAFAFA),
+            RoundedCornerShape(32.dp)
+        )
         .clip(RoundedCornerShape(32.dp))
-        .background(MaterialTheme.colorScheme.surfaceVariant)
         .padding(horizontal = 16.dp)
 
     Box(
