@@ -59,12 +59,13 @@ fun SettingsScreen(
     val disableAnimations by viewModel.disableAnimations.collectAsState()
     val enterToAdd by viewModel.enterToAdd.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp)
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+        ) {
         Spacer(modifier = Modifier.statusBarsPadding())
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -411,9 +412,15 @@ fun SettingsScreen(
 
     if (showRestoreConfirm) {
         CustomConfirmDialog(
-            title = stringResource(R.string.confirm),
+            title = stringResource(R.string.settings_restore_defaults),
             onConfirm = {
-                onRestore()
+                themeController.setThemeMode(AppThemeMode.System)
+                themeController.setAppLanguage(AppLanguage.System)
+                themeController.setAccentColor(AppAccentColor.Blue)
+                themeController.setCustomAccentColor(Color(0xFF3B82F6))
+                themeController.setBackgroundPath(null)
+                themeController.setBackgroundBlur(0f)
+                
                 showRestoreConfirm = false
             },
             onDismiss = { showRestoreConfirm = false },
@@ -421,7 +428,7 @@ fun SettingsScreen(
             dismissText = stringResource(R.string.cancel),
             confirmColor = MaterialTheme.colorScheme.error
         ) {
-            Text(stringResource(R.string.restore_warning))
+            Text(stringResource(R.string.restore_defaults_confirm))
         }
     }
 }

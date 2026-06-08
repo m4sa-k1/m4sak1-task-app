@@ -74,10 +74,10 @@ fun CustomAddDialog(
                         enter = scaleIn(
                             initialScale = 0.8f,
                             animationSpec = spring(
-                                dampingRatio = 0.6f,
-                                stiffness = Spring.StiffnessMedium
+                                dampingRatio = 0.7f,
+                                stiffness = Spring.StiffnessLow
                             )
-                        ) + fadeIn(animationSpec = tween(200)),
+                        ) + fadeIn(animationSpec = tween(300)),
                         exit = scaleOut(
                             targetScale = 0.8f,
                             animationSpec = tween(150)
