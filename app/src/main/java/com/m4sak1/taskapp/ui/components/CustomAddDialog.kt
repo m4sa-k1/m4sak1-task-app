@@ -65,11 +65,16 @@ fun CustomAddDialog(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
                     onClick = onDismissRequest
-                ),
-            contentAlignment = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) Alignment.BottomCenter else Alignment.Center
+                )
         ) {
-            // Dialog content
             Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding(),
+                contentAlignment = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) Alignment.BottomCenter else Alignment.Center
+            ) {
+                // Dialog content
+                Box(
                 modifier = Modifier
                     .fillMaxWidth(if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) 1f else 0.85f)
                     .animateEnterExit(
@@ -182,4 +187,5 @@ fun CustomAddDialog(
             }
         }
     }
+}
 }

@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.sp
 
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
 
@@ -53,16 +55,13 @@ fun CustomInfoDialog(
     }
 
     if (showDialog) {
-        Dialog(
+        Popup(
             onDismissRequest = {
                 animateIn = false
                 if (disableAnimations) onDismissRequest() else onDismissRequest()
             },
-            properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+            properties = PopupProperties(focusable = true, excludeFromSystemGesture = false)
         ) {
-            val dialogWindowProvider = androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider
-            dialogWindowProvider?.window?.setWindowAnimations(-1)
-
             // Full screen overlay with fade
             AnimatedVisibility(
                 visible = animateIn,
