@@ -20,13 +20,21 @@ class NotificationWorker(
         }
 
         val taskTitle = inputData.getString("task_title") ?: return Result.failure()
+        val hour = inputData.getInt("notification_hour", 24)
         
-        // Ensure context has the correct locale based on user settings
-        // Actually, we'll just use the applicationContext which should be updated by our AppLanguage setting
-        // or just rely on string resources which use the current context's locale.
+        val arrayResId = when (hour) {
+            48 -> R.array.notification_messages_48h
+            72 -> R.array.notification_messages_72h
+            else -> R.array.notification_messages_24h
+        }
         
-        val notificationTitle = applicationContext.getString(R.string.notification_reminder_title)
-        val notificationBody = applicationContext.getString(R.string.notification_reminder_body, taskTitle)
+        val messages = applicationContext.resources.getStringArray(arrayResId)
+        val randomMessage = messages.random()
+        val parts = randomMessage.split("|")
+        
+        val notificationTitle = parts.getOrNull(0) ?: applicationContext.getString(R.string.notification_reminder_title)
+        val rawBody = parts.getOrNull(1) ?: applicationContext.getString(R.string.notification_reminder_body)
+        val notificationBody = String.format(rawBody, taskTitle)
 
         val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 

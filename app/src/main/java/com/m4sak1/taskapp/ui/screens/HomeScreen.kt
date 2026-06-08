@@ -41,6 +41,7 @@ import kotlin.math.sin
 @Composable
 fun HomeScreen(viewModel: TaskViewModel) {
     val tasks by viewModel.uiTasks.collectAsState()
+    val highlightOldTasks by viewModel.highlightOldTasks.collectAsState()
 
     Column(
         modifier = Modifier
@@ -71,6 +72,7 @@ fun HomeScreen(viewModel: TaskViewModel) {
                     Box(modifier = Modifier.animateItemPlacement()) {
                         TaskItem(
                             task = task,
+                            highlightOldTasks = highlightOldTasks,
                             onToggle = { viewModel.toggleTaskCompletion(task) }
                         )
                     }
@@ -100,15 +102,30 @@ class StarShape : Shape {
 }
 
 @Composable
-fun TaskItem(task: Task, onToggle: () -> Unit) {
+fun TaskItem(task: Task, highlightOldTasks: Boolean, onToggle: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     
     val rowModifier = Modifier
         .fillMaxWidth()
         .clickable(interactionSource = interactionSource, indication = null) { onToggle() }
-        .padding(vertical = 16.dp)
+        .padding(vertical = 16.dp, horizontal = 12.dp)
+        
+    val isOldTask = highlightOldTasks && !task.isCompleted && (System.currentTimeMillis() - task.createdAt > 24L * 60 * 60 * 1000)
     
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(
+                if (isOldTask) {
+                    Modifier
+                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f))
+                } else {
+                    Modifier.padding(horizontal = 16.dp)
+                }
+            )
+    ) {
         Row(
             modifier = rowModifier,
             verticalAlignment = Alignment.CenterVertically
@@ -137,6 +154,8 @@ fun TaskItem(task: Task, onToggle: () -> Unit) {
                 textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None
             )
         }
-        Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+        if (!isOldTask) {
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+        }
     }
 }
