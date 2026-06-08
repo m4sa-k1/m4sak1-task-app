@@ -70,41 +70,41 @@ fun CustomAddDialog(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .imePadding(),
+                    .let { if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.Center) it.imePadding() else it },
                 contentAlignment = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) Alignment.BottomCenter else Alignment.Center
             ) {
                 // Dialog content
                 Box(
-                modifier = Modifier
-                    .fillMaxWidth(if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) 1f else 0.85f)
-                    .animateEnterExit(
-                        enter = if (disableAnimations) EnterTransition.None else {
-                            if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) {
-                                slideInVertically(initialOffsetY = { it }, animationSpec = tween(250))
-                            } else {
-                                scaleIn(initialScale = 0.8f, animationSpec = spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
+                    modifier = Modifier
+                        .fillMaxWidth(if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) 1f else 0.85f)
+                        .animateEnterExit(
+                            enter = if (disableAnimations) EnterTransition.None else {
+                                if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) {
+                                    slideInVertically(initialOffsetY = { it }, animationSpec = tween(250))
+                                } else {
+                                    scaleIn(initialScale = 0.8f, animationSpec = spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
+                                }
+                            },
+                            exit = if (disableAnimations) ExitTransition.None else {
+                                slideOutVertically(targetOffsetY = { it }, animationSpec = tween(200)) + fadeOut(animationSpec = tween(150))
                             }
-                        },
-                        exit = if (disableAnimations) ExitTransition.None else {
-                            slideOutVertically(targetOffsetY = { it }, animationSpec = tween(200)) + fadeOut(animationSpec = tween(150))
-                        }
-                    )
-                    .clip(
-                        if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) 
-                            RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp) 
-                        else 
-                            RoundedCornerShape(28.dp)
-                    )
-                    .background(MaterialTheme.colorScheme.surface)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {} // Consume clicks so they don't dismiss the dialog
-                    )
-                    .padding(horizontal = 24.dp, vertical = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) 32.dp else 24.dp)
-                    .let { if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) it.navigationBarsPadding() else it }
-            ) {
-                Column(horizontalAlignment = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) Alignment.CenterHorizontally else Alignment.Start) {
+                        )
+                        .clip(
+                            if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) 
+                                RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp) 
+                            else 
+                                RoundedCornerShape(28.dp)
+                        )
+                        .background(MaterialTheme.colorScheme.surface)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = {} // Consume clicks so they don't dismiss the dialog
+                        )
+                        .let { if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) it.navigationBarsPadding().imePadding() else it }
+                        .padding(horizontal = 24.dp, vertical = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) 32.dp else 24.dp)
+                ) {
+                    Column(horizontalAlignment = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) Alignment.CenterHorizontally else Alignment.Start) {
                     if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) {
                         // Small drag handle visual
                         Box(
