@@ -101,7 +101,13 @@ fun CustomAddDialog(
                             indication = null,
                             onClick = {} // Consume clicks so they don't dismiss the dialog
                         )
-                        .let { if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) it.navigationBarsPadding().imePadding() else it }
+                        .let { 
+                            if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) {
+                                it.windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
+                            } else {
+                                it
+                            }
+                        }
                         .padding(horizontal = 24.dp, vertical = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) 32.dp else 24.dp)
                 ) {
                     Column(horizontalAlignment = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) Alignment.CenterHorizontally else Alignment.Start) {
