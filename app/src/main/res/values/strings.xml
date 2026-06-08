@@ -70,4 +70,25 @@
     <string name="add_task_dialog_style">Add Task Style</string>
     <string name="dialog_style_center">Center</string>
     <string name="dialog_style_bottom_sheet">Bottom Sheet</string>
+
+    <string-array name="notification_messages_24h">
+        <item>Task Reminder|Don\'t forget about: %1$s!</item>
+        <item>24 hours passed|How is \"%1$s\" going?</item>
+        <item>Time to start|It\'s time to start \"%1$s\"!</item>
+    </string-array>
+    
+    <string-array name="notification_messages_48h">
+        <item>2 days passed|\"%1$s\" is waiting for you!</item>
+        <item>Any progress?|Why not make a little progress on \"%1$s\"?</item>
+        <item>Reminder|Let\'s clear \"%1$s\" and feel refreshed!</item>
+    </string-array>
+    
+    <string-array name="notification_messages_72h">
+        <item>Task from 3 days ago|Are you done with \"%1$s\"?</item>
+        <item>Time to clear it up|Let\'s do \"%1$s\" today!</item>
+        <item>Task check|Consider completing or deleting \"%1$s\".</item>
+    </string-array>
+    
+    <string name="settings_highlight_old_tasks">Highlight Old Tasks</string>
+    <string name="settings_highlight_old_tasks_desc">Highlight the background of tasks added more than 24 hours ago</string>
 </resources>

@@ -66,6 +66,10 @@ class PreferenceManager(context: Context) {
     var addDialogStyle: AppAddDialogStyle
         get() = AppAddDialogStyle.valueOf(prefs.getString("add_dialog_style", AppAddDialogStyle.Center.name) ?: AppAddDialogStyle.Center.name)
         set(value) = prefs.edit().putString("add_dialog_style", value.name).apply()
+
+    var highlightOldTasks: Boolean
+        get() = prefs.getBoolean("highlight_old_tasks", true)
+        set(value) = prefs.edit().putBoolean("highlight_old_tasks", value).apply()
 }
 
 enum class AppAddDialogStyle { Center, BottomSheet }

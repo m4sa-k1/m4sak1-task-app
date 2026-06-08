@@ -47,6 +47,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _addDialogStyle = MutableStateFlow(prefManager.addDialogStyle)
     val addDialogStyle = _addDialogStyle.asStateFlow()
 
+    private val _highlightOldTasks = MutableStateFlow(prefManager.highlightOldTasks)
+    val highlightOldTasks = _highlightOldTasks.asStateFlow()
+
     private val _notificationsEnabled = MutableStateFlow(prefManager.notificationsEnabled)
     val notificationsEnabled = _notificationsEnabled.asStateFlow()
 
@@ -114,6 +117,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         prefManager.addDialogStyle = style
     }
 
+    fun setHighlightOldTasks(enabled: Boolean) {
+        _highlightOldTasks.value = enabled
+        prefManager.highlightOldTasks = enabled
+    }
+
     fun setNotificationsEnabled(enabled: Boolean) {
         _notificationsEnabled.value = enabled
         prefManager.notificationsEnabled = enabled
@@ -153,21 +161,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             TaskAppWidget.forceUpdate(getApplication())
             
             if (_notificationsEnabled.value) {
-                val inputData = Data.Builder()
-                    .putString("task_title", title)
-                    .build()
-                
-                val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
-                    .setInitialDelay(1, TimeUnit.DAYS)
-                    .setInputData(inputData)
-                    .addTag("task_$id")
-                    .build()
-                    
-                WorkManager.getInstance(getApplication()).enqueueUniqueWork(
-                    "task_$id",
-                    ExistingWorkPolicy.REPLACE,
-                    workRequest
-                )
+                scheduleNotifications(id.toInt(), title)
             }
         }
     }
@@ -199,7 +193,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             val workManager = WorkManager.getInstance(getApplication())
 
             if (newStatus) {
-                workManager.cancelUniqueWork("task_${task.id}")
+                workManager.cancelAllWorkByTag("task_${task.id}")
                 
                 // 2. Handle memory list for 15m delay
                 if (!_hideImmediately.value) {
@@ -217,19 +211,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } else {
                 if (_notificationsEnabled.value) {
-                    val inputData = Data.Builder()
-                        .putString("task_title", task.title)
-                        .build()
-                    val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
-                        .setInitialDelay(1, TimeUnit.DAYS)
-                        .setInputData(inputData)
-                        .addTag("task_${task.id}")
-                        .build()
-                    workManager.enqueueUniqueWork(
-                        "task_${task.id}",
-                        ExistingWorkPolicy.REPLACE,
-                        workRequest
-                    )
+                    scheduleNotifications(task.id, task.title)
                 }
 
                 // 3. Reverting completion: remove from memory list so it appears in DB incomplete flow
@@ -252,6 +234,30 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             val currentList = _recentlyCompletedTasks.value.toMutableList()
             currentList.removeAll { deletedIds.contains(it.id) }
             _recentlyCompletedTasks.value = currentList
+        }
+    }
+
+    private fun scheduleNotifications(taskId: Int, title: String) {
+        val workManager = WorkManager.getInstance(getApplication())
+        val delaysInHours = listOf(24, 48, 72)
+        
+        for (hours in delaysInHours) {
+            val inputData = Data.Builder()
+                .putString("task_title", title)
+                .putInt("notification_hour", hours)
+                .build()
+            
+            val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+                .setInitialDelay(hours.toLong(), TimeUnit.HOURS)
+                .setInputData(inputData)
+                .addTag("task_$taskId")
+                .build()
+                
+            workManager.enqueueUniqueWork(
+                "task_${taskId}_reminder_$hours",
+                ExistingWorkPolicy.REPLACE,
+                workRequest
+            )
         }
     }
 
