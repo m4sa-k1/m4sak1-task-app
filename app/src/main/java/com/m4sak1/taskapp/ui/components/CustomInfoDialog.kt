@@ -16,8 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
+import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.res.stringResource
 import com.m4sak1.taskapp.R
 import kotlinx.coroutines.delay
@@ -50,23 +51,30 @@ fun CustomInfoDialog(
     }
 
     if (showDialog) {
-        Dialog(
+        val view = androidx.compose.ui.platform.LocalView.current
+        val density = androidx.compose.ui.platform.LocalDensity.current
+        val rootWidth = view.rootView.width
+        val rootHeight = view.rootView.height
+
+        Popup(
             onDismissRequest = {
                 animateIn = false
                 if (disableAnimations) onDismissRequest() else onDismissRequest()
             },
-            properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
-        ) {
-            val view = androidx.compose.ui.platform.LocalView.current
-            LaunchedEffect(view) {
-                val window = (view.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window
-                window?.let {
-                    androidx.core.view.WindowCompat.setDecorFitsSystemWindows(it, false)
-                    it.navigationBarColor = android.graphics.Color.TRANSPARENT
-                    it.statusBarColor = android.graphics.Color.TRANSPARENT
+            properties = PopupProperties(clippingEnabled = false, focusable = true, excludeFromSystemGesture = false),
+            popupPositionProvider = remember {
+                object : PopupPositionProvider {
+                    override fun calculatePosition(
+                        anchorBounds: androidx.compose.ui.unit.IntRect,
+                        windowSize: androidx.compose.ui.unit.IntSize,
+                        layoutDirection: androidx.compose.ui.unit.LayoutDirection,
+                        popupContentSize: androidx.compose.ui.unit.IntSize
+                    ): androidx.compose.ui.unit.IntOffset {
+                        return androidx.compose.ui.unit.IntOffset.Zero
+                    }
                 }
             }
-
+        ) {
             AnimatedVisibility(
                 visible = animateIn,
                 enter = if (disableAnimations) EnterTransition.None else fadeIn(animationSpec = tween(250)),
@@ -74,7 +82,10 @@ fun CustomInfoDialog(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .size(
+                            width = with(density) { rootWidth.toDp() },
+                            height = with(density) { rootHeight.toDp() }
+                        )
                         .background(Color.Black.copy(alpha = 0.5f))
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
