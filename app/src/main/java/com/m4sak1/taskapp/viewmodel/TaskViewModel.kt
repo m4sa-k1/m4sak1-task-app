@@ -21,7 +21,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 import androidx.work.Data
-import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
 import com.m4sak1.taskapp.worker.NotificationWorker
@@ -140,7 +140,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     fun addTask(title: String, isStarred: Boolean = false): kotlinx.coroutines.Job? {
         if (title.isBlank()) return null
         return viewModelScope.launch {
-            taskDao.insert(Task(title = title, isStarred = isStarred))
+            val id = taskDao.insert(Task(title = title, isStarred = isStarred))
             TaskAppWidget.forceUpdate(getApplication())
             
             if (_notificationsEnabled.value) {
@@ -151,9 +151,14 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                 val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
                     .setInitialDelay(1, TimeUnit.DAYS)
                     .setInputData(inputData)
+                    .addTag("task_$id")
                     .build()
                     
-                WorkManager.getInstance(getApplication()).enqueue(workRequest)
+                WorkManager.getInstance(getApplication()).enqueueUniqueWork(
+                    "task_$id",
+                    ExistingWorkPolicy.REPLACE,
+                    workRequest
+                )
             }
         }
     }
@@ -181,8 +186,12 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             // 1. Update DB immediately
             taskDao.update(updatedTask)
             TaskAppWidget.forceUpdate(getApplication())
+            
+            val workManager = WorkManager.getInstance(getApplication())
 
             if (newStatus) {
+                workManager.cancelUniqueWork("task_${task.id}")
+                
                 // 2. Handle memory list for 15m delay
                 if (!_hideImmediately.value) {
                     val currentList = _recentlyCompletedTasks.value.toMutableList()
@@ -198,6 +207,22 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                     _recentlyCompletedTasks.value = listAfterDelay
                 }
             } else {
+                if (_notificationsEnabled.value) {
+                    val inputData = Data.Builder()
+                        .putString("task_title", task.title)
+                        .build()
+                    val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+                        .setInitialDelay(1, TimeUnit.DAYS)
+                        .setInputData(inputData)
+                        .addTag("task_${task.id}")
+                        .build()
+                    workManager.enqueueUniqueWork(
+                        "task_${task.id}",
+                        ExistingWorkPolicy.REPLACE,
+                        workRequest
+                    )
+                }
+
                 // 3. Reverting completion: remove from memory list so it appears in DB incomplete flow
                 val currentList = _recentlyCompletedTasks.value.toMutableList()
                 currentList.removeAll { it.id == updatedTask.id }
@@ -210,6 +235,10 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             taskDao.deleteTasks(tasks)
             TaskAppWidget.forceUpdate(getApplication())
+            val workManager = WorkManager.getInstance(getApplication())
+            tasks.forEach { task ->
+                workManager.cancelUniqueWork("task_${task.id}")
+            }
             val deletedIds = tasks.map { it.id }.toSet()
             val currentList = _recentlyCompletedTasks.value.toMutableList()
             currentList.removeAll { deletedIds.contains(it.id) }
