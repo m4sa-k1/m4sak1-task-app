@@ -51,6 +51,8 @@ fun CustomAddDialog(
         }
     }
 
+    val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+
     // Full screen overlay with fade
     AnimatedVisibility(
         visible = visible,
@@ -64,7 +66,10 @@ fun CustomAddDialog(
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
-                    onClick = onDismissRequest
+                    onClick = {
+                        keyboardController?.hide()
+                        onDismissRequest()
+                    }
                 )
         ) {
             Box(
@@ -165,6 +170,7 @@ fun CustomAddDialog(
                                 Button(
                                     onClick = {
                                         if (newTaskTitle.isNotBlank()) {
+                                            keyboardController?.hide()
                                             onAddTask(newTaskTitle, isTaskStarred)
                                         }
                                     },
@@ -227,13 +233,17 @@ fun CustomAddDialog(
                                 horizontalArrangement = Arrangement.End,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                TextButton(onClick = onDismissRequest) {
+                                TextButton(onClick = {
+                                    keyboardController?.hide()
+                                    onDismissRequest()
+                                }) {
                                     Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.primary)
                                 }
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Button(
                                     onClick = {
                                         if (newTaskTitle.isNotBlank()) {
+                                            keyboardController?.hide()
                                             onAddTask(newTaskTitle, isTaskStarred)
                                         }
                                     },
