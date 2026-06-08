@@ -108,90 +108,145 @@ fun CustomAddDialog(
                                 it
                             }
                         }
-                        .padding(horizontal = 24.dp, vertical = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) 32.dp else 24.dp)
+                        .padding(horizontal = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) 16.dp else 24.dp, vertical = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) 16.dp else 24.dp)
                 ) {
-                    Column(horizontalAlignment = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) Alignment.CenterHorizontally else Alignment.Start) {
                     if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) {
-                        // Small drag handle visual
-                        Box(
-                            modifier = Modifier
-                                .width(40.dp)
-                                .height(4.dp)
-                                .clip(RoundedCornerShape(2.dp))
-                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                    }
-                    Text(
-                        text = stringResource(R.string.new_task),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = if (style == com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet) Modifier.fillMaxWidth() else Modifier
-                    )
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    OutlinedTextField(
-                        value = newTaskTitle,
-                        onValueChange = { newTaskTitle = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(focusRequester),
-                        placeholder = { Text(stringResource(R.string.task_placeholder)) },
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp),
-                        trailingIcon = {
-                            IconButton(onClick = { isTaskStarred = !isTaskStarred }) {
-                                Text(
-                                    text = if (isTaskStarred) "★" else "☆",
-                                    fontSize = 24.sp,
-                                    color = if (isTaskStarred) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                )
-                            }
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = if (enterToAdd) ImeAction.Done else ImeAction.Default
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                if (enterToAdd && newTaskTitle.isNotBlank()) {
-                                    onAddTask(newTaskTitle, isTaskStarred)
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            androidx.compose.foundation.text.BasicTextField(
+                                value = newTaskTitle,
+                                onValueChange = { newTaskTitle = it },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequester),
+                                textStyle = androidx.compose.ui.text.TextStyle(
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = 18.sp
+                                ),
+                                keyboardOptions = KeyboardOptions(
+                                    imeAction = if (enterToAdd) ImeAction.Done else ImeAction.Default
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        if (enterToAdd && newTaskTitle.isNotBlank()) {
+                                            onAddTask(newTaskTitle, isTaskStarred)
+                                        }
+                                    }
+                                ),
+                                cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+                                decorationBox = { innerTextField ->
+                                    Box(modifier = Modifier.fillMaxWidth()) {
+                                        if (newTaskTitle.isEmpty()) {
+                                            Text(
+                                                text = stringResource(R.string.task_placeholder),
+                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                                fontSize = 18.sp
+                                            )
+                                        }
+                                        innerTextField()
+                                    }
+                                }
+                            )
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                IconButton(onClick = { isTaskStarred = !isTaskStarred }) {
+                                    Text(
+                                        text = if (isTaskStarred) "★" else "☆",
+                                        fontSize = 28.sp,
+                                        color = if (isTaskStarred) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                    )
+                                }
+                                
+                                Button(
+                                    onClick = {
+                                        if (newTaskTitle.isNotBlank()) {
+                                            onAddTask(newTaskTitle, isTaskStarred)
+                                        }
+                                    },
+                                    enabled = newTaskTitle.isNotBlank(),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                                ) {
+                                    Text(stringResource(R.string.add_task), color = MaterialTheme.colorScheme.onPrimary)
                                 }
                             }
-                        ),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-                        )
-                    )
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        TextButton(onClick = onDismissRequest) {
-                            Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.primary)
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = {
-                                if (newTaskTitle.isNotBlank()) {
-                                    onAddTask(newTaskTitle, isTaskStarred)
+                    } else {
+                        Column(horizontalAlignment = Alignment.Start) {
+                            Text(
+                                text = stringResource(R.string.new_task),
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            OutlinedTextField(
+                                value = newTaskTitle,
+                                onValueChange = { newTaskTitle = it },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequester),
+                                placeholder = { Text(stringResource(R.string.task_placeholder)) },
+                                singleLine = true,
+                                shape = RoundedCornerShape(12.dp),
+                                trailingIcon = {
+                                    IconButton(onClick = { isTaskStarred = !isTaskStarred }) {
+                                        Text(
+                                            text = if (isTaskStarred) "★" else "☆",
+                                            fontSize = 24.sp,
+                                            color = if (isTaskStarred) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                        )
+                                    }
+                                },
+                                keyboardOptions = KeyboardOptions(
+                                    imeAction = if (enterToAdd) ImeAction.Done else ImeAction.Default
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        if (enterToAdd && newTaskTitle.isNotBlank()) {
+                                            onAddTask(newTaskTitle, isTaskStarred)
+                                        }
+                                    }
+                                ),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                                )
+                            )
+                            
+                            Spacer(modifier = Modifier.height(24.dp))
+                            
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                TextButton(onClick = onDismissRequest) {
+                                    Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.primary)
                                 }
-                            },
-                            shape = CircleShape,
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                        ) {
-                            Text(stringResource(R.string.add_task), color = MaterialTheme.colorScheme.onPrimary)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Button(
+                                    onClick = {
+                                        if (newTaskTitle.isNotBlank()) {
+                                            onAddTask(newTaskTitle, isTaskStarred)
+                                        }
+                                    },
+                                    shape = CircleShape,
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                                ) {
+                                    Text(stringResource(R.string.add_task), color = MaterialTheme.colorScheme.onPrimary)
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     }
-}
 }
