@@ -56,6 +56,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _releaseNotificationsEnabled = MutableStateFlow(prefManager.releaseNotificationsEnabled)
     val releaseNotificationsEnabled = _releaseNotificationsEnabled.asStateFlow()
 
+    private val _ignoredReleaseVersion = MutableStateFlow(prefManager.ignoredReleaseVersion)
+    val ignoredReleaseVersion = _ignoredReleaseVersion.asStateFlow()
+
     private val _hasRequestedNotificationPermission = MutableStateFlow(prefManager.hasRequestedNotificationPermission)
     val hasRequestedNotificationPermission = _hasRequestedNotificationPermission.asStateFlow()
 
@@ -164,6 +167,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     fun setReleaseNotificationsEnabled(enabled: Boolean) {
         _releaseNotificationsEnabled.value = enabled
         prefManager.releaseNotificationsEnabled = enabled
+    }
+
+    fun ignoreReleaseVersion(version: String) {
+        _ignoredReleaseVersion.value = version
+        prefManager.ignoredReleaseVersion = version
     }
 
     fun setHasRequestedNotificationPermission(requested: Boolean) {

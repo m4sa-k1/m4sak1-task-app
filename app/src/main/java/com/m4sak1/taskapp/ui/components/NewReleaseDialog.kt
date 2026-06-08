@@ -17,10 +17,11 @@ fun NewReleaseDialog(
     release: GithubRelease,
     visible: Boolean,
     onDismissRequest: () -> Unit,
+    onIgnoreRequest: () -> Unit,
     disableAnimations: Boolean
 ) {
     if (!visible && disableAnimations) return
-    val context = LocalContext.current
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
 
     CustomInfoDialog(
         visible = visible,
@@ -44,13 +45,21 @@ fun NewReleaseDialog(
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/masaki-09/m4sak1-task-app/releases/latest"))
-                    context.startActivity(intent)
+                    try {
+                        uriHandler.openUri("https://github.com/masaki-09/m4sak1-task-app/releases/latest")
+                    } catch (e: Exception) {}
                     onDismissRequest()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("ダウンロードページへ")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedButton(
+                onClick = onIgnoreRequest,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("このバージョンを無視する")
             }
         }
     }

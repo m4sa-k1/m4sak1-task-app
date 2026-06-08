@@ -219,15 +219,6 @@ fun SettingsScreen(
                     )
                 }
             )
-            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-            SettingsItem(
-                title = stringResource(R.string.settings_notifications_test),
-                modifier = Modifier.clickable { 
-                    if (notificationsEnabled) {
-                        viewModel.sendTestNotification()
-                    }
-                }
-            )
             HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             val releaseEnabled by viewModel.releaseNotificationsEnabled.collectAsState()
             SettingsItem(
@@ -237,6 +228,15 @@ fun SettingsScreen(
                         checked = releaseEnabled,
                         onCheckedChange = { viewModel.setReleaseNotificationsEnabled(it) }
                     )
+                }
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            SettingsItem(
+                title = stringResource(R.string.settings_notifications_test),
+                modifier = Modifier.clickable { 
+                    if (notificationsEnabled) {
+                        viewModel.sendTestNotification()
+                    }
                 }
             )
         }
@@ -382,12 +382,16 @@ fun SettingsScreen(
     }
 
     if (showCustomColorDialog) {
-        var customHex by remember { mutableStateOf("") }
+        var r by remember { mutableFloatStateOf(themeController.customAccentColor.red) }
+        var g by remember { mutableFloatStateOf(themeController.customAccentColor.green) }
+        var b by remember { mutableFloatStateOf(themeController.customAccentColor.blue) }
+        val selectedColor = Color(r, g, b)
+
         CustomConfirmDialog(
             title = "カスタム色",
             onConfirm = { 
                 try { 
-                    themeController.setCustomAccentColor(Color(android.graphics.Color.parseColor(customHex)))
+                    themeController.setCustomAccentColor(selectedColor)
                     themeController.setAccentColor(AppAccentColor.Custom)
                     showCustomColorDialog = false
                     showAccentDialog = false
@@ -396,13 +400,37 @@ fun SettingsScreen(
             onDismiss = { showCustomColorDialog = false },
             confirmText = stringResource(R.string.ok)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                OutlinedTextField(
-                    value = customHex,
-                    onValueChange = { if (it.length <= 7) customHex = it },
-                    label = { Text("#RRGGBB") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(selectedColor)
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                Text(text = "R", modifier = Modifier.fillMaxWidth())
+                Slider(
+                    value = r,
+                    onValueChange = { r = it },
+                    colors = SliderDefaults.colors(thumbColor = Color.Red, activeTrackColor = Color.Red)
+                )
+                
+                Text(text = "G", modifier = Modifier.fillMaxWidth())
+                Slider(
+                    value = g,
+                    onValueChange = { g = it },
+                    colors = SliderDefaults.colors(thumbColor = Color.Green, activeTrackColor = Color.Green)
+                )
+                
+                Text(text = "B", modifier = Modifier.fillMaxWidth())
+                Slider(
+                    value = b,
+                    onValueChange = { b = it },
+                    colors = SliderDefaults.colors(thumbColor = Color.Blue, activeTrackColor = Color.Blue)
                 )
             }
         }

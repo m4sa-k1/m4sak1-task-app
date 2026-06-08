@@ -76,13 +76,14 @@ fun MainScreen(
     
     val latestRelease by taskViewModel.latestRelease.collectAsState()
     val releaseNotificationsEnabled by taskViewModel.releaseNotificationsEnabled.collectAsState()
+    val ignoredReleaseVersion by taskViewModel.ignoredReleaseVersion.collectAsState()
     var hasDismissedReleaseDialog by remember { mutableStateOf(false) }
     var showNewReleaseDialog by remember { mutableStateOf(false) }
     
-    LaunchedEffect(latestRelease, releaseNotificationsEnabled) {
+    LaunchedEffect(latestRelease, releaseNotificationsEnabled, ignoredReleaseVersion) {
         if (latestRelease != null && releaseNotificationsEnabled && !hasDismissedReleaseDialog) {
             val releaseVersion = latestRelease!!.tagName.removePrefix("v")
-            if (releaseVersion != BuildConfig.VERSION_NAME) {
+            if (releaseVersion != BuildConfig.VERSION_NAME && releaseVersion != ignoredReleaseVersion) {
                 showNewReleaseDialog = true
             }
         }
@@ -367,6 +368,12 @@ fun MainScreen(
                     release = latestRelease!!,
                     visible = showNewReleaseDialog,
                     onDismissRequest = {
+                        showNewReleaseDialog = false
+                        hasDismissedReleaseDialog = true
+                    },
+                    onIgnoreRequest = {
+                        val version = latestRelease!!.tagName.removePrefix("v")
+                        taskViewModel.ignoreReleaseVersion(version)
                         showNewReleaseDialog = false
                         hasDismissedReleaseDialog = true
                     },
