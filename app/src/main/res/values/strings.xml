@@ -52,7 +52,7 @@
     <string name="blur_on_off">Blur On/Off</string>
     <string name="clear">Clear</string>
     <string name="hex_color_hint">Hex Color Code (e.g., #FF5533)</string>
-    <string name="settings_disable_animations">Disable tab animations</string>
+    <string name="settings_disable_animations">Disable animations</string>
     <string name="settings_enter_to_add">Add task with Enter key</string>
     <string name="settings_notifications">Push Notifications</string>
     <string name="settings_notifications_enable">Enable Push Notifications</string>
@@ -66,4 +66,8 @@
     <string name="settings_disclaimer">Disclaimer</string>
     <string name="disclaimer_text">The creator assumes no responsibility for any damage, loss, or trouble caused by the use of this app. Use at your own risk.</string>
     <string name="settings_glass_mode">Glass Mode</string>
+    <string name="close">Close</string>
+    <string name="add_task_dialog_style">Add Task Style</string>
+    <string name="dialog_style_center">Center</string>
+    <string name="dialog_style_bottom_sheet">Bottom Sheet</string>
 </resources>

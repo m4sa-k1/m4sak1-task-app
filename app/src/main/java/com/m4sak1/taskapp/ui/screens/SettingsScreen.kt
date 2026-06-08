@@ -118,6 +118,13 @@ fun SettingsScreen(
                     )
                 }
             )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            val addDialogStyle by viewModel.addDialogStyle.collectAsState()
+            SettingsItem(
+                title = stringResource(R.string.add_task_dialog_style),
+                contentText = if (addDialogStyle == com.m4sak1.taskapp.data.AppAddDialogStyle.Center) stringResource(R.string.dialog_style_center) else stringResource(R.string.dialog_style_bottom_sheet),
+                modifier = Modifier.clickable { viewModel.setAddDialogStyle(if (addDialogStyle == com.m4sak1.taskapp.data.AppAddDialogStyle.Center) com.m4sak1.taskapp.data.AppAddDialogStyle.BottomSheet else com.m4sak1.taskapp.data.AppAddDialogStyle.Center) }
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -381,7 +388,8 @@ fun SettingsScreen(
         visible = showAboutDialog,
         onDismissRequest = { showAboutDialog = false },
         title = stringResource(R.string.settings_about),
-        confirmText = stringResource(R.string.ok)
+        confirmText = stringResource(R.string.close),
+        disableAnimations = disableAnimations
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
@@ -401,7 +409,8 @@ fun SettingsScreen(
         visible = showDisclaimerDialog,
         onDismissRequest = { showDisclaimerDialog = false },
         title = stringResource(R.string.settings_disclaimer),
-        confirmText = stringResource(R.string.ok)
+        confirmText = stringResource(R.string.close),
+        disableAnimations = disableAnimations
     ) {
         Text(
             text = stringResource(R.string.disclaimer_text),

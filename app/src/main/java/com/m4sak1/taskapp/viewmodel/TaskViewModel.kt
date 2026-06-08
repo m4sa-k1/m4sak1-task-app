@@ -44,6 +44,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _enterToAdd = MutableStateFlow(prefManager.enterToAdd)
     val enterToAdd = _enterToAdd.asStateFlow()
 
+    private val _addDialogStyle = MutableStateFlow(prefManager.addDialogStyle)
+    val addDialogStyle = _addDialogStyle.asStateFlow()
+
     private val _notificationsEnabled = MutableStateFlow(prefManager.notificationsEnabled)
     val notificationsEnabled = _notificationsEnabled.asStateFlow()
 
@@ -104,6 +107,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     fun setEnterToAdd(enabled: Boolean) {
         _enterToAdd.value = enabled
         prefManager.enterToAdd = enabled
+    }
+
+    fun setAddDialogStyle(style: AppAddDialogStyle) {
+        _addDialogStyle.value = style
+        prefManager.addDialogStyle = style
     }
 
     fun setNotificationsEnabled(enabled: Boolean) {
