@@ -141,32 +141,33 @@ fun MainScreen(
         }
         
         val isGlass = themeController.isGlassModeEnabled && bitmap != null && hazeState != null
+        val backgroundModifier = if (isGlass) Modifier.haze(state = hazeState!!) else Modifier
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(if (isGlass) Modifier.haze(state = hazeState!!) else Modifier)
+            modifier = Modifier.fillMaxSize()
         ) {
-            // Base background color (for when no image is set)
-            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
-
-            bitmap?.let {
-                Image(
-                    bitmap = it.asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .blur(themeController.backgroundBlur.dp),
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-            // Uniform overlay across the entire screen (including behind nav bar)
-            if (bitmap != null && !isGlass) {
-                Box(modifier = Modifier.fillMaxSize().background(
-                    if (themeController.isDarkTheme) Color.Black.copy(alpha = 0.45f)
-                    else Color.White.copy(alpha = 0.45f)
-                ))
+            Box(modifier = Modifier.fillMaxSize().then(backgroundModifier)) {
+                // Base background color (for when no image is set)
+                Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+    
+                bitmap?.let {
+                    Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .blur(themeController.backgroundBlur.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+    
+                // Uniform overlay across the entire screen (including behind nav bar)
+                if (bitmap != null && !isGlass) {
+                    Box(modifier = Modifier.fillMaxSize().background(
+                        if (themeController.isDarkTheme) Color.Black.copy(alpha = 0.45f)
+                        else Color.White.copy(alpha = 0.45f)
+                    ))
+                }
             }
 
             // NAVIGATION STRUCTURE
