@@ -2,7 +2,6 @@ package com.m4sak1.taskapp.ui.theme
 
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
-import dev.chrisbanes.haze.HazeState
 
 enum class AppThemeMode { System, Light, Dark }
 enum class AppLanguage { System, English, Japanese, SimplifiedChinese, TraditionalChinese }
@@ -33,13 +32,9 @@ data class ThemeController(
     val setBackgroundPath: (String?) -> Unit,
     val backgroundBlur: Float,
     val setBackgroundBlur: (Float) -> Unit,
-    val isGlassModeEnabled: Boolean,
-    val setGlassModeEnabled: (Boolean) -> Unit,
     val isDarkTheme: Boolean
 )
 
 val LocalThemeController = compositionLocalOf<ThemeController> {
     error("No ThemeController provided")
 }
-
-val LocalHazeState = compositionLocalOf<HazeState?> { null }

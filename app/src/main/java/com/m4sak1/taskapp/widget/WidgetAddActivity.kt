@@ -19,8 +19,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.glance.appwidget.updateAll
 import com.m4sak1.taskapp.R
 import com.m4sak1.taskapp.ui.theme.TaskAppTheme
+import com.m4sak1.taskapp.ui.components.CustomAddDialog
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 class WidgetAddActivity : ComponentActivity() {
     private val taskViewModel: TaskViewModel by viewModels()
@@ -36,64 +38,27 @@ class WidgetAddActivity : ComponentActivity() {
         setContent {
             TaskAppTheme {
                 val scope = rememberCoroutineScope()
-                var newTaskTitle by remember { mutableStateOf("") }
-                var isTaskStarred by remember { mutableStateOf(false) }
-                val focusRequester = remember { FocusRequester() }
-                
-                LaunchedEffect(Unit) {
-                    kotlinx.coroutines.delay(100)
-                    try {
-                        focusRequester.requestFocus()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
+                var visible by remember { mutableStateOf(true) }
+                val enterToAdd by taskViewModel.enterToAdd.collectAsState()
 
-                AlertDialog(
-                    onDismissRequest = { finish() },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                if (newTaskTitle.isNotBlank()) {
-                                    scope.launch {
-                                        taskViewModel.addTask(newTaskTitle, isTaskStarred)?.join()
-                                        finish()
-                                    }
-                                }
-                            },
-                            shape = CircleShape,
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onBackground)
-                        ) {
-                            Text(stringResource(R.string.add_task), color = MaterialTheme.colorScheme.background)
+                CustomAddDialog(
+                    visible = visible,
+                    onDismissRequest = {
+                        visible = false
+                        scope.launch {
+                            delay(200) // wait for exit animation
+                            finish()
                         }
                     },
-                    dismissButton = {
-                        TextButton(onClick = { finish() }) {
-                            Text(stringResource(R.string.cancel))
+                    onAddTask = { title, starred ->
+                        visible = false
+                        scope.launch {
+                            taskViewModel.addTask(title, starred)?.join()
+                            delay(200) // wait for exit animation
+                            finish()
                         }
                     },
-                    title = { Text(stringResource(R.string.new_task)) },
-                    text = {
-                        OutlinedTextField(
-                            value = newTaskTitle,
-                            onValueChange = { newTaskTitle = it },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .focusRequester(focusRequester),
-                            placeholder = { Text(stringResource(R.string.task_placeholder)) },
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
-                            trailingIcon = {
-                                IconButton(onClick = { isTaskStarred = !isTaskStarred }) {
-                                    Text(
-                                        text = if (isTaskStarred) "★" else "☆",
-                                        fontSize = 24.sp,
-                                        color = if (isTaskStarred) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                    )
-                                }
-                            }
-                        )
-                    }
+                    enterToAdd = enterToAdd
                 )
             }
         }

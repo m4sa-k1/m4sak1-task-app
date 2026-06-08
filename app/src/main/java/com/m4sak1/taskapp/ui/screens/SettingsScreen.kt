@@ -28,15 +28,14 @@ import androidx.compose.ui.platform.LocalContext
 import com.m4sak1.taskapp.BuildConfig
 import com.m4sak1.taskapp.MainActivity
 import com.m4sak1.taskapp.R
-import com.m4sak1.taskapp.findActivity
 import com.m4sak1.taskapp.ui.components.CustomConfirmDialog
+import com.m4sak1.taskapp.ui.components.CustomInfoDialog
 import com.m4sak1.taskapp.ui.theme.AppAccentColor
 import com.m4sak1.taskapp.ui.theme.AppLanguage
 import com.m4sak1.taskapp.ui.theme.AppThemeMode
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
-import com.m4sak1.taskapp.ui.theme.LocalHazeState
+import com.m4sak1.taskapp.ui.theme.LocalThemeController
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
-import dev.chrisbanes.haze.hazeChild
 import androidx.compose.foundation.border
 
 @Composable
@@ -146,25 +145,13 @@ fun SettingsScreen(
                     if (themeController.backgroundPath != null) {
                         TextButton(onClick = { 
                             themeController.setBackgroundPath(null)
-                            // Disable glass mode automatically when background is cleared
-                            themeController.setGlassModeEnabled(false)
                         }) {
                             Text(stringResource(R.string.clear), color = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
             )
-            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-            SettingsItem(
-                title = stringResource(R.string.settings_glass_mode),
-                trailingContent = {
-                    Switch(
-                        checked = themeController.isGlassModeEnabled,
-                        onCheckedChange = { themeController.setGlassModeEnabled(it) },
-                        enabled = themeController.backgroundPath != null
-                    )
-                }
-            )
+
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
                 title = stringResource(R.string.settings_edit_home),
@@ -389,31 +376,36 @@ fun SettingsScreen(
         }
     }
 
-    if (showAboutDialog) {
-        CustomConfirmDialog(
-            title = stringResource(R.string.confirm),
-            onConfirm = { showAboutDialog = false },
-            onDismiss = { showAboutDialog = false },
-            confirmText = stringResource(R.string.ok)
-        ) {
-            Column {
-                Text("m4 task")
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(stringResource(R.string.maintained_by))
-            }
+    CustomInfoDialog(
+        visible = showAboutDialog,
+        onDismissRequest = { showAboutDialog = false },
+        title = stringResource(R.string.settings_about),
+        confirmText = stringResource(R.string.ok)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                "m4 task",
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.maintained_by),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
         }
     }
 
-    if (showDisclaimerDialog) {
-        AlertDialog(
-            onDismissRequest = { showDisclaimerDialog = false },
-            title = { Text(text = stringResource(R.string.settings_disclaimer), fontWeight = FontWeight.Bold) },
-            text = { Text(text = stringResource(R.string.disclaimer_text)) },
-            confirmButton = {
-                TextButton(onClick = { showDisclaimerDialog = false }) {
-                    Text(text = "OK")
-                }
-            }
+    CustomInfoDialog(
+        visible = showDisclaimerDialog,
+        onDismissRequest = { showDisclaimerDialog = false },
+        title = stringResource(R.string.settings_disclaimer),
+        confirmText = stringResource(R.string.ok)
+    ) {
+        Text(
+            text = stringResource(R.string.disclaimer_text),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            lineHeight = 22.sp
         )
     }
 
@@ -460,32 +452,11 @@ private fun getLanguageLabel(language: AppLanguage): String = when (language) {
 
 @Composable
 fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
-    val themeController = LocalThemeController.current
-    val hazeState = LocalHazeState.current
-    val isGlass = themeController.isGlassModeEnabled && hazeState != null
-
-    val containerModifier = if (isGlass) {
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .hazeChild(state = hazeState!!)
-            .background(
-                if (themeController.isDarkTheme) Color.Black.copy(alpha = 0.25f)
-                else Color.White.copy(alpha = 0.4f)
-            )
-            .border(
-                1.dp,
-                if (themeController.isDarkTheme) Color.White.copy(alpha = 0.1f) else Color.White.copy(alpha = 0.5f),
-                RoundedCornerShape(16.dp)
-            )
-            .padding(vertical = 4.dp)
-    } else {
-        Modifier
+    val containerModifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
             .padding(vertical = 4.dp)
-    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(

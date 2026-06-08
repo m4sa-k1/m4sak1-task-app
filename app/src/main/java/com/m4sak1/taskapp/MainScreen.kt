@@ -27,7 +27,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import dev.chrisbanes.haze.haze
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -39,9 +38,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.m4sak1.taskapp.ui.components.FloatingBottomNav
+import com.m4sak1.taskapp.ui.components.CustomAddDialog
 import com.m4sak1.taskapp.ui.screens.*
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
-import com.m4sak1.taskapp.ui.theme.LocalHazeState
 import com.m4sak1.taskapp.viewmodel.TaskViewModel
 import kotlinx.coroutines.launch
 import java.io.File
@@ -122,8 +121,6 @@ fun MainScreen(
         }
     }
 
-    val hazeState = LocalHazeState.current
-    
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.Transparent
@@ -140,13 +137,10 @@ fun MainScreen(
             } else null
         }
         
-        val isGlass = themeController.isGlassModeEnabled && bitmap != null && hazeState != null
-        val backgroundModifier = if (isGlass) Modifier.haze(state = hazeState!!) else Modifier
-
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            Box(modifier = Modifier.fillMaxSize().then(backgroundModifier)) {
+            Box(modifier = Modifier.fillMaxSize()) {
                 // Base background color (for when no image is set)
                 Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
     
@@ -162,7 +156,7 @@ fun MainScreen(
                 }
     
                 // Uniform overlay across the entire screen (including behind nav bar)
-                if (bitmap != null && !isGlass) {
+                if (bitmap != null) {
                     Box(modifier = Modifier.fillMaxSize().background(
                         if (themeController.isDarkTheme) Color.Black.copy(alpha = 0.45f)
                         else Color.White.copy(alpha = 0.45f)
@@ -338,79 +332,15 @@ fun MainScreen(
             }
 
             val enterToAdd by taskViewModel.enterToAdd.collectAsState()
-            if (showAddDialog) {
-                var isTaskStarred by remember { mutableStateOf(false) }
-                val focusRequester = remember { FocusRequester() }
-                
-                LaunchedEffect(Unit) {
-                    kotlinx.coroutines.delay(100)
-                    try {
-                        focusRequester.requestFocus()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-                
-                AlertDialog(
-                    onDismissRequest = { showAddDialog = false },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                if (newTaskTitle.isNotBlank()) {
-                                    taskViewModel.addTask(newTaskTitle, isTaskStarred)
-                                    newTaskTitle = ""
-                                    showAddDialog = false
-                                }
-                            },
-                            shape = CircleShape,
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onBackground)
-                        ) {
-                            Text(stringResource(R.string.add_task), color = MaterialTheme.colorScheme.background)
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showAddDialog = false }) {
-                            Text(stringResource(R.string.cancel))
-                        }
-                    },
-                    title = { Text(stringResource(R.string.new_task)) },
-                    text = {
-                        OutlinedTextField(
-                            value = newTaskTitle,
-                            onValueChange = { newTaskTitle = it },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .focusRequester(focusRequester),
-                            placeholder = { Text(stringResource(R.string.task_placeholder)) },
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
-                            trailingIcon = {
-                                IconButton(onClick = { isTaskStarred = !isTaskStarred }) {
-                                    Text(
-                                        text = if (isTaskStarred) "★" else "☆",
-                                        fontSize = 24.sp,
-                                        color = if (isTaskStarred) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                    )
-                                }
-                            },
-                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                                imeAction = if (enterToAdd) androidx.compose.ui.text.input.ImeAction.Done else androidx.compose.ui.text.input.ImeAction.Default
-                            ),
-                            keyboardActions = androidx.compose.foundation.text.KeyboardActions(
-                                onDone = {
-                                    if (enterToAdd && newTaskTitle.isNotBlank()) {
-                                        taskViewModel.addTask(newTaskTitle, isTaskStarred)
-                                        newTaskTitle = ""
-                                        showAddDialog = false
-                                    }
-                                }
-                            )
-                        )
-                    },
-                    shape = RoundedCornerShape(24.dp),
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            }
+            CustomAddDialog(
+                visible = showAddDialog,
+                onDismissRequest = { showAddDialog = false },
+                onAddTask = { title, starred ->
+                    taskViewModel.addTask(title, starred)
+                    showAddDialog = false
+                },
+                enterToAdd = enterToAdd
+            )
         }
     }
 }

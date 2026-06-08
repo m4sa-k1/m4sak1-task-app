@@ -26,6 +26,7 @@ import androidx.glance.layout.*
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.text.FontWeight
+import com.m4sak1.taskapp.MainActivity
 import com.m4sak1.taskapp.R
 import com.m4sak1.taskapp.data.AppDatabase
 import com.m4sak1.taskapp.data.PreferenceManager
@@ -96,6 +97,7 @@ class TaskAppWidget : GlanceAppWidget() {
                 .appWidgetBackground()
                 .background(Color(colors.surface.value))
                 .cornerRadius(16.dp)
+                .clickable(onClick = actionStartActivity<MainActivity>())
                 .padding(16.dp),
         ) {
             // Header
