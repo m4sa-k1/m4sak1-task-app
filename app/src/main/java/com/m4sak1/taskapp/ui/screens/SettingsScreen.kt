@@ -412,15 +412,9 @@ fun SettingsScreen(
 
     if (showRestoreConfirm) {
         CustomConfirmDialog(
-            title = stringResource(R.string.settings_restore_defaults),
+            title = stringResource(R.string.confirm),
             onConfirm = {
-                themeController.setThemeMode(AppThemeMode.System)
-                themeController.setAppLanguage(AppLanguage.System)
-                themeController.setAccentColor(AppAccentColor.Blue)
-                themeController.setCustomAccentColor(Color(0xFF3B82F6))
-                themeController.setBackgroundPath(null)
-                themeController.setBackgroundBlur(0f)
-                
+                onRestore()
                 showRestoreConfirm = false
             },
             onDismiss = { showRestoreConfirm = false },
@@ -428,7 +422,8 @@ fun SettingsScreen(
             dismissText = stringResource(R.string.cancel),
             confirmColor = MaterialTheme.colorScheme.error
         ) {
-            Text(stringResource(R.string.restore_defaults_confirm))
+            Text(stringResource(R.string.restore_warning))
+        }
         }
     }
 }
