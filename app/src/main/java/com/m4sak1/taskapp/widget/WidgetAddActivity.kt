@@ -17,6 +17,8 @@ class WidgetAddActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        @Suppress("DEPRECATION")
+        overridePendingTransition(0, 0)
         
         // Ensure transparent background for the Activity window
         window.statusBarColor = android.graphics.Color.TRANSPARENT
@@ -45,6 +47,8 @@ class WidgetAddActivity : ComponentActivity() {
                         scope.launch {
                             delay(200) // allow exit animation to play
                             finish()
+                            @Suppress("DEPRECATION")
+                            overridePendingTransition(0, 0)
                         }
                     },
                     onAddTask = { title, starred ->
@@ -53,6 +57,8 @@ class WidgetAddActivity : ComponentActivity() {
                             showDialog = false
                             delay(200)
                             finish()
+                            @Suppress("DEPRECATION")
+                            overridePendingTransition(0, 0)
                         }
                     },
                     enterToAdd = enterToAdd,
