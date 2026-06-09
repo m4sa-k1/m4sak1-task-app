@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">m4 task</string>
     <string name="tab_home">ホーム</string>
     <string name="tab_stats">統計</string>
     <string name="tab_settings">設定</string>
