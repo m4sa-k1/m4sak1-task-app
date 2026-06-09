@@ -17,6 +17,7 @@ val verMajor = versionProps.getProperty("major").toInt()
 val verMinor = versionProps.getProperty("minor").toInt()
 val verPatch = versionProps.getProperty("patch").toInt()
 val verBuild = versionProps.getProperty("build").toInt()
+val verBeta = versionProps.getProperty("beta_version")?.toIntOrNull()
 
 android {
     namespace = "com.m4sak1.taskapp"
@@ -27,7 +28,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = verBuild
-        versionName = "$verMajor.$verMinor.$verPatch"
+        versionName = if (verBeta != null) "Beta1.$verBeta" else "$verMajor.$verMinor.$verPatch"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
