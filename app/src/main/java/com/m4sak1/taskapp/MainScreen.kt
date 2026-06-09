@@ -275,7 +275,8 @@ fun MainScreen(
                                         HorizontalPager(
                                             state = pagerState, 
                                             modifier = Modifier.fillMaxSize(),
-                                            beyondBoundsPageCount = 2
+                                            beyondBoundsPageCount = 2,
+                                            userScrollEnabled = !disableAnimations
                                         ) { page ->
                                             when (page) {
                                                 0 -> HomeScreen(taskViewModel)
