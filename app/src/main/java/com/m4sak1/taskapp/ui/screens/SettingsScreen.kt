@@ -507,53 +507,49 @@ fun SettingsScreen(
     if (showFabAnimDialog) {
         val disableAnimationsState by viewModel.disableAnimations.collectAsState()
         val fabAnimationDirectionState by viewModel.fabAnimationDirection.collectAsState()
-        com.m4sak1.taskapp.ui.components.CustomInfoDialog(
+        CustomConfirmDialog(
             visible = showFabAnimDialog,
             title = stringResource(R.string.settings_fab_animation),
-            onDismissRequest = { showFabAnimDialog = false },
+            onConfirm = { showFabAnimDialog = false },
+            onDismiss = { showFabAnimDialog = false },
+            confirmText = stringResource(R.string.ok),
             disableAnimations = disableAnimationsState
         ) {
-            if (disableAnimationsState) {
-                Text(
-                    text = "アニメーションが無効化されているため、この設定は適用されません",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
-            val options = listOf(
-                com.m4sak1.taskapp.data.FabAnimationDirection.Up to stringResource(R.string.fab_anim_up),
-                com.m4sak1.taskapp.data.FabAnimationDirection.Down to stringResource(R.string.fab_anim_down),
-                com.m4sak1.taskapp.data.FabAnimationDirection.Left to stringResource(R.string.fab_anim_left),
-                com.m4sak1.taskapp.data.FabAnimationDirection.Right to stringResource(R.string.fab_anim_right),
-                com.m4sak1.taskapp.data.FabAnimationDirection.None to stringResource(R.string.fab_anim_none)
-            )
-            
-            options.forEach { (direction, label) ->
-                val selected = fabAnimationDirectionState == direction
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable {
-                            viewModel.updateFabAnimationDirection(direction)
-                            showFabAnimDialog = false
-                        }
-                        .background(if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+            Column {
+                if (disableAnimationsState) {
                     Text(
-                        text = label,
-                        color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(1f)
+                        text = "アニメーションが無効化されているため、この設定は適用されません",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
-                    if (selected) {
-                        Icon(
-                            Icons.Filled.Check,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                }
+                val options = listOf(
+                    com.m4sak1.taskapp.data.FabAnimationDirection.Up to stringResource(R.string.fab_anim_up),
+                    com.m4sak1.taskapp.data.FabAnimationDirection.Down to stringResource(R.string.fab_anim_down),
+                    com.m4sak1.taskapp.data.FabAnimationDirection.Left to stringResource(R.string.fab_anim_left),
+                    com.m4sak1.taskapp.data.FabAnimationDirection.Right to stringResource(R.string.fab_anim_right),
+                    com.m4sak1.taskapp.data.FabAnimationDirection.None to stringResource(R.string.fab_anim_none)
+                )
+                
+                options.forEach { (direction, label) ->
+                    val selected = fabAnimationDirectionState == direction
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                viewModel.updateFabAnimationDirection(direction)
+                                showFabAnimDialog = false
+                            }
+                            .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(selected = selected, onClick = null)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = label,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodyLarge
                         )
                     }
                 }
