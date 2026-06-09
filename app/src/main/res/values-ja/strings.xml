@@ -40,7 +40,7 @@
     <string name="restore_warning">注意: データを復元すると、現在のすべてのタスクと設定が上書きされます。この操作は取り消せません。続行してもよろしいですか？</string>
     <string name="ok">OK</string>
     <string name="maintained_by">m4sak1 によってメンテナンスされています</string>
-    <string name="system_default">システムデフォルト</string>
+    <string name="system_default">システム</string>
     <string name="theme_light">ライトモード</string>
     <string name="theme_dark">ダークモード</string>
     <string name="customize">カスタマイズ</string>

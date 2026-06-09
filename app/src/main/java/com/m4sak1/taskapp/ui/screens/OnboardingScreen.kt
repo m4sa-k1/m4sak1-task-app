@@ -176,11 +176,11 @@ fun OnboardingLanguageStep(
                     Text(
                         text = label,
                         modifier = Modifier.weight(1f),
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                        fontWeight = FontWeight.Medium,
+                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     if (isSelected) {
-                        Icon(Icons.Default.Check, contentDescription = null, tint = Color.White)
+                        Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
             }
@@ -768,24 +768,29 @@ fun EnterToAddMock(
 
     var showTask by remember { mutableStateOf(false) }
     var keyPress by remember { mutableStateOf(false) }
+    var showStrikethrough by remember { mutableStateOf(false) }
     
     LaunchedEffect(isSelected) {
         if (isSelected) {
             while(true) {
                 showTask = false
                 keyPress = false
+                showStrikethrough = false
                 delay(800)
                 keyPress = true
                 delay(150) // Reduced key press time so it feels faster and snappy
                 keyPress = false
                 if (isEnter) {
                     showTask = true
+                } else {
+                    showStrikethrough = true
                 }
                 delay(1200) // Keep the task visible for a while before looping
             }
         } else {
             showTask = false
             keyPress = false
+            showStrikethrough = false
         }
     }
 
@@ -834,7 +839,22 @@ fun EnterToAddMock(
                             .clip(RoundedCornerShape(4.dp))
                             .graphicsLayer(scaleX = keyScale, scaleY = keyScale)
                             .background(keyColor)
-                    )
+                    ) {
+                        if (!isEnter) {
+                            val lineProgress by animateFloatAsState(targetValue = if (showStrikethrough) 1f else 0f, animationSpec = tween(300))
+                            androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
+                                if (lineProgress > 0f) {
+                                    drawLine(
+                                        color = Color.Red,
+                                        start = androidx.compose.ui.geometry.Offset(size.width, 0f),
+                                        end = androidx.compose.ui.geometry.Offset(size.width * (1f - lineProgress), size.height * lineProgress),
+                                        strokeWidth = 3.dp.toPx(),
+                                        cap = androidx.compose.ui.graphics.StrokeCap.Round
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

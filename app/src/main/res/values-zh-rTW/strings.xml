@@ -27,6 +27,8 @@
     <string name="settings_immediate_hide_desc">關閉時：15分後或退出時隱藏</string>
     <string name="confirm">繼續</string>
     <string name="delete">刪除</string>
+    <string name="settings_system_theme">跟隨系統主題</string>
+    <string name="settings_release_notifications">新版本應用內通知</string>
     <string name="settings_edit_home">編輯首頁</string>
     <string name="save">儲存</string>
     <string name="reset_default">恢復預設</string>

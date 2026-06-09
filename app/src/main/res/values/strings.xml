@@ -39,7 +39,7 @@
     <string name="restore_warning">Restoring a backup will overwrite all current tasks and settings. This action cannot be undone. Are you sure you want to continue?</string>
     <string name="ok">OK</string>
     <string name="maintained_by">Maintained by m4sak1</string>
-    <string name="system_default">System Default</string>
+    <string name="system_default">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="customize">Customize</string>
