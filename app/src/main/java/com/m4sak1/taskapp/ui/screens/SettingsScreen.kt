@@ -314,178 +314,178 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(100.dp))
     }
 
-    if (showThemeDialog) {
-        CustomConfirmDialog(
-            title = stringResource(R.string.settings_dark_mode),
-            onConfirm = { showThemeDialog = false },
-            onDismiss = { showThemeDialog = false },
-            confirmText = stringResource(R.string.ok)
-        ) {
-            Column {
-                AppThemeMode.entries.forEach { mode ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                themeController.setThemeMode(mode)
-                                showThemeDialog = false
-                            }
-                            .padding(vertical = 12.dp)
-                    ) {
-                        RadioButton(selected = themeController.themeMode == mode, onClick = null)
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(text = getThemeModeName(mode))
-                    }
-                }
-            }
-        }
-    }
-
-    if (showAccentDialog) {
-        CustomConfirmDialog(
-            title = stringResource(R.string.settings_accent_color),
-            onConfirm = { showAccentDialog = false },
-            onDismiss = { showAccentDialog = false },
-            confirmText = stringResource(R.string.ok)
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                val accents = AppAccentColor.entries
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    accents.take(5).forEach { accent ->
-                        AccentColorCircle(
-                            accent = accent,
-                            isSelected = themeController.accentColor == accent,
-                            onClick = {
-                                themeController.setAccentColor(accent)
-                                if (accent != AppAccentColor.Custom) showAccentDialog = false
-                            }
-                        )
-                    }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    accents.drop(5).take(5).forEach { accent ->
-                        AccentColorCircle(
-                            accent = accent,
-                            isSelected = themeController.accentColor == accent,
-                            onClick = {
-                                if (accent == AppAccentColor.Custom) {
-                                    showCustomColorDialog = true
-                                } else {
-                                    themeController.setAccentColor(accent)
-                                    showAccentDialog = false
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    if (showCustomColorDialog) {
-        var r by remember { mutableFloatStateOf(themeController.customAccentColor.red) }
-        var g by remember { mutableFloatStateOf(themeController.customAccentColor.green) }
-        var b by remember { mutableFloatStateOf(themeController.customAccentColor.blue) }
-        val selectedColor = Color(r, g, b)
-
-        CustomConfirmDialog(
-            title = "カスタム色",
-            onConfirm = { 
-                try { 
-                    themeController.setCustomAccentColor(selectedColor)
-                    themeController.setAccentColor(AppAccentColor.Custom)
-                    showCustomColorDialog = false
-                    showAccentDialog = false
-                } catch (e: Exception) {}
-            },
-            onDismiss = { showCustomColorDialog = false },
-            confirmText = stringResource(R.string.ok)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
+    CustomConfirmDialog(
+        visible = showThemeDialog,
+        title = stringResource(R.string.settings_dark_mode),
+        onConfirm = { showThemeDialog = false },
+        onDismiss = { showThemeDialog = false },
+        confirmText = stringResource(R.string.ok),
+        disableAnimations = disableAnimations
+    ) {
+        Column {
+            AppThemeMode.entries.forEach { mode ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(selectedColor)
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                Text(text = "R", modifier = Modifier.fillMaxWidth())
-                Slider(
-                    value = r,
-                    onValueChange = { r = it },
-                    colors = SliderDefaults.colors(thumbColor = Color.Red, activeTrackColor = Color.Red)
-                )
-                
-                Text(text = "G", modifier = Modifier.fillMaxWidth())
-                Slider(
-                    value = g,
-                    onValueChange = { g = it },
-                    colors = SliderDefaults.colors(thumbColor = Color.Green, activeTrackColor = Color.Green)
-                )
-                
-                Text(text = "B", modifier = Modifier.fillMaxWidth())
-                Slider(
-                    value = b,
-                    onValueChange = { b = it },
-                    colors = SliderDefaults.colors(thumbColor = Color.Blue, activeTrackColor = Color.Blue)
-                )
+                        .fillMaxWidth()
+                        .clickable {
+                            themeController.setThemeMode(mode)
+                            showThemeDialog = false
+                        }
+                        .padding(vertical = 12.dp)
+                ) {
+                    RadioButton(selected = themeController.themeMode == mode, onClick = null)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(text = getThemeModeName(mode))
+                }
             }
         }
     }
 
-    if (showLanguageDialog) {
-        CustomConfirmDialog(
-            title = stringResource(R.string.settings_language),
-            onConfirm = { showLanguageDialog = false },
-            onDismiss = { showLanguageDialog = false },
-            confirmText = stringResource(R.string.ok)
+    CustomConfirmDialog(
+        visible = showAccentDialog,
+        title = stringResource(R.string.settings_accent_color),
+        onConfirm = { showAccentDialog = false },
+        onDismiss = { showAccentDialog = false },
+        confirmText = stringResource(R.string.ok),
+        disableAnimations = disableAnimations
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column {
-                AppLanguage.entries.forEach { lang ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                themeController.setAppLanguage(lang)
-                                showLanguageDialog = false
+            val accents = AppAccentColor.entries
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                accents.take(5).forEach { accent ->
+                    AccentColorCircle(
+                        accent = accent,
+                        isSelected = themeController.accentColor == accent,
+                        onClick = {
+                            themeController.setAccentColor(accent)
+                            if (accent != AppAccentColor.Custom) showAccentDialog = false
+                        }
+                    )
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                accents.drop(5).take(5).forEach { accent ->
+                    AccentColorCircle(
+                        accent = accent,
+                        isSelected = themeController.accentColor == accent,
+                        onClick = {
+                            if (accent == AppAccentColor.Custom) {
+                                showCustomColorDialog = true
+                            } else {
+                                themeController.setAccentColor(accent)
+                                showAccentDialog = false
                             }
-                            .padding(vertical = 12.dp)
-                        ) {
-                        RadioButton(selected = themeController.appLanguage == lang, onClick = null)
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(text = getLanguageLabel(lang))
-                    }
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    var r by remember { mutableFloatStateOf(themeController.customAccentColor.red) }
+    var g by remember { mutableFloatStateOf(themeController.customAccentColor.green) }
+    var b by remember { mutableFloatStateOf(themeController.customAccentColor.blue) }
+    val selectedColor = Color(r, g, b)
+
+    CustomConfirmDialog(
+        visible = showCustomColorDialog,
+        title = "カスタム色",
+        onConfirm = { 
+            try { 
+                themeController.setCustomAccentColor(selectedColor)
+                themeController.setAccentColor(AppAccentColor.Custom)
+                showCustomColorDialog = false
+                showAccentDialog = false
+            } catch (e: Exception) {}
+        },
+        onDismiss = { showCustomColorDialog = false },
+        confirmText = stringResource(R.string.ok),
+        disableAnimations = disableAnimations
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(selectedColor)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Text(text = "R", modifier = Modifier.fillMaxWidth())
+            Slider(
+                value = r,
+                onValueChange = { r = it },
+                colors = SliderDefaults.colors(thumbColor = Color.Red, activeTrackColor = Color.Red)
+            )
+            
+            Text(text = "G", modifier = Modifier.fillMaxWidth())
+            Slider(
+                value = g,
+                onValueChange = { g = it },
+                colors = SliderDefaults.colors(thumbColor = Color.Green, activeTrackColor = Color.Green)
+            )
+            
+            Text(text = "B", modifier = Modifier.fillMaxWidth())
+            Slider(
+                value = b,
+                onValueChange = { b = it },
+                colors = SliderDefaults.colors(thumbColor = Color.Blue, activeTrackColor = Color.Blue)
+            )
+        }
+    }
+
+    CustomConfirmDialog(
+        visible = showLanguageDialog,
+        title = stringResource(R.string.settings_language),
+        onConfirm = { showLanguageDialog = false },
+        onDismiss = { showLanguageDialog = false },
+        confirmText = stringResource(R.string.ok),
+        disableAnimations = disableAnimations
+    ) {
+        Column {
+            AppLanguage.entries.forEach { lang ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            themeController.setAppLanguage(lang)
+                            showLanguageDialog = false
+                        }
+                        .padding(vertical = 12.dp)
+                    ) {
+                    RadioButton(selected = themeController.appLanguage == lang, onClick = null)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(text = getLanguageLabel(lang))
                 }
             }
         }
     }
 
 
-    if (showRestoreConfirm) {
-        CustomConfirmDialog(
-            title = stringResource(R.string.confirm),
-            onConfirm = {
-                onRestore()
-                showRestoreConfirm = false
-            },
-            onDismiss = { showRestoreConfirm = false },
-            confirmText = stringResource(R.string.confirm),
-            dismissText = stringResource(R.string.cancel),
-            confirmColor = MaterialTheme.colorScheme.error
-        ) {
-            Text(stringResource(R.string.restore_warning))
-        }
-        }
+    CustomConfirmDialog(
+        visible = showRestoreConfirm,
+        title = stringResource(R.string.confirm),
+        onConfirm = {
+            onRestore()
+            showRestoreConfirm = false
+        },
+        onDismiss = { showRestoreConfirm = false },
+        confirmText = stringResource(R.string.confirm),
+        dismissText = stringResource(R.string.cancel),
+        confirmColor = MaterialTheme.colorScheme.error,
+        disableAnimations = disableAnimations
+    ) {
+        Text(stringResource(R.string.restore_warning))
+    }
     }
 }
 
