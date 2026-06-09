@@ -47,6 +47,9 @@ fun SettingsScreen(
     onBackup: () -> Unit,
     onRestore: () -> Unit,
     onPickBackground: () -> Unit,
+    onShowAbout: () -> Unit = {},
+    onShowDisclaimer: () -> Unit = {},
+    onShowChangelog: () -> Unit = {},
     scrollState: androidx.compose.foundation.ScrollState = androidx.compose.foundation.rememberScrollState(),
     onDialogVisibilityChanged: (Boolean) -> Unit = {}
 ) {
@@ -54,16 +57,13 @@ fun SettingsScreen(
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showAccentDialog by remember { mutableStateOf(false) }
-    var showAboutDialog by remember { mutableStateOf(false) }
-    var showDisclaimerDialog by remember { mutableStateOf(false) }
-    var showChangelogDialog by remember { mutableStateOf(false) }
     var showRestoreConfirm by remember { mutableStateOf(false) }
     var showCustomColorDialog by remember { mutableStateOf(false) }
     val hideImmediately by viewModel.hideImmediately.collectAsState()
     val disableAnimations by viewModel.disableAnimations.collectAsState()
     val enterToAdd by viewModel.enterToAdd.collectAsState()
 
-    val anyDialogVisible = showThemeDialog || showLanguageDialog || showAccentDialog || showAboutDialog || showDisclaimerDialog || showChangelogDialog || showRestoreConfirm || showCustomColorDialog
+    val anyDialogVisible = showThemeDialog || showLanguageDialog || showAccentDialog || showRestoreConfirm || showCustomColorDialog
     LaunchedEffect(anyDialogVisible) {
         onDialogVisibilityChanged(anyDialogVisible)
     }
@@ -267,7 +267,7 @@ fun SettingsScreen(
             SettingsItem(
                 title = stringResource(R.string.settings_version), 
                 contentText = BuildConfig.VERSION_NAME,
-                modifier = Modifier.clickable { showChangelogDialog = true }
+                modifier = Modifier.clickable { onShowChangelog() }
             )
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
@@ -283,12 +283,12 @@ fun SettingsScreen(
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
                 title = stringResource(R.string.settings_about),
-                modifier = Modifier.clickable { showAboutDialog = true }
+                modifier = Modifier.clickable { onShowAbout() }
             )
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             SettingsItem(
                 title = stringResource(R.string.settings_disclaimer),
-                modifier = Modifier.clickable { showDisclaimerDialog = true }
+                modifier = Modifier.clickable { onShowDisclaimer() }
             )
         }
 
@@ -470,47 +470,6 @@ fun SettingsScreen(
         }
     }
 
-    CustomInfoDialog(
-        visible = showAboutDialog,
-        onDismissRequest = { showAboutDialog = false },
-        title = stringResource(R.string.settings_about),
-        confirmText = stringResource(R.string.close),
-        disableAnimations = disableAnimations
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                "m4 task",
-                fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                stringResource(R.string.maintained_by),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
-        }
-    }
-
-    CustomInfoDialog(
-        visible = showDisclaimerDialog,
-        onDismissRequest = { showDisclaimerDialog = false },
-        title = stringResource(R.string.settings_disclaimer),
-        confirmText = stringResource(R.string.close),
-        disableAnimations = disableAnimations
-    ) {
-        Text(
-            text = stringResource(R.string.disclaimer_text),
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-    }
-
-    com.m4sak1.taskapp.ui.components.ReleaseHistoryDialog(
-        visible = showChangelogDialog,
-        onDismissRequest = { showChangelogDialog = false },
-        disableAnimations = disableAnimations
-    )
 
     if (showRestoreConfirm) {
         CustomConfirmDialog(

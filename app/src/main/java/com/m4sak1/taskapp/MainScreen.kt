@@ -60,7 +60,9 @@ fun MainScreen(
 ) {
     var currentTab by remember { mutableStateOf(ScreenTab.Home) }
     var showAddDialog by remember { mutableStateOf(false) }
-    var settingsDialogVisible by remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
+    var showDisclaimerDialog by remember { mutableStateOf(false) }
+    var showChangelogDialog by remember { mutableStateOf(false) }
     var newTaskTitle by remember { mutableStateOf("") }
     var editingBgUri by remember { mutableStateOf<Uri?>(null) }
     
@@ -286,19 +288,19 @@ fun MainScreen(
                                                     onBackup = { exportLauncher.launch("m4task_backup.zip") },
                                                     onRestore = { importLauncher.launch(arrayOf("application/zip")) },
                                                     onPickBackground = { bgLauncher.launch("image/*") },
-                                                    scrollState = settingsScrollState,
-                                                    onDialogVisibilityChanged = { settingsDialogVisible = it }
+                                                    onShowAbout = { showAboutDialog = true },
+                                                    onShowDisclaimer = { showDisclaimerDialog = true },
+                                                    onShowChangelog = { showChangelogDialog = true },
+                                                    scrollState = settingsScrollState
                                                 )
                                             }
                                         }
-                                        if (!settingsDialogVisible) {
-                                            Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-                                                FloatingBottomNav(
-                                                    currentTab = currentTab,
-                                                    onTabSelected = { currentTab = it },
-                                                    disableAnimations = disableAnimations
-                                                )
-                                            }
+                                        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+                                            FloatingBottomNav(
+                                                currentTab = currentTab,
+                                                onTabSelected = { currentTab = it },
+                                                disableAnimations = disableAnimations
+                                            )
                                         }
                                     }
                                 }
@@ -384,6 +386,47 @@ fun MainScreen(
                     disableAnimations = disableAnimations
                 )
             }
+
+            // Info bottom-sheets rendered here (above FloatingBottomNav) so they never slide under it
+            CustomInfoDialog(
+                visible = showAboutDialog,
+                onDismissRequest = { showAboutDialog = false },
+                title = stringResource(R.string.settings_about),
+                confirmText = stringResource(R.string.close),
+                disableAnimations = disableAnimations
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        "m4 task",
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        stringResource(R.string.maintained_by),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                }
+            }
+            CustomInfoDialog(
+                visible = showDisclaimerDialog,
+                onDismissRequest = { showDisclaimerDialog = false },
+                title = stringResource(R.string.settings_disclaimer),
+                confirmText = stringResource(R.string.close),
+                disableAnimations = disableAnimations
+            ) {
+                Text(
+                    text = stringResource(R.string.disclaimer_text),
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            ReleaseHistoryDialog(
+                visible = showChangelogDialog,
+                onDismissRequest = { showChangelogDialog = false },
+                disableAnimations = disableAnimations
+            )
         }
     }
 }
