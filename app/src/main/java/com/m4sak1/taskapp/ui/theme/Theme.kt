@@ -93,6 +93,10 @@ fun TaskAppTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
-        content = content
-    )
+    ) {
+        androidx.compose.runtime.CompositionLocalProvider(
+            androidx.compose.material.ripple.LocalRippleTheme provides NoRippleTheme,
+            content = content
+        )
+    }
 }

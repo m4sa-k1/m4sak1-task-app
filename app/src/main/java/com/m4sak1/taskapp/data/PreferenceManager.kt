@@ -78,6 +78,10 @@ class PreferenceManager(context: Context) {
     var highlightOldTasks: Boolean
         get() = prefs.getBoolean("highlight_old_tasks", true)
         set(value) = prefs.edit().putBoolean("highlight_old_tasks", value).apply()
+
+    var isOnboardingCompleted: Boolean
+        get() = prefs.getBoolean("is_onboarding_completed", false)
+        set(value) = prefs.edit().putBoolean("is_onboarding_completed", value).apply()
 }
 
 enum class AppAddDialogStyle { Center, BottomSheet }

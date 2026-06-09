@@ -15,6 +15,7 @@ import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -141,10 +142,36 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = Color.Transparent
                     ) {
-                        MainScreen(
-                            taskViewModel = taskViewModel,
-                            activity = activityContext
-                        )
+                        var isOnboardingCompleted by remember { mutableStateOf(prefManager.isOnboardingCompleted) }
+                        
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = isOnboardingCompleted,
+                                enter = androidx.compose.animation.fadeIn(),
+                                exit = androidx.compose.animation.fadeOut(),
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                MainScreen(
+                                    taskViewModel = taskViewModel,
+                                    activity = activityContext
+                                )
+                            }
+                            
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = !isOnboardingCompleted,
+                                enter = androidx.compose.animation.fadeIn(),
+                                exit = androidx.compose.animation.fadeOut(),
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                com.m4sak1.taskapp.ui.screens.OnboardingScreen(
+                                    themeController = themeController,
+                                    prefManager = prefManager,
+                                    onFinish = {
+                                        isOnboardingCompleted = true
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             }
