@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">m4 task</string>
     <string name="tab_home">Home</string>
     <string name="tab_stats">Stats</string>
     <string name="tab_settings">Settings</string>

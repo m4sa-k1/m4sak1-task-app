@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,7 +42,7 @@ fun OnboardingScreen(
     prefManager: PreferenceManager,
     onFinish: () -> Unit
 ) {
-    val pagerState = rememberPagerState(pageCount = { 5 })
+    val pagerState = rememberPagerState(pageCount = { 6 })
     val scope = rememberCoroutineScope()
 
     Surface(
@@ -63,19 +64,23 @@ fun OnboardingScreen(
                             themeController = themeController,
                             onNext = { scope.launch { pagerState.animateScrollToPage(1) } }
                         )
-                        1 -> OnboardingThemeStep(
+                        1 -> OnboardingAccentColorStep(
                             themeController = themeController,
                             onNext = { scope.launch { pagerState.animateScrollToPage(2) } }
                         )
-                        2 -> OnboardingAddStyleStep(
-                            prefManager = prefManager,
+                        2 -> OnboardingThemeStep(
+                            themeController = themeController,
                             onNext = { scope.launch { pagerState.animateScrollToPage(3) } }
                         )
-                        3 -> OnboardingHideImmediatelyStep(
+                        3 -> OnboardingAddStyleStep(
                             prefManager = prefManager,
                             onNext = { scope.launch { pagerState.animateScrollToPage(4) } }
                         )
-                        4 -> OnboardingEnterToAddStep(
+                        4 -> OnboardingHideImmediatelyStep(
+                            prefManager = prefManager,
+                            onNext = { scope.launch { pagerState.animateScrollToPage(5) } }
+                        )
+                        5 -> OnboardingEnterToAddStep(
                             prefManager = prefManager,
                             onFinish = {
                                 prefManager.isOnboardingCompleted = true
@@ -94,7 +99,7 @@ fun OnboardingScreen(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                repeat(5) { index ->
+                repeat(6) { index ->
                     val isSelected = pagerState.currentPage == index
                     val color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
                     val width by animateDpAsState(targetValue = if (isSelected) 24.dp else 8.dp, label = "indicator_width")
@@ -153,11 +158,11 @@ fun OnboardingLanguageStep(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .clickable { themeController.setAppLanguage(lang) },
+                    .padding(vertical = 4.dp),
+                shape = RoundedCornerShape(12.dp),
                 color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
+                border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+                onClick = { themeController.setAppLanguage(lang) }
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
@@ -184,6 +189,76 @@ fun OnboardingLanguageStep(
             shape = RoundedCornerShape(12.dp)
         ) {
             Text("Next", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+fun OnboardingAccentColorStep(
+    themeController: ThemeController,
+    onNext: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(id = R.string.settings_accent_color),
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        val colors = com.m4sak1.taskapp.ui.theme.AppAccentColor.values()
+        
+        androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
+            columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(4),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(colors.size) { index ->
+                val colorOption = colors[index]
+                val isSelected = themeController.accentColor == colorOption
+                
+                Box(
+                    modifier = Modifier
+                        .aspectRatio(1f)
+                        .clip(CircleShape)
+                        .background(if (colorOption == com.m4sak1.taskapp.ui.theme.AppAccentColor.Custom) MaterialTheme.colorScheme.surfaceVariant else colorOption.color)
+                        .clickable { themeController.setAccentColor(colorOption) }
+                        .border(
+                            width = if (isSelected) 3.dp else 1.dp,
+                            color = if (isSelected) MaterialTheme.colorScheme.onBackground else Color.Gray.copy(alpha = 0.3f),
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isSelected) {
+                        Icon(
+                            Icons.Default.Check,
+                            contentDescription = null,
+                            tint = if (colorOption == com.m4sak1.taskapp.ui.theme.AppAccentColor.Custom) MaterialTheme.colorScheme.primary else Color.White
+                        )
+                    } else if (colorOption == com.m4sak1.taskapp.ui.theme.AppAccentColor.Custom) {
+                        Text(stringResource(id = R.string.customize), fontSize = 10.sp)
+                    }
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(48.dp))
+        
+        Button(
+            onClick = onNext,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(stringResource(id = R.string.ok), fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -629,14 +704,14 @@ fun EnterToAddMock(
             while(true) {
                 showTask = false
                 keyPress = false
-                delay(1000)
+                delay(800)
                 keyPress = true
-                delay(300)
+                delay(150) // Reduced key press time so it feels faster and snappy
                 keyPress = false
                 if (isEnter) {
                     showTask = true
                 }
-                delay(1500)
+                delay(1200) // Keep the task visible for a while before looping
             }
         } else {
             showTask = false
@@ -666,7 +741,7 @@ fun EnterToAddMock(
                     Box(modifier = Modifier.fillMaxSize()) {
                         this@Column.AnimatedVisibility(
                             visible = showTask,
-                            enter = slideInVertically { it } + fadeIn(),
+                            enter = slideInVertically { it / 2 } + fadeIn(), // Slightly shorter slide for snappier animation
                             exit = fadeOut(),
                             modifier = Modifier.align(Alignment.BottomCenter)
                         ) {
@@ -678,13 +753,17 @@ fun EnterToAddMock(
                 // Keyboard Area
                 Box(modifier = Modifier.fillMaxWidth().height(40.dp).clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))) {
                     // Enter key
+                    val keyColor by animateColorAsState(if (keyPress) primaryColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                    val keyScale by animateFloatAsState(if (keyPress) 0.9f else 1f)
+                    
                     Box(
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
                             .padding(4.dp)
-                            .size(if (keyPress) 24.dp else 28.dp, 32.dp)
+                            .size(28.dp, 32.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(if (keyPress) primaryColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                            .graphicsLayer(scaleX = keyScale, scaleY = keyScale)
+                            .background(keyColor)
                     )
                 }
             }

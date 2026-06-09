@@ -29,6 +29,13 @@ android {
         targetSdk = 34
         versionCode = verBuild
         versionName = if (verBeta != null) "Beta1.$verBeta" else "$verMajor.$verMinor.$verPatch"
+        
+        if (verBeta != null) {
+            applicationIdSuffix = ".beta"
+            resValue("string", "app_name", "m4 task[Beta]")
+        } else {
+            resValue("string", "app_name", "m4 task")
+        }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
