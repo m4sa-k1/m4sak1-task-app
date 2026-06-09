@@ -34,7 +34,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -67,6 +70,12 @@ fun MainScreen(
     var editingBgUri by remember { mutableStateOf<Uri?>(null) }
     
     val disableAnimations by taskViewModel.disableAnimations.collectAsState()
+    val fabAnimationDirection by taskViewModel.fabAnimationDirection.collectAsState()
+    
+    val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
+    val screenWidthPx = with(density) { configuration.screenWidthDp.dp.roundToPx() }
+    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.roundToPx() }
 
     val fabOffsetX by taskViewModel.fabOffsetX.collectAsState()
     val fabOffsetY by taskViewModel.fabOffsetY.collectAsState()
@@ -299,8 +308,28 @@ fun MainScreen(
                                         Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                                             androidx.compose.animation.AnimatedVisibility(
                                                 visible = currentTab == ScreenTab.Home,
-                                                enter = if (disableAnimations) androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(0)) else androidx.compose.animation.slideInVertically(initialOffsetY = { it - fabOffsetY.roundToInt() }) + androidx.compose.animation.fadeIn(),
-                                                exit = if (disableAnimations) androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(0)) else androidx.compose.animation.slideOutVertically(targetOffsetY = { it - fabOffsetY.roundToInt() }) + androidx.compose.animation.fadeOut(),
+                                                enter = if (disableAnimations || fabAnimationDirection == com.m4sak1.taskapp.data.FabAnimationDirection.None) {
+                                                    androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(0))
+                                                } else {
+                                                    when (fabAnimationDirection) {
+                                                        com.m4sak1.taskapp.data.FabAnimationDirection.Up -> androidx.compose.animation.slideInVertically(initialOffsetY = { it - fabOffsetY.roundToInt() }) + androidx.compose.animation.fadeIn()
+                                                        com.m4sak1.taskapp.data.FabAnimationDirection.Down -> androidx.compose.animation.slideInVertically(initialOffsetY = { -screenHeightPx - fabOffsetY.roundToInt() }) + androidx.compose.animation.fadeIn()
+                                                        com.m4sak1.taskapp.data.FabAnimationDirection.Left -> androidx.compose.animation.slideInHorizontally(initialOffsetX = { it - fabOffsetX.roundToInt() }) + androidx.compose.animation.fadeIn()
+                                                        com.m4sak1.taskapp.data.FabAnimationDirection.Right -> androidx.compose.animation.slideInHorizontally(initialOffsetX = { -screenWidthPx - fabOffsetX.roundToInt() }) + androidx.compose.animation.fadeIn()
+                                                        else -> androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(0))
+                                                    }
+                                                },
+                                                exit = if (disableAnimations || fabAnimationDirection == com.m4sak1.taskapp.data.FabAnimationDirection.None) {
+                                                    androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(0))
+                                                } else {
+                                                    when (fabAnimationDirection) {
+                                                        com.m4sak1.taskapp.data.FabAnimationDirection.Up -> androidx.compose.animation.slideOutVertically(targetOffsetY = { it - fabOffsetY.roundToInt() }) + androidx.compose.animation.fadeOut()
+                                                        com.m4sak1.taskapp.data.FabAnimationDirection.Down -> androidx.compose.animation.slideOutVertically(targetOffsetY = { -screenHeightPx - fabOffsetY.roundToInt() }) + androidx.compose.animation.fadeOut()
+                                                        com.m4sak1.taskapp.data.FabAnimationDirection.Left -> androidx.compose.animation.slideOutHorizontally(targetOffsetX = { it - fabOffsetX.roundToInt() }) + androidx.compose.animation.fadeOut()
+                                                        com.m4sak1.taskapp.data.FabAnimationDirection.Right -> androidx.compose.animation.slideOutHorizontally(targetOffsetX = { -screenWidthPx - fabOffsetX.roundToInt() }) + androidx.compose.animation.fadeOut()
+                                                        else -> androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(0))
+                                                    }
+                                                },
                                                 modifier = Modifier
                                                     .align(Alignment.BottomEnd)
                                                     .offset { IntOffset(fabOffsetX.roundToInt(), fabOffsetY.roundToInt()) }

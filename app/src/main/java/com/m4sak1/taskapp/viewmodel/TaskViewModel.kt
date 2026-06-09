@@ -59,6 +59,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _ignoredReleaseVersion = MutableStateFlow(prefManager.ignoredReleaseVersion)
     val ignoredReleaseVersion = _ignoredReleaseVersion.asStateFlow()
 
+    private val _fabAnimationDirection = MutableStateFlow(prefManager.fabAnimationDirection)
+    val fabAnimationDirection = _fabAnimationDirection.asStateFlow()
+
     private val _hasRequestedNotificationPermission = MutableStateFlow(prefManager.hasRequestedNotificationPermission)
     val hasRequestedNotificationPermission = _hasRequestedNotificationPermission.asStateFlow()
 
@@ -184,6 +187,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         _fabOffsetY.value = y
         prefManager.fabOffsetX = x
         prefManager.fabOffsetY = y
+    }
+
+    fun updateFabAnimationDirection(direction: FabAnimationDirection) {
+        _fabAnimationDirection.value = direction
+        prefManager.fabAnimationDirection = direction
     }
 
     fun resetFabPosition() {

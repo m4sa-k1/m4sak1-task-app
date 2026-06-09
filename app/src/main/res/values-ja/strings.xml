@@ -22,7 +22,15 @@
     <string name="stats_total_completed">総完了タスク数</string>
     <string name="stats_quick_rate">24時間以内達成率</string>
     <string name="past_tasks">過去のタスク</string>
-    <string name="settings_about">このアプリについて</string>
+    <string name="settings_about">Task Appについて</string>
+    <string name="settings_about_desc">バージョン情報と開発者</string>
+    <string name="settings_fab_animation">追加ボタンのアニメーション</string>
+    <string name="settings_fab_animation_desc">＋ボタンの出現・消滅方向</string>
+    <string name="fab_anim_up">↑ 上 (下から出現)</string>
+    <string name="fab_anim_down">↓ 下 (上から出現)</string>
+    <string name="fab_anim_left">← 左 (右から出現)</string>
+    <string name="fab_anim_right">→ 右 (左から出現)</string>
+    <string name="fab_anim_none">✕ 無し</string>
     <string name="settings_immediate_hide">完了時に即非表示</string>
     <string name="settings_immediate_hide_desc">オフの場合: 15分後または終了時に非表示</string>
     <string name="confirm">続行</string>

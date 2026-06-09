@@ -82,6 +82,10 @@ class PreferenceManager(context: Context) {
     var isOnboardingCompleted: Boolean
         get() = prefs.getBoolean("is_onboarding_completed", false)
         set(value) = prefs.edit().putBoolean("is_onboarding_completed", value).apply()
+    var fabAnimationDirection: FabAnimationDirection
+        get() = FabAnimationDirection.valueOf(prefs.getString("fab_animation_direction", FabAnimationDirection.Up.name) ?: FabAnimationDirection.Up.name)
+        set(value) = prefs.edit().putString("fab_animation_direction", value.name).apply()
 }
 
 enum class AppAddDialogStyle { Center, BottomSheet }
+enum class FabAnimationDirection { Up, Down, Left, Right, None }

@@ -22,7 +22,15 @@
     <string name="stats_total_completed">总完成任务数</string>
     <string name="stats_quick_rate">24小时内达成率</string>
     <string name="past_tasks">历史任务</string>
-    <string name="settings_about">关于此应用</string>
+    <string name="settings_about">关于 Task App</string>
+    <string name="settings_about_desc">版本信息与开发者</string>
+    <string name="settings_fab_animation">悬浮按钮动画</string>
+    <string name="settings_fab_animation_desc">＋按钮的出现/消失方向</string>
+    <string name="fab_anim_up">↑ 向上 (从底部出现)</string>
+    <string name="fab_anim_down">↓ 向下 (从顶部出现)</string>
+    <string name="fab_anim_left">← 向左 (从右侧出现)</string>
+    <string name="fab_anim_right">→ 向右 (从左侧出现)</string>
+    <string name="fab_anim_none">✕ 无</string>
     <string name="settings_immediate_hide">完成后立即隐藏</string>
     <string name="settings_immediate_hide_desc">关闭时：15分后或退出时隐藏</string>
     <string name="confirm">继续</string>

@@ -21,7 +21,15 @@
     <string name="stats_total_completed">Total Completed</string>
     <string name="stats_quick_rate">24h Completion Rate</string>
     <string name="past_tasks">Past Tasks</string>
-    <string name="settings_about">About</string>
+    <string name="settings_about">About Task App</string>
+    <string name="settings_about_desc">Version info and developer credits</string>
+    <string name="settings_fab_animation">FAB Animation</string>
+    <string name="settings_fab_animation_desc">Animation direction for the + button</string>
+    <string name="fab_anim_up">↑ Up (From Bottom)</string>
+    <string name="fab_anim_down">↓ Down (From Top)</string>
+    <string name="fab_anim_left">← Left (From Right)</string>
+    <string name="fab_anim_right">→ Right (From Left)</string>
+    <string name="fab_anim_none">✕ None</string>
     <string name="settings_immediate_hide">Hide completed tasks now</string>
     <string name="settings_immediate_hide_desc">Off: Hide after 15m or app close</string>
     <string name="confirm">Continue</string>

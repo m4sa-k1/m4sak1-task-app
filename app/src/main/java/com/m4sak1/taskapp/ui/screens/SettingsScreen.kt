@@ -13,6 +13,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -57,6 +59,7 @@ fun SettingsScreen(
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showAccentDialog by remember { mutableStateOf(false) }
+    var showFabAnimDialog by remember { mutableStateOf(false) }
     var showRestoreConfirm by remember { mutableStateOf(false) }
     var showCustomColorDialog by remember { mutableStateOf(false) }
     val hideImmediately by viewModel.hideImmediately.collectAsState()
@@ -179,6 +182,20 @@ fun SettingsScreen(
                         }
                     }
                 }
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            
+            val fabAnimationDirection by viewModel.fabAnimationDirection.collectAsState()
+            SettingsItem(
+                title = stringResource(R.string.settings_fab_animation),
+                contentText = when (fabAnimationDirection) {
+                    com.m4sak1.taskapp.data.FabAnimationDirection.Up -> stringResource(R.string.fab_anim_up)
+                    com.m4sak1.taskapp.data.FabAnimationDirection.Down -> stringResource(R.string.fab_anim_down)
+                    com.m4sak1.taskapp.data.FabAnimationDirection.Left -> stringResource(R.string.fab_anim_left)
+                    com.m4sak1.taskapp.data.FabAnimationDirection.Right -> stringResource(R.string.fab_anim_right)
+                    com.m4sak1.taskapp.data.FabAnimationDirection.None -> stringResource(R.string.fab_anim_none)
+                },
+                modifier = Modifier.clickable { showFabAnimDialog = true }
             )
 
             Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
@@ -485,6 +502,63 @@ fun SettingsScreen(
         disableAnimations = disableAnimations
     ) {
         Text(stringResource(R.string.restore_warning))
+    }
+
+    if (showFabAnimDialog) {
+        val disableAnimationsState by viewModel.disableAnimations.collectAsState()
+        val fabAnimationDirectionState by viewModel.fabAnimationDirection.collectAsState()
+        com.m4sak1.taskapp.ui.components.CustomInfoDialog(
+            visible = showFabAnimDialog,
+            title = stringResource(R.string.settings_fab_animation),
+            onDismissRequest = { showFabAnimDialog = false },
+            disableAnimations = disableAnimationsState
+        ) {
+            if (disableAnimationsState) {
+                Text(
+                    text = "アニメーションが無効化されているため、この設定は適用されません",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+            val options = listOf(
+                com.m4sak1.taskapp.data.FabAnimationDirection.Up to stringResource(R.string.fab_anim_up),
+                com.m4sak1.taskapp.data.FabAnimationDirection.Down to stringResource(R.string.fab_anim_down),
+                com.m4sak1.taskapp.data.FabAnimationDirection.Left to stringResource(R.string.fab_anim_left),
+                com.m4sak1.taskapp.data.FabAnimationDirection.Right to stringResource(R.string.fab_anim_right),
+                com.m4sak1.taskapp.data.FabAnimationDirection.None to stringResource(R.string.fab_anim_none)
+            )
+            
+            options.forEach { (direction, label) ->
+                val selected = fabAnimationDirectionState == direction
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable {
+                            viewModel.updateFabAnimationDirection(direction)
+                            showFabAnimDialog = false
+                        }
+                        .background(if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = label,
+                        color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (selected) {
+                        Icon(
+                            Icons.Filled.Check,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+            }
+        }
     }
     }
 }
