@@ -329,17 +329,17 @@ fun MainScreen(
                     Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                         androidx.compose.animation.AnimatedVisibility(
                             visible = currentTab == ScreenTab.Home,
-                            enter = if (disableAnimations) androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(0)) else androidx.compose.animation.slideInVertically(initialOffsetY = { it }) + androidx.compose.animation.fadeIn(),
-                            exit = if (disableAnimations) androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(0)) else androidx.compose.animation.slideOutVertically(targetOffsetY = { it }) + androidx.compose.animation.fadeOut(),
-                            modifier = Modifier.align(Alignment.BottomEnd)
+                            enter = if (disableAnimations) androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(0)) else androidx.compose.animation.slideInVertically(initialOffsetY = { it - fabOffsetY.roundToInt() }) + androidx.compose.animation.fadeIn(),
+                            exit = if (disableAnimations) androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(0)) else androidx.compose.animation.slideOutVertically(targetOffsetY = { it - fabOffsetY.roundToInt() }) + androidx.compose.animation.fadeOut(),
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .offset { IntOffset(fabOffsetX.roundToInt(), fabOffsetY.roundToInt()) }
                         ) {
                             FloatingActionButton(
                                 onClick = { showAddDialog = true },
                                 containerColor = MaterialTheme.colorScheme.onBackground,
                                 contentColor = MaterialTheme.colorScheme.background,
-                                shape = CircleShape,
-                                modifier = Modifier
-                                    .offset { IntOffset(fabOffsetX.roundToInt(), fabOffsetY.roundToInt()) }
+                                shape = CircleShape
                             ) {
                                 Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_task))
                             }
