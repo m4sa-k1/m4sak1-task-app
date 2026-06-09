@@ -66,26 +66,31 @@ fun OnboardingScreen(
                         )
                         1 -> OnboardingAccentColorStep(
                             themeController = themeController,
-                            onNext = { scope.launch { pagerState.animateScrollToPage(2) } }
+                            onNext = { scope.launch { pagerState.animateScrollToPage(2) } },
+                            onBack = { scope.launch { pagerState.animateScrollToPage(0) } }
                         )
                         2 -> OnboardingThemeStep(
                             themeController = themeController,
-                            onNext = { scope.launch { pagerState.animateScrollToPage(3) } }
+                            onNext = { scope.launch { pagerState.animateScrollToPage(3) } },
+                            onBack = { scope.launch { pagerState.animateScrollToPage(1) } }
                         )
                         3 -> OnboardingAddStyleStep(
                             prefManager = prefManager,
-                            onNext = { scope.launch { pagerState.animateScrollToPage(4) } }
+                            onNext = { scope.launch { pagerState.animateScrollToPage(4) } },
+                            onBack = { scope.launch { pagerState.animateScrollToPage(2) } }
                         )
                         4 -> OnboardingHideImmediatelyStep(
                             prefManager = prefManager,
-                            onNext = { scope.launch { pagerState.animateScrollToPage(5) } }
+                            onNext = { scope.launch { pagerState.animateScrollToPage(5) } },
+                            onBack = { scope.launch { pagerState.animateScrollToPage(3) } }
                         )
                         5 -> OnboardingEnterToAddStep(
                             prefManager = prefManager,
                             onFinish = {
                                 prefManager.isOnboardingCompleted = true
                                 onFinish()
-                            }
+                            },
+                            onBack = { scope.launch { pagerState.animateScrollToPage(4) } }
                         )
                     }
                 }
@@ -160,7 +165,7 @@ fun OnboardingLanguageStep(
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
                 shape = RoundedCornerShape(12.dp),
-                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
                 border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
                 onClick = { themeController.setAppLanguage(lang) }
             ) {
@@ -172,10 +177,10 @@ fun OnboardingLanguageStep(
                         text = label,
                         modifier = Modifier.weight(1f),
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     if (isSelected) {
-                        Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Default.Check, contentDescription = null, tint = Color.White)
                     }
                 }
             }
@@ -196,7 +201,8 @@ fun OnboardingLanguageStep(
 @Composable
 fun OnboardingAccentColorStep(
     themeController: ThemeController,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onBack: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -253,12 +259,24 @@ fun OnboardingAccentColorStep(
         
         Spacer(modifier = Modifier.height(48.dp))
         
-        Button(
-            onClick = onNext,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(12.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(stringResource(id = R.string.ok), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            OutlinedButton(
+                onClick = onBack,
+                modifier = Modifier.weight(1f).height(56.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(stringResource(id = R.string.back), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+            Button(
+                onClick = onNext,
+                modifier = Modifier.weight(1f).height(56.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(stringResource(id = R.string.ok), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -266,7 +284,8 @@ fun OnboardingAccentColorStep(
 @Composable
 fun OnboardingThemeStep(
     themeController: ThemeController,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onBack: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -310,12 +329,24 @@ fun OnboardingThemeStep(
 
         Spacer(modifier = Modifier.height(48.dp))
         
-        Button(
-            onClick = onNext,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(12.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(stringResource(id = R.string.ok), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            OutlinedButton(
+                onClick = onBack,
+                modifier = Modifier.weight(1f).height(56.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(stringResource(id = R.string.back), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+            Button(
+                onClick = onNext,
+                modifier = Modifier.weight(1f).height(56.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(stringResource(id = R.string.ok), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -368,7 +399,8 @@ fun ThemeOptionMock(
 @Composable
 fun OnboardingAddStyleStep(
     prefManager: PreferenceManager,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onBack: () -> Unit
 ) {
     var addStyle by remember { mutableStateOf(prefManager.addDialogStyle) }
 
@@ -414,12 +446,24 @@ fun OnboardingAddStyleStep(
 
         Spacer(modifier = Modifier.height(48.dp))
         
-        Button(
-            onClick = onNext,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(12.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(stringResource(id = R.string.ok), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            OutlinedButton(
+                onClick = onBack,
+                modifier = Modifier.weight(1f).height(56.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(stringResource(id = R.string.back), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+            Button(
+                onClick = onNext,
+                modifier = Modifier.weight(1f).height(56.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(stringResource(id = R.string.ok), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -512,7 +556,8 @@ fun AddStyleMock(
 @Composable
 fun OnboardingHideImmediatelyStep(
     prefManager: PreferenceManager,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onBack: () -> Unit
 ) {
     var hideImmediately by remember { mutableStateOf(prefManager.hideImmediately) }
 
@@ -558,12 +603,24 @@ fun OnboardingHideImmediatelyStep(
 
         Spacer(modifier = Modifier.height(48.dp))
         
-        Button(
-            onClick = onNext,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(12.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(stringResource(id = R.string.ok), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            OutlinedButton(
+                onClick = onBack,
+                modifier = Modifier.weight(1f).height(56.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(stringResource(id = R.string.back), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+            Button(
+                onClick = onNext,
+                modifier = Modifier.weight(1f).height(56.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(stringResource(id = R.string.ok), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -631,7 +688,8 @@ fun HideImmediatelyMock(
 @Composable
 fun OnboardingEnterToAddStep(
     prefManager: PreferenceManager,
-    onFinish: () -> Unit
+    onFinish: () -> Unit,
+    onBack: () -> Unit
 ) {
     var enterToAdd by remember { mutableStateOf(prefManager.enterToAdd) }
 
@@ -677,12 +735,24 @@ fun OnboardingEnterToAddStep(
 
         Spacer(modifier = Modifier.height(48.dp))
         
-        Button(
-            onClick = onFinish,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(12.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Let's Go!", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            OutlinedButton(
+                onClick = onBack,
+                modifier = Modifier.weight(1f).height(56.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(stringResource(id = R.string.back), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+            Button(
+                onClick = onFinish,
+                modifier = Modifier.weight(1f).height(56.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Let's Go!", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
