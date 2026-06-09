@@ -32,8 +32,8 @@ class ToggleTaskAction : ActionCallback {
                     )
                     dao.update(updatedTask)
                     
-                    // Cancel notification
-                    androidx.work.WorkManager.getInstance(context).cancelUniqueWork("task_${task.id}")
+                    // Cancel all scheduled reminder notifications for this task
+                    androidx.work.WorkManager.getInstance(context).cancelAllWorkByTag("task_${task.id}")
                     
                     // Update all widgets
                     TaskAppWidget.forceUpdate(context)
