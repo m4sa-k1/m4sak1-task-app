@@ -81,13 +81,14 @@ class TaskAppWidget : GlanceAppWidget() {
     @Composable
     private fun WidgetUI(context: Context, showStarredOnly: Boolean, colors: androidx.compose.material3.ColorScheme, updateTrigger: Long) {
         // Fetch tasks synchronously since we update the widget on DB changes
-        // Warning: This blocks the composition if not careful, but Glance allows synchronous DB reads here
         val db = AppDatabase.getDatabase(context)
-        // This is a bit of a hack in Glance: we can read blocking because it's a RemoteViews generation pass
-        val allTasks = kotlinx.coroutines.runBlocking { db.taskDao().getAllTasksDirect() }
-        val incompleteTasks = allTasks.filter { !it.isCompleted }.sortedWith(
-            compareByDescending<com.m4sak1.taskapp.data.Task> { it.isStarred }.thenByDescending { it.id }
-        )
+        // Use remember with updateTrigger so Compose doesn't skip recomposition
+        val incompleteTasks = androidx.compose.runtime.remember(updateTrigger, showStarredOnly) {
+            val allTasks = kotlinx.coroutines.runBlocking { db.taskDao().getAllTasksDirect() }
+            allTasks.filter { !it.isCompleted }.sortedWith(
+                compareByDescending<com.m4sak1.taskapp.data.Task> { it.isStarred }.thenByDescending { it.id }
+            )
+        }
         
         val tasksToShow = if (showStarredOnly) incompleteTasks.filter { it.isStarred } else incompleteTasks
 
