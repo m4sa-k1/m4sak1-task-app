@@ -117,13 +117,16 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         _recentlyCompletedTasks
     ) { incomplete, recentlyCompleted ->
         // Filter out any incomplete tasks from DB that might somehow also be in the memory list
-        // (Though usually they shouldn't overlap if DB is updated first)
         val recentlyIds = recentlyCompleted.map { it.id }.toSet()
         val filteredIncomplete = incomplete.filter { it.id !in recentlyIds }
         (filteredIncomplete + recentlyCompleted).sortedWith(
             compareByDescending<Task> { it.isStarred }.thenByDescending { it.id }
         )
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    // Wish list items (separate from normal tasks)
+    val wishListTasks: StateFlow<List<Task>> = taskDao.getIncompleteWishListItems()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val totalCompletedCount = allCompletedTasks.map { it.size }
     val quickCompletionRate = allCompletedTasks.map { tasks ->
@@ -218,6 +221,26 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             if (_notificationsEnabled.value) {
                 scheduleNotifications(id.toInt(), title)
             }
+        }
+    }
+
+    fun addWishListItem(title: String): kotlinx.coroutines.Job? {
+        if (title.isBlank()) return null
+        return viewModelScope.launch {
+            taskDao.insert(Task(title = title, isWishListItem = true))
+            // No widget update, no notification for wish list items
+        }
+    }
+
+    fun toggleWishListItemCompletion(task: Task) {
+        val newStatus = !task.isCompleted
+        val updatedTask = task.copy(
+            isCompleted = newStatus,
+            completedAt = if (newStatus) System.currentTimeMillis() else null
+        )
+        viewModelScope.launch {
+            taskDao.update(updatedTask)
+            // No widget update, no notification, no highlight for wish list items
         }
     }
 
@@ -323,7 +346,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val allTasks = taskDao.getAllTasksDirect()
                 val backupData = AppBackup(
-                    tasks = allTasks.map { TaskBackup(it.title, it.isCompleted, it.createdAt, it.completedAt) },
+                    tasks = allTasks.map { TaskBackup(it.title, it.isCompleted, it.createdAt, it.completedAt, it.isWishListItem) },
                     settings = SettingsBackup(
                         themeMode = themeController.themeMode.name,
                         appLanguage = themeController.appLanguage.name,
@@ -394,7 +417,13 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
                 taskDao.deleteAllTasks()
                 taskDao.insertAll(backup.tasks.map { 
-                    Task(title = it.title, isCompleted = it.isCompleted, createdAt = it.createdAt, completedAt = it.completedAt)
+                    Task(
+                        title = it.title,
+                        isCompleted = it.isCompleted,
+                        createdAt = it.createdAt,
+                        completedAt = it.completedAt,
+                        isWishListItem = it.isWishListItem
+                    )
                 })
 
                 withContext(Dispatchers.Main) {

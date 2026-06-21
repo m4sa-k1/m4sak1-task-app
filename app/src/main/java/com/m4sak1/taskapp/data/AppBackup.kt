@@ -13,7 +13,8 @@ data class TaskBackup(
     val title: String,
     val isCompleted: Boolean,
     val createdAt: Long,
-    val completedAt: Long?
+    val completedAt: Long?,
+    val isWishListItem: Boolean = false
 )
 
 @Serializable

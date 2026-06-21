@@ -34,7 +34,8 @@ fun CustomAddDialog(
     onAddTask: (String, Boolean) -> Unit,
     enterToAdd: Boolean,
     style: com.m4sak1.taskapp.data.AppAddDialogStyle = com.m4sak1.taskapp.data.AppAddDialogStyle.Center,
-    disableAnimations: Boolean = false
+    disableAnimations: Boolean = false,
+    showStarButton: Boolean = true
 ) {
     var newTaskTitle by remember { mutableStateOf("") }
     var isTaskStarred by remember { mutableStateOf(false) }
@@ -159,12 +160,16 @@ fun CustomAddDialog(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                IconButton(onClick = { isTaskStarred = !isTaskStarred }) {
-                                    Text(
-                                        text = if (isTaskStarred) "★" else "☆",
-                                        fontSize = 28.sp,
-                                        color = if (isTaskStarred) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                    )
+                                if (showStarButton) {
+                                    IconButton(onClick = { isTaskStarred = !isTaskStarred }) {
+                                        Text(
+                                            text = if (isTaskStarred) "★" else "☆",
+                                            fontSize = 28.sp,
+                                            color = if (isTaskStarred) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                        )
+                                    }
+                                } else {
+                                    Spacer(modifier = Modifier.size(48.dp))
                                 }
                                 
                                 Button(
@@ -201,15 +206,17 @@ fun CustomAddDialog(
                                 placeholder = { Text(stringResource(R.string.task_placeholder)) },
                                 singleLine = true,
                                 shape = RoundedCornerShape(12.dp),
-                                trailingIcon = {
-                                    IconButton(onClick = { isTaskStarred = !isTaskStarred }) {
-                                        Text(
-                                            text = if (isTaskStarred) "★" else "☆",
-                                            fontSize = 24.sp,
-                                            color = if (isTaskStarred) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                        )
+                                trailingIcon = if (showStarButton) {
+                                    {
+                                        IconButton(onClick = { isTaskStarred = !isTaskStarred }) {
+                                            Text(
+                                                text = if (isTaskStarred) "★" else "☆",
+                                                fontSize = 24.sp,
+                                                color = if (isTaskStarred) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                            )
+                                        }
                                     }
-                                },
+                                } else null,
                                 keyboardOptions = KeyboardOptions(
                                     imeAction = if (enterToAdd) ImeAction.Done else ImeAction.Default
                                 ),

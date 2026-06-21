@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import com.m4sak1.taskapp.ui.components.NewReleaseDialog
@@ -63,6 +64,7 @@ fun MainScreen(
 ) {
     var currentTab by remember { mutableStateOf(ScreenTab.Home) }
     var showAddDialog by remember { mutableStateOf(false) }
+    var showAddWishListDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
     var showDisclaimerDialog by remember { mutableStateOf(false) }
     var showChangelogDialog by remember { mutableStateOf(false) }
@@ -289,7 +291,7 @@ fun MainScreen(
                                         ) { page ->
                                             when (page) {
                                                 0 -> HomeScreen(taskViewModel)
-                                                1 -> StatsScreen(viewModel = taskViewModel, onShowPastTasks = { currentTab = ScreenTab.PastTasks })
+                                                1 -> WishListScreen(viewModel = taskViewModel)
                                                 2 -> SettingsScreen(
                                                     viewModel = taskViewModel, 
                                                     onShowLicenses = { currentTab = ScreenTab.Licenses },
@@ -339,6 +341,47 @@ fun MainScreen(
                                                     containerColor = MaterialTheme.colorScheme.onBackground,
                                                     contentColor = MaterialTheme.colorScheme.background,
                                                     shape = CircleShape
+                                                ) {
+                                                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_task))
+                                                }
+                                            }
+
+                                            // Star FAB for WishList tab
+                                            val wishFabEnter = if (disableAnimations || fabAnimationDirection == com.m4sak1.taskapp.data.FabAnimationDirection.None) {
+                                                androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(0))
+                                            } else {
+                                                when (fabAnimationDirection) {
+                                                    com.m4sak1.taskapp.data.FabAnimationDirection.Up -> androidx.compose.animation.slideInVertically(initialOffsetY = { it - fabOffsetY.roundToInt() }) + androidx.compose.animation.fadeIn()
+                                                    com.m4sak1.taskapp.data.FabAnimationDirection.Down -> androidx.compose.animation.slideInVertically(initialOffsetY = { -screenHeightPx - fabOffsetY.roundToInt() }) + androidx.compose.animation.fadeIn()
+                                                    com.m4sak1.taskapp.data.FabAnimationDirection.Left -> androidx.compose.animation.slideInHorizontally(initialOffsetX = { it - fabOffsetX.roundToInt() }) + androidx.compose.animation.fadeIn()
+                                                    com.m4sak1.taskapp.data.FabAnimationDirection.Right -> androidx.compose.animation.slideInHorizontally(initialOffsetX = { -screenWidthPx - fabOffsetX.roundToInt() }) + androidx.compose.animation.fadeIn()
+                                                    else -> androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(0))
+                                                }
+                                            }
+                                            val wishFabExit = if (disableAnimations || fabAnimationDirection == com.m4sak1.taskapp.data.FabAnimationDirection.None) {
+                                                androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(0))
+                                            } else {
+                                                when (fabAnimationDirection) {
+                                                    com.m4sak1.taskapp.data.FabAnimationDirection.Up -> androidx.compose.animation.slideOutVertically(targetOffsetY = { it - fabOffsetY.roundToInt() }) + androidx.compose.animation.fadeOut()
+                                                    com.m4sak1.taskapp.data.FabAnimationDirection.Down -> androidx.compose.animation.slideOutVertically(targetOffsetY = { -screenHeightPx - fabOffsetY.roundToInt() }) + androidx.compose.animation.fadeOut()
+                                                    com.m4sak1.taskapp.data.FabAnimationDirection.Left -> androidx.compose.animation.slideOutHorizontally(targetOffsetX = { it - fabOffsetX.roundToInt() }) + androidx.compose.animation.fadeOut()
+                                                    com.m4sak1.taskapp.data.FabAnimationDirection.Right -> androidx.compose.animation.slideOutHorizontally(targetOffsetX = { -screenWidthPx - fabOffsetX.roundToInt() }) + androidx.compose.animation.fadeOut()
+                                                    else -> androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(0))
+                                                }
+                                            }
+                                            androidx.compose.animation.AnimatedVisibility(
+                                                visible = currentTab == ScreenTab.Stats,
+                                                enter = wishFabEnter,
+                                                exit = wishFabExit,
+                                                modifier = Modifier
+                                                    .align(Alignment.BottomEnd)
+                                                    .offset { IntOffset(fabOffsetX.roundToInt(), fabOffsetY.roundToInt()) }
+                                            ) {
+                                                FloatingActionButton(
+                                                    onClick = { showAddWishListDialog = true },
+                                                    containerColor = MaterialTheme.colorScheme.onBackground,
+                                                    contentColor = MaterialTheme.colorScheme.background,
+                                                    shape = com.m4sak1.taskapp.ui.screens.StarShape()
                                                 ) {
                                                     Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_task))
                                                 }
@@ -400,6 +443,19 @@ fun MainScreen(
                 enterToAdd = enterToAdd,
                 style = addDialogStyle,
                 disableAnimations = disableAnimations
+            )
+            // WishList add dialog — same style settings, no star button
+            CustomAddDialog(
+                visible = showAddWishListDialog,
+                onDismissRequest = { showAddWishListDialog = false },
+                onAddTask = { title, _ ->
+                    taskViewModel.addWishListItem(title)
+                    showAddWishListDialog = false
+                },
+                enterToAdd = enterToAdd,
+                style = addDialogStyle,
+                disableAnimations = disableAnimations,
+                showStarButton = false
             )
             if (latestRelease != null) {
                 NewReleaseDialog(

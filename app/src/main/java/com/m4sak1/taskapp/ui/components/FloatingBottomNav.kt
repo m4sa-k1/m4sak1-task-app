@@ -32,9 +32,9 @@ import androidx.compose.ui.unit.dp
 import com.m4sak1.taskapp.ScreenTab
 import com.m4sak1.taskapp.ui.theme.LocalThemeController
 
-val BarChartIcon: ImageVector
+val WishListStarIcon: ImageVector
     get() = ImageVector.Builder(
-        name = "BarChart",
+        name = "WishListStar",
         defaultWidth = 24.dp,
         defaultHeight = 24.dp,
         viewportWidth = 24f,
@@ -42,13 +42,22 @@ val BarChartIcon: ImageVector
     ).apply {
         path(
             stroke = SolidColor(Color.Black),
-            strokeLineWidth = 2f,
+            strokeLineWidth = 1.8f,
             strokeLineCap = StrokeCap.Round,
             strokeLineJoin = StrokeJoin.Round
         ) {
-            moveTo(18f, 20f); lineTo(18f, 10f)
-            moveTo(12f, 20f); lineTo(12f, 4f)
-            moveTo(6f, 20f); lineTo(6f, 14f)
+            // 5-pointed star: M12,2 L15.09,8.26 L22,9.27 L17,14.14 L18.18,21.02 L12,17.77 L5.82,21.02 L7,14.14 L2,9.27 L8.91,8.26 Z
+            moveTo(12f, 2f)
+            lineTo(15.09f, 8.26f)
+            lineTo(22f, 9.27f)
+            lineTo(17f, 14.14f)
+            lineTo(18.18f, 21.02f)
+            lineTo(12f, 17.77f)
+            lineTo(5.82f, 21.02f)
+            lineTo(7f, 14.14f)
+            lineTo(2f, 9.27f)
+            lineTo(8.91f, 8.26f)
+            close()
         }
     }.build()
 
@@ -124,7 +133,7 @@ fun FloatingBottomNav(
                         val isSelected = tab == currentTab
                         val icon = when(tab) {
                             ScreenTab.Home -> Icons.Outlined.Home
-                            ScreenTab.Stats -> BarChartIcon
+                            ScreenTab.Stats -> WishListStarIcon
                             ScreenTab.Settings -> Icons.Outlined.Settings
                             else -> Icons.Outlined.Home // Should not happen
                         }

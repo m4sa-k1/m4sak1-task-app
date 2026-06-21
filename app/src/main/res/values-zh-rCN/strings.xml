@@ -2,10 +2,11 @@
 <resources>
     <string name="back">返回</string>
     <string name="tab_home">主页</string>
-    <string name="tab_stats">统计</string>
+    <string name="tab_stats">愿望清单</string>
     <string name="tab_settings">设置</string>
     <string name="title_tasks">任务</string>
     <string name="no_tasks">没有任务</string>
+    <string name="no_wishlist_items">还没有项目</string>
     <string name="new_task">新任务</string>
     <string name="task_placeholder">你需要做什么？</string>
     <string name="add_task">添加</string>

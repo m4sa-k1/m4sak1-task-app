@@ -2,10 +2,11 @@
 <resources>
     <string name="back">戻る</string>
     <string name="tab_home">ホーム</string>
-    <string name="tab_stats">統計</string>
+    <string name="tab_stats">やりたいことリスト</string>
     <string name="tab_settings">設定</string>
     <string name="title_tasks">タスク</string>
     <string name="no_tasks">未完了のタスクはありません</string>
+    <string name="no_wishlist_items">まだアイテムがありません</string>
     <string name="new_task">新しいタスク</string>
     <string name="task_placeholder">何をしますか？</string>
     <string name="add_task">追加</string>

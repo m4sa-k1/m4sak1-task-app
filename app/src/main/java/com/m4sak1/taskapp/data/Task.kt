@@ -11,5 +11,6 @@ data class Task(
     val isCompleted: Boolean = false,
     val isStarred: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
-    val completedAt: Long? = null
+    val completedAt: Long? = null,
+    val isWishListItem: Boolean = false
 )
