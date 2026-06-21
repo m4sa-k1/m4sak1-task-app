@@ -52,6 +52,7 @@ fun SettingsScreen(
     onShowAbout: () -> Unit = {},
     onShowDisclaimer: () -> Unit = {},
     onShowChangelog: () -> Unit = {},
+    onShowPastTasks: (showWishList: Boolean) -> Unit = {},
     scrollState: androidx.compose.foundation.ScrollState = androidx.compose.foundation.rememberScrollState(),
     onDialogVisibilityChanged: (Boolean) -> Unit = {}
 ) {
@@ -62,6 +63,7 @@ fun SettingsScreen(
     var showFabAnimDialog by remember { mutableStateOf(false) }
     var showRestoreConfirm by remember { mutableStateOf(false) }
     var showCustomColorDialog by remember { mutableStateOf(false) }
+    var showPastTasksTypeDialog by remember { mutableStateOf(false) }
     val hideImmediately by viewModel.hideImmediately.collectAsState()
     val disableAnimations by viewModel.disableAnimations.collectAsState()
     val enterToAdd by viewModel.enterToAdd.collectAsState()
@@ -202,6 +204,11 @@ fun SettingsScreen(
             SettingsItem(
                 title = stringResource(R.string.settings_edit_home),
                 modifier = Modifier.clickable { onShowEditHome() }
+            )
+            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            SettingsItem(
+                title = stringResource(R.string.past_tasks),
+                modifier = Modifier.clickable { showPastTasksTypeDialog = true }
             )
         }
 
@@ -554,6 +561,54 @@ fun SettingsScreen(
             }
         }
     }
+    }
+
+    // Past Tasks type selection popup
+    if (showPastTasksTypeDialog) {
+        AlertDialog(
+            onDismissRequest = { showPastTasksTypeDialog = false },
+            confirmButton = {},
+            title = { Text(stringResource(R.string.past_tasks)) },
+            text = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    // Normal tasks option
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                showPastTasksTypeDialog = false
+                                onShowPastTasks(false)
+                            }
+                            .padding(vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.past_tasks_normal),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                    // Wishlist option
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                showPastTasksTypeDialog = false
+                                onShowPastTasks(true)
+                            }
+                            .padding(vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.past_tasks_wishlist),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        )
     }
 }
 

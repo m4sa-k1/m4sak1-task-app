@@ -111,6 +111,12 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     val allCompletedTasks: Flow<List<Task>> = taskDao.getAllCompletedTasks()
 
+    val completedNormalTasks: StateFlow<List<Task>> = taskDao.getAllCompletedNormalTasks()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    val completedWishListItems: StateFlow<List<Task>> = taskDao.getAllCompletedWishListItems()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
     // CRITICAL FIX: Ensure no duplicate keys by filtering out tasks that are already in recentlyCompleted
     val uiTasks: StateFlow<List<Task>> = combine(
         taskDao.getIncompleteTasks(),

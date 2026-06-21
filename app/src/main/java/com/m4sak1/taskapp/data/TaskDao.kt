@@ -14,6 +14,12 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE isCompleted = 0 AND isWishListItem = 1 ORDER BY id DESC")
     fun getIncompleteWishListItems(): Flow<List<Task>>
 
+    @Query("SELECT * FROM tasks WHERE isCompleted = 1 AND isWishListItem = 0 ORDER BY completedAt DESC")
+    fun getAllCompletedNormalTasks(): Flow<List<Task>>
+
+    @Query("SELECT * FROM tasks WHERE isCompleted = 1 AND isWishListItem = 1 ORDER BY completedAt DESC")
+    fun getAllCompletedWishListItems(): Flow<List<Task>>
+
     @Query("SELECT * FROM tasks WHERE isCompleted = 1 ORDER BY isStarred DESC, completedAt DESC")
     fun getAllCompletedTasks(): Flow<List<Task>>
 

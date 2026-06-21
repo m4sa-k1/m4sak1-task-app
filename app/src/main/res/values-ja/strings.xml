@@ -2,7 +2,7 @@
 <resources>
     <string name="back">戻る</string>
     <string name="tab_home">ホーム</string>
-    <string name="tab_stats">やりたいことリスト</string>
+    <string name="tab_stats">やりたいこと</string>
     <string name="tab_settings">設定</string>
     <string name="title_tasks">タスク</string>
     <string name="no_tasks">未完了のタスクはありません</string>
@@ -23,6 +23,9 @@
     <string name="stats_total_completed">総完了タスク数</string>
     <string name="stats_quick_rate">24時間以内達成率</string>
     <string name="past_tasks">過去のタスク</string>
+    <string name="past_tasks_normal">通常タスク</string>
+    <string name="past_tasks_wishlist">やりたいこと</string>
+    <string name="past_wishlist_items">過去のやりたいこと</string>
     <string name="settings_about">Task Appについて</string>
     <string name="settings_about_desc">バージョン情報と開発者</string>
     <string name="settings_fab_animation">追加ボタンのアニメーション</string>

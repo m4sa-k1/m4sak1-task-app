@@ -27,8 +27,16 @@ import com.m4sak1.taskapp.viewmodel.TaskViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PastTasksScreen(viewModel: TaskViewModel, onBack: () -> Unit) {
-    val completedTasks by viewModel.allCompletedTasks.collectAsState(initial = emptyList())
+fun PastTasksScreen(
+    viewModel: TaskViewModel,
+    onBack: () -> Unit,
+    showWishList: Boolean = false   // false = normal tasks, true = wishlist
+) {
+    val completedTasks by if (showWishList) {
+        viewModel.completedWishListItems.collectAsState()
+    } else {
+        viewModel.completedNormalTasks.collectAsState()
+    }
     
     var selectionMode by remember { mutableStateOf(false) }
     var selectedTasks by remember { mutableStateOf(setOf<Task>()) }
@@ -38,11 +46,16 @@ fun PastTasksScreen(viewModel: TaskViewModel, onBack: () -> Unit) {
         selectedTasks = emptySet()
     }
 
+    val screenTitle = if (showWishList)
+        stringResource(R.string.past_wishlist_items)
+    else
+        stringResource(R.string.past_tasks)
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { 
-                    Text(if (selectionMode) "${selectedTasks.size} selected" else stringResource(R.string.past_tasks)) 
+                    Text(if (selectionMode) "${selectedTasks.size} selected" else screenTitle) 
                 },
                 navigationIcon = {
                     IconButton(onClick = {
@@ -128,7 +141,12 @@ fun PastTasksScreen(viewModel: TaskViewModel, onBack: () -> Unit) {
                                     selectedTasks + task
                                 }
                             } else {
-                                viewModel.toggleTaskCompletion(task)
+                                // Restore: use correct toggle depending on type
+                                if (showWishList) {
+                                    viewModel.toggleWishListItemCompletion(task)
+                                } else {
+                                    viewModel.toggleTaskCompletion(task)
+                                }
                             }
                         }
                     )

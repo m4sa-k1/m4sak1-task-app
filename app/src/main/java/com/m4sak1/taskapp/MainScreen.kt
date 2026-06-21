@@ -54,7 +54,7 @@ import android.net.Uri
 import androidx.compose.ui.graphics.ImageBitmap
 import kotlin.math.roundToInt
 
-enum class ScreenTab { Home, Stats, Settings, Licenses, MITLicense, PastTasks, EditHome }
+enum class ScreenTab { Home, Stats, Settings, Licenses, MITLicense, PastTasks, PastTasksWishList, EditHome }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -303,6 +303,9 @@ fun MainScreen(
                                                     onShowAbout = { showAboutDialog = true },
                                                     onShowDisclaimer = { showDisclaimerDialog = true },
                                                     onShowChangelog = { showChangelogDialog = true },
+                                                    onShowPastTasks = { isWishList ->
+                                                        currentTab = if (isWishList) ScreenTab.PastTasksWishList else ScreenTab.PastTasks
+                                                    },
                                                     scrollState = settingsScrollState
                                                 )
                                             }
@@ -381,7 +384,7 @@ fun MainScreen(
                                                     onClick = { showAddWishListDialog = true },
                                                     containerColor = MaterialTheme.colorScheme.onBackground,
                                                     contentColor = MaterialTheme.colorScheme.background,
-                                                    shape = com.m4sak1.taskapp.ui.screens.StarShape()
+                                                    shape = CircleShape
                                                 ) {
                                                     Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_task))
                                                 }
@@ -405,8 +408,12 @@ fun MainScreen(
                                     MITLicenseScreen(onBack = { currentTab = ScreenTab.Settings })
                                 }
                                 ScreenTab.PastTasks -> {
-                                    BackHandler { currentTab = ScreenTab.Stats }
-                                    PastTasksScreen(viewModel = taskViewModel, onBack = { currentTab = ScreenTab.Stats })
+                                    BackHandler { currentTab = ScreenTab.Settings }
+                                    PastTasksScreen(viewModel = taskViewModel, onBack = { currentTab = ScreenTab.Settings }, showWishList = false)
+                                }
+                                ScreenTab.PastTasksWishList -> {
+                                    BackHandler { currentTab = ScreenTab.Settings }
+                                    PastTasksScreen(viewModel = taskViewModel, onBack = { currentTab = ScreenTab.Settings }, showWishList = true)
                                 }
                                 ScreenTab.EditHome -> {
                                     BackHandler { currentTab = ScreenTab.Settings }

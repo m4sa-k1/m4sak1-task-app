@@ -22,6 +22,9 @@
     <string name="stats_total_completed">Total Completed</string>
     <string name="stats_quick_rate">24h Completion Rate</string>
     <string name="past_tasks">Past Tasks</string>
+    <string name="past_tasks_normal">Normal Tasks</string>
+    <string name="past_tasks_wishlist">Wishlist</string>
+    <string name="past_wishlist_items">Past Wishlist</string>
     <string name="settings_about">About Task App</string>
     <string name="settings_about_desc">Version info and developer credits</string>
     <string name="settings_fab_animation">FAB Animation</string>

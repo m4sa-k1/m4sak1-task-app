@@ -23,6 +23,9 @@
     <string name="stats_total_completed">总完成任务数</string>
     <string name="stats_quick_rate">24小时内达成率</string>
     <string name="past_tasks">历史任务</string>
+    <string name="past_tasks_normal">普通任务</string>
+    <string name="past_tasks_wishlist">愿望清单</string>
+    <string name="past_wishlist_items">过去的愿望</string>
     <string name="settings_about">关于 Task App</string>
     <string name="settings_about_desc">版本信息与开发者</string>
     <string name="settings_fab_animation">悬浮按钮动画</string>
