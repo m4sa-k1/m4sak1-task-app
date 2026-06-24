@@ -85,7 +85,7 @@ class TaskAppWidget : GlanceAppWidget() {
         // Use remember with updateTrigger so Compose doesn't skip recomposition
         val incompleteTasks = androidx.compose.runtime.remember(updateTrigger, showStarredOnly) {
             val allTasks = kotlinx.coroutines.runBlocking { db.taskDao().getAllTasksDirect() }
-            allTasks.filter { !it.isCompleted }.sortedWith(
+            allTasks.filter { !it.isCompleted && !it.isWishListItem }.sortedWith(
                 compareByDescending<com.m4sak1.taskapp.data.Task> { it.isStarred }.thenByDescending { it.id }
             )
         }
