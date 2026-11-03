@@ -99,11 +99,12 @@ class TaskAppWidget : GlanceAppWidget() {
                 .background(Color(colors.surface.value))
                 .cornerRadius(16.dp)
                 .clickable(onClick = actionStartActivity<MainActivity>())
-                // .padding(16.dp) removed so LazyColumn hits edges
         ) {
             // Header
             Row(
-                modifier = GlanceModifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 12.dp),
+                modifier = GlanceModifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 2.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Toggle Filter Button
@@ -116,7 +117,8 @@ class TaskAppWidget : GlanceAppWidget() {
                     ),
                     modifier = GlanceModifier
                         .clickable(onClick = actionRunCallback<ToggleFilterAction>())
-                        .padding(8.dp)
+                        .padding(horizontal = 4.dp, vertical = 4.dp),
+                    maxLines = 1
                 )
 
                 Spacer(modifier = GlanceModifier.defaultWeight())
@@ -126,17 +128,17 @@ class TaskAppWidget : GlanceAppWidget() {
                     text = "+",
                     style = TextStyle(
                         color = ColorProvider(colors.primary),
-                        fontSize = 24.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
                     ),
-                    modifier = GlanceModifier.padding(8.dp).clickable(
+                    modifier = GlanceModifier.padding(horizontal = 6.dp, vertical = 2.dp).clickable(
                         onClick = actionStartActivity<WidgetAddActivity>()
                     )
                 )
             }
 
             if (tasksToShow.isEmpty()) {
-                Box(modifier = GlanceModifier.fillMaxSize().padding(horizontal = 16.dp), contentAlignment = Alignment.Center) {
+                Box(modifier = GlanceModifier.fillMaxSize().padding(horizontal = 12.dp), contentAlignment = Alignment.Center) {
                     Text(
                         text = context.getString(R.string.no_tasks),
                         style = TextStyle(color = ColorProvider(colors.onSurface.copy(alpha = 0.5f)), fontSize = 14.sp)
@@ -148,7 +150,7 @@ class TaskAppWidget : GlanceAppWidget() {
                         Row(
                             modifier = GlanceModifier
                                 .fillMaxWidth()
-                                .padding(vertical = 8.dp, horizontal = 16.dp)
+                                .padding(vertical = 4.dp, horizontal = 12.dp)
                                 .clickable(
                                     onClick = actionRunCallback<ToggleTaskAction>(
                                         parameters = actionParametersOf(taskIdKey to task.id)
@@ -161,16 +163,16 @@ class TaskAppWidget : GlanceAppWidget() {
                                 text = if (task.isStarred) "☆" else "○",
                                 style = TextStyle(
                                     color = ColorProvider(colors.onSurface),
-                                    fontSize = 24.sp
+                                    fontSize = 20.sp
                                 ),
-                                modifier = GlanceModifier.padding(end = 8.dp)
+                                modifier = GlanceModifier.padding(end = 6.dp)
                             )
                             
                             Text(
                                 text = task.title,
                                 style = TextStyle(
                                     color = ColorProvider(colors.onSurface),
-                                    fontSize = 18.sp
+                                    fontSize = 16.sp
                                 ),
                                 maxLines = 1, // Truncate
                             )
